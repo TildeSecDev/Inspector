@@ -1,0 +1,19 @@
+{
+  "stepNumber": 14,
+  "title": "HTTP Header Harden",
+  "description": "The portal allows clickjacking and insecure redirects.<br><br><b>Objective:</b> Verify and add proper HTTP security headers on the portal to prevent framing and enforce HTTPS.",
+  "dialogue": [
+    "Mira: \"I heard the portal is missing some important security headers. That could be risky!\"",
+    "Mira: \"Can you help me check and add the right headers to keep users safe?\""
+  ],
+  "hints": [
+    "Check for X-Frame-Options, CSP, HSTS in responses.",
+    "Use curl -I or Burp Suite."
+  ],
+  "validation": {
+    "command": "curl -I",
+    "type": "contains"
+  },
+  "achievement": "Header Guardian",
+  "skills_gained": ["header configuration", "HTTP security"]
+}

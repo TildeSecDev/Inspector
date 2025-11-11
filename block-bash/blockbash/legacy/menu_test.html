@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RPG Menu Test</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+        button {
+            background: #4a4a4a;
+            color: #fff;
+            border: 1px solid #6a6a6a;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5a5a5a;
+        }
+        .log {
+            background: #0a0a0a;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>RPG Menu Rendering Test</h1>
+        
+        <div class="test-section">
+            <h2>Validation Test</h2>
+            <button onclick="testValidation()">Test 'ls' Command Validation</button>
+            <div id="validation-log" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Menu Test</h2>
+            <button onclick="testMenuRendering()">Test Menu Rendering</button>
+            <div id="menu-log" class="log"></div>
+            <div id="menu-display" style="min-height: 100px; border: 1px solid #6a6a6a; margin: 10px 0; padding: 10px;">
+                <!-- Menu will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const logElement = document.getElementById(elementId);
+            logElement.innerHTML += '[' + new Date().toLocaleTimeString() + '] ' + message + '<br>';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function testValidation() {
+            log('validation-log', 'Testing validation endpoint...');
+            try {
+                const response = await fetch('/ws/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        command: 'ls',
+                        lesson_id: 'rpg'
+                    })
+                });
+                
+                const result = await response.json();
+                log('validation-log', 'Validation result: ' + JSON.stringify(result));
+                
+                if (result.pass) {
+                    log('validation-log', '✓ Validation passed!');
+                    if (result.menu) {
+                        log('validation-log', '✓ Menu items: ' + result.menu.join(', '));
+                    }
+                } else {
+                    log('validation-log', '✗ Validation failed: ' + result.hint);
+                }
+            } catch (error) {
+                log('validation-log', '✗ Error: ' + error.message);
+            }
+        }
+
+        async function testMenuRendering() {
+            log('menu-log', 'Testing menu rendering...');
+            
+            // First get the validation result
+            try {
+                const response = await fetch('/ws/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        command: 'ls',
+                        lesson_id: 'rpg'
+                    })
+                });
+                
+                const result = await response.json();
+                log('menu-log', 'Got validation result: ' + JSON.stringify(result));
+                
+                if (result.pass && result.menu) {
+                    // Create the menu display
+                    const menuDisplay = document.getElementById('menu-display');
+                    menuDisplay.innerHTML = '';
+                    
+                    const menuTitle = document.createElement('h3');
+                    menuTitle.textContent = '--- MENU ---';
+                    menuTitle.style.color = '#ffe066';
+                    menuTitle.style.textAlign = 'center';
+                    menuDisplay.appendChild(menuTitle);
+                    
+                    result.menu.forEach(item => {
+                        const button = document.createElement('button');
+                        button.textContent = item;
+                        button.style.display = 'block';
+                        button.style.width = '200px';
+                        button.style.margin = '10px auto';
+                        button.onclick = () => {
+                            log('menu-log', 'Clicked: ' + item);
+                        };
+                        menuDisplay.appendChild(button);
+                    });
+                    
+                    log('menu-log', '✓ Menu rendered successfully!');
+                }
+            } catch (error) {
+                log('menu-log', '✗ Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

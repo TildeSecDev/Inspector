@@ -1,0 +1,19 @@
+{
+  "stepNumber": 50,
+  "title": "Covert Exfil Block",
+  "description": "Data was exfiltrated over DNS tunnels.<br><br><b>Objective:</b> Implement DNS query rate-limits and monitor for tunneling signatures.",
+  "dialogue": [
+    "Mira: \"We must detect and block covert channels.\"",
+    "Mira: \"Can you help me monitor for tunneling and set up rate-limits?\""
+  ],
+  "hints": [
+    "Look for unusual DNS query patterns.",
+    "Use dnscat2 and Suricata."
+  ],
+  "validation": {
+    "command": "dnscat2",
+    "type": "contains"
+  },
+  "achievement": "Exfil Expert",
+  "skills_gained": ["intrusion detection", "anomaly monitoring"]
+}

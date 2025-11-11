@@ -1,0 +1,19 @@
+{
+  "stepNumber": 39,
+  "title": "BLE Beacon Audit",
+  "description": "Free-Coffee beacon spread malware.<br><br><b>Objective:</b> Detect rogue BLE beacons and enforce beacon authentication policies.",
+  "dialogue": [
+    "Mira: \"We need to scan for unauthorized BLE beacons.\"",
+    "Mira: \"Can you help me detect and block rogue beacons?\""
+  ],
+  "hints": [
+    "Use hcitool to list beacons in range.",
+    "Use bluetoothctl for management."
+  ],
+  "validation": {
+    "command": "hcitool",
+    "type": "contains"
+  },
+  "achievement": "Beacon Bard",
+  "skills_gained": ["BLE scanning", "access control"]
+}

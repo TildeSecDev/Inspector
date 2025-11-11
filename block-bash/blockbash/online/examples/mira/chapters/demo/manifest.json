@@ -1,0 +1,19 @@
+{
+  "title": "Mission: Trace the Hacker (Demo)",
+  "author": "TildeSec Team",
+  "description": "A demo mission for Mira's Story. Trace the hacker in the café using network tools.",
+  "steps": [
+    "step0.json",
+    "step1.json",
+    "step2.json",
+    "step3.json",
+    "step4.json",
+    "step5.json",
+    "step6.json"
+  ],
+  "assets": {
+    "css": "demo.css",
+    "js": "logic.js"
+  },
+  "startStep": 0
+}

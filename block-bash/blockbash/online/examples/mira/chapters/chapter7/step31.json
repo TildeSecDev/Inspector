@@ -1,0 +1,19 @@
+{
+  "stepNumber": 31,
+  "title": "Firmware Extraction Audit",
+  "description": "The router's firmware may contain hidden backdoors.<br><br><b>Objective:</b> Extract the firmware image, analyze in Ghidra, then verify no backdoors remain.",
+  "dialogue": [
+    "Mira: \"Let's pull the firmware and inspect it.\"",
+    "Mira: \"Can you help me extract and analyze the image?\""
+  ],
+  "hints": [
+    "Use Binwalk to carve out the image.",
+    "Use Ghidra for static analysis."
+  ],
+  "validation": {
+    "command": "Binwalk",
+    "type": "contains"
+  },
+  "achievement": "Firmware Forager",
+  "skills_gained": ["firmware carving", "static analysis"]
+}

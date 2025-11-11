@@ -1,0 +1,21 @@
+{
+  "stepNumber": 6,
+  "title": "Threat Host Sweep",
+  "description": "After our Wi-Fi victory, strange things are happening—computers are sending mysterious signals like they're possessed! We need to sweep the network like detectives searching a crime scene and uncover any hidden intruders lurking in the shadows.<br><br><b>Objective:</b> Become a network ghostbuster! Use ARP scans and ping sweeps to map out all the devices on the subnet and spot the suspicious ones that don't belong.",
+  "dialogue": [
+    "Mira: \"Whoa, after we cleaned up that Wi-Fi mess, some computers are still acting super shady—sending weird traffic like they're calling home to aliens!\"",
+    "Mira: \"I bet there are rogue devices hiding on our network. Can you help me scan the subnet and flush out any unknown hosts? Let's turn this into a digital treasure hunt!\"",
+    "Mira: \"Time to play 'Find the Intruder'—you're the expert detective!\""
+  ],
+  "hints": [
+    "ARP scans are like knocking on every door in the neighborhood—see who answers!",
+    "Try nmap -sn for a quick ping sweep, or arp-scan to map MAC addresses like fingerprints.",
+    "Look for devices with unfamiliar MACs—they might be the villains in disguise!"
+  ],
+  "validation": {
+    "command": "nmap -sn",
+    "type": "contains"
+  },
+  "achievement": "Network Enumerator",
+  "skills_gained": ["ARP scanning", "ping sweeps"]
+}

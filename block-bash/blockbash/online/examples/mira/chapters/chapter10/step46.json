@@ -1,0 +1,19 @@
+{
+  "stepNumber": 46,
+  "title": "Persistent Cronjob Removal",
+  "description": "A malicious cronjob was discovered on the portal.<br><br><b>Objective:</b> Remove the malicious cron entry, then restrict crontab to admins only.",
+  "dialogue": [
+    "Mira: \"We must remove that job and secure future entries.\"",
+    "Mira: \"Can you help me restrict crontab to admins only?\""
+  ],
+  "hints": [
+    "Check /etc/crontab and user crontabs.",
+    "Use crontab and ssh."
+  ],
+  "validation": {
+    "command": "crontab",
+    "type": "contains"
+  },
+  "achievement": "Cron Commander",
+  "skills_gained": ["crontab management", "privilege restriction"]
+}

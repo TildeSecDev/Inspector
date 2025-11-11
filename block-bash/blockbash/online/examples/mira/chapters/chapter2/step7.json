@@ -1,0 +1,19 @@
+{
+  "stepNumber": 7,
+  "title": "Gateway Interface Probe",
+  "description": "The router admin panel is exposed on a non-standard port.<br><br><b>Objective:</b> Scan the gateway for open ports to discover and secure hidden management interfaces.",
+  "dialogue": [
+    "Mira: \"I found the router admin panel on a weird port. That could be a backdoor!\"",
+    "Mira: \"Can you help me scan the gateway for open ports and secure any hidden management interfaces?\""
+  ],
+  "hints": [
+    "Probe the gateway across high-value ports.",
+    "Try nmap -p 21,22,80,443,8080 or masscan."
+  ],
+  "validation": {
+    "command": "nmap -p",
+    "type": "contains"
+  },
+  "achievement": "Gateway Sleuth",
+  "skills_gained": ["port scanning", "service identification"]
+}

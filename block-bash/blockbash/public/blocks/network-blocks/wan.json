@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Cloud/Internet",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "cloud-internet",
+    "data-category": "wan",
+    "nestable": false,
+    "icon": "fa fa-cloud",
+    "deviceType": "wan-cloud",
+    "ports": ["wan"],
+    "innerHTML": "<div class=\"network-block-title\">Cloud/Internet</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Represents the Internet or service provider network</p><input type=\"text\" class=\"cloud-name\" placeholder=\"Cloud Name\"><input type=\"text\" class=\"provider\" placeholder=\"Service Provider\"><select class=\"connection-type\"><option value=\"internet\">Internet</option><option value=\"wan\">WAN Cloud</option><option value=\"vpn\">VPN Cloud</option></select></div>"
+  },
+  {
+    "name": "Frame Relay Switch",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "frame-relay-switch",
+    "data-category": "wan",
+    "nestable": false,
+    "icon": "fa fa-exchange",
+    "deviceType": "wan-switch",
+    "ports": ["serial"],
+    "innerHTML": "<div class=\"network-block-title\">Frame Relay Switch</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Frame Relay switching device</p><input type=\"text\" class=\"device-name\" placeholder=\"FR Switch Name\"><textarea class=\"pvc-config\" placeholder=\"PVC Configuration (DLCI mappings)\"></textarea><input type=\"text\" class=\"encapsulation\" placeholder=\"Encapsulation Type\" value=\"frame-relay\" readonly></div>"
+  },
+  {
+    "name": "Frame Relay Cloud",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "frame-relay-cloud",
+    "data-category": "wan",
+    "nestable": false,
+    "icon": "fa fa-cloud",
+    "deviceType": "wan-cloud",
+    "ports": ["serial"],
+    "innerHTML": "<div class=\"network-block-title\">Frame Relay Cloud</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Frame Relay provider network cloud</p><input type=\"text\" class=\"cloud-name\" placeholder=\"FR Cloud Name\"><input type=\"text\" class=\"provider\" placeholder=\"Frame Relay Provider\"><textarea class=\"dlci-mappings\" placeholder=\"DLCI to Port Mappings\"></textarea></div>"
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "stepNumber": 8,
+  "title": "OS Fingerprinting",
+  "description": "Determine the operating system of a remote host.",
+  "hints": [
+    "Use TCP/IP stack fingerprinting.",
+    "Analyze response signatures."
+  ],
+  "blocks": ["Set Target Host", "Enable OS Detection", "Start Scan"],
+  "achievement": "OS Identifier",
+  "skill": "OS Detection",
+  "points": 10
+}

@@ -1,0 +1,174 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+// Updated path after restructuring: server entry lives in backend/server/app.js
+// For Playwright test environment, prefer root app (app.js) which currently hosts enhanced sandbox websocket route.
+let app = require('../backend/server/app');
+if (process.env.PLAYWRIGHT === '1') {
+  try {
+    app = require('../app');
+    console.log('[startup] PLAYWRIGHT=1 using root app.js entry');
+  } catch (e) {
+    console.warn('[startup] Failed to switch to root app.js for PLAYWRIGHT:', e.message);
+  }
+}
+// If another instance already set a global flag, avoid double creation
+if (global.__BLOCKBASH_PRIMARY_SERVER__) {
+  console.log('[startup] Detected existing primary server instance, reusing.');
+}
+var server = global.__BLOCKBASH_PRIMARY_SERVER__ || require('http').createServer(app);
+var expressWs = require('express-ws');
+var debug = require('debug')('express:server');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+// Default port expected by project is 3000; allow override via PORT
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+// Pre-check if port is already in use to avoid triggering listen + express-ws error cascade.
+const net = require('net');
+function checkPortInUse(p, cb) {
+  const socket = new net.Socket();
+  let handled = false;
+  socket.once('connect', () => { handled = true; socket.destroy(); cb(true); });
+  socket.once('error', (err) => { if (handled) return; handled = true; cb(false); });
+  socket.connect(p, '127.0.0.1');
+}
+
+let PORT_ALREADY_IN_USE = false;
+checkPortInUse(port, (inUse) => {
+  PORT_ALREADY_IN_USE = inUse;
+  if (inUse && process.env.ALLOW_PORT_REUSE === '1') {
+    console.warn(`[startup] Port ${port} already in use; ALLOW_PORT_REUSE=1 -> graceful exit (reusing external server).`);
+    // Do not start; exit cleanly so calling scripts succeed.
+    process.exit(0);
+  } else if (inUse) {
+    console.error(`[startup] Port ${port} is in use. Set ALLOW_PORT_REUSE=1 to skip or free the port.`);
+    process.exit(1);
+  } else {
+    // Safe to proceed with normal startup sequence.
+    proceedListen();
+  }
+});
+
+// Initialize express-ws
+expressWs(app, server);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+function proceedListen() {
+  if (server.listening) {
+    console.log('[startup] Server already in listening state, skipping listen() call.');
+    return;
+  }
+  if (process.env.NODE_ENV !== 'test') {
+    console.log('Attempting to listen on port:', port);
+    console.log('Server object:', server);
+  }
+  server.listen(port, '0.0.0.0', () => {
+    if (process.env.NODE_ENV !== 'test') console.log('Server is actually listening and callback fired');
+  });
+  server.on('error', onError);
+  server.on('listening', onListening);
+  global.__BLOCKBASH_PRIMARY_SERVER__ = server;
+}
+
+// Start a secondary server on port 3002 (needed for sandbox Playwright tests expecting that port)
+// Skip during Jest/integration tests to avoid EADDRINUSE
+const SECONDARY_PORT = 3002;
+// Treat NODE_ENV==='test' as test env to avoid starting secondary port during Jest runs
+const TEST_ENV = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined || process.env.TEST_MODE === '1';
+if (process.env.NODE_ENV === 'test') {
+  // expose primary server so globalTeardown can close it cleanly
+  global.__JEST_PRIMARY_SERVER__ = server;
+}
+if (!TEST_ENV && port !== SECONDARY_PORT) {
+  try {
+    checkPortInUse(SECONDARY_PORT, (inUse2) => {
+      if (inUse2) {
+        console.warn(`[multi-port] Port ${SECONDARY_PORT} in use; skipping secondary server.`);
+        return;
+      }
+      const secondaryServer = require('http').createServer(app);
+      expressWs(app, secondaryServer);
+      secondaryServer.listen(SECONDARY_PORT, '0.0.0.0', () => {
+        console.log('[multi-port] Secondary server listening on', SECONDARY_PORT);
+      });
+      secondaryServer.on('error', (e) => console.warn('[multi-port] secondary server error', e.message));
+    });
+  } catch (e) {
+    console.warn('[multi-port] Failed to start secondary server on', SECONDARY_PORT, e.message);
+  }
+}
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      if (process.env.ALLOW_PORT_REUSE === '1') {
+        console.warn(bind + ' in use; ALLOW_PORT_REUSE=1 set, continuing without exiting.');
+        return; // swallow error; assume external process
+      }
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  if (process.env.NODE_ENV !== 'test') console.log('Server listening on ' + bind);
+}

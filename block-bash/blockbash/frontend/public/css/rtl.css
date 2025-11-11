@@ -1,0 +1,8 @@
+/* Basic RTL adjustments */
+html[dir=rtl] body.rtl {
+  direction: rtl;
+}
+html[dir=rtl] body.rtl .button-container,
+html[dir=rtl] body.rtl header .button-container { flex-direction: row-reverse; }
+html[dir=rtl] body.rtl .profile-stats { text-align: right; }
+html[dir=rtl] body.rtl #notification-dropdown { right: auto; left: 0; }

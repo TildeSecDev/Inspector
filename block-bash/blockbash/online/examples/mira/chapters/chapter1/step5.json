@@ -1,0 +1,19 @@
+{
+  "stepNumber": 5,
+  "title": "MAC-Whitelist Enforcement",
+  "description": "The MAC ACL reset left the shop open to any device.<br><br><b>Objective:</b> Restore the MAC whitelist on the real AP and verify unauthorized MACs cannot connect.",
+  "dialogue": [
+    "Mira: \"Our whitelist got wiped! Now anyone can join the network. We must restore the whitelist to keep malware out.\"",
+    "Mira: \"Can you help me reapply the MAC ACL list and check that only approved devices can connect?\""
+  ],
+  "hints": [
+    "Retrieve and reapply the AP’s MAC ACL list.",
+    "Use macchanger and ssh to configure the whitelist."
+  ],
+  "validation": {
+    "command": "macchanger",
+    "type": "contains"
+  },
+  "achievement": "Whitelist Champion",
+  "skills_gained": ["MAC ACL management", "router config"]
+}

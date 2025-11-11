@@ -1,0 +1,19 @@
+{
+  "stepNumber": 34,
+  "title": "Token Discovery Remediation",
+  "description": "Secret tokens in firmware unlocked debug console.<br><br><b>Objective:</b> Identify embedded tokens, revoke or rotate them, and update firmware.",
+  "dialogue": [
+    "Mira: \"Those tokens are too powerful—let's revoke them.\"",
+    "Mira: \"Can you help me find and rotate all embedded tokens?\""
+  ],
+  "hints": [
+    "Use strings to find embedded URLs or tokens.",
+    "Use grep for searching."
+  ],
+  "validation": {
+    "command": "strings",
+    "type": "contains"
+  },
+  "achievement": "Token Tracker",
+  "skills_gained": ["token management", "revocation procedures"]
+}

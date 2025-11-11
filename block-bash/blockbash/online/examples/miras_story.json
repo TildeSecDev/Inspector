@@ -1,0 +1,742 @@
+{
+  "Mira": {
+    "Wireless Attacks": [
+      {
+        "name": "Spoofed SSID Cleanup",
+        "scenario": "Alice, Mira's friend, accidentally connected to a fake Wi-Fi network at the café and got spyware.",
+        "dialogue": [
+          "Mira: \"Hey, can you help me? Alice just got some weird pop-ups after using the café Wi-Fi.\"",
+          "Mira: \"She thought she was on the real 'CoffeeShopWifi', but something's off. I checked and there are two networks with the same name!\"",
+          "Mira: \"I'm worried one is a fake. Can you help me find out which one is the imposter and shut it down? Alice is counting on us!\""
+        ],
+        "hint": "Two APs share the same SSID but different MAC addresses.",
+        "task": "Locate and disable the spoofed “CoffeeShopWifi” AP, then reconnect only to the legitimate one.",
+        "software": ["airodump-ng", "aireplay-ng"],
+        "achievement": "Rogue AP Remediator",
+        "skills_gained": ["identifying malicious SSIDs", "AP deactivation"]
+      },
+      {
+        "name": "Deauth Defense",
+        "scenario": "Mira's friends keep getting disconnected from Wi-Fi and end up on a suspicious network.",
+        "dialogue": [
+          "Mira: \"Ugh, every time we try to connect, we get kicked off and end up on some weird network!\"",
+          "Mira: \"I think someone is forcing us off the real Wi-Fi. It's making everyone nervous.\"",
+          "Mira: \"Can you help me figure out how to stop these disconnects? I want my friends to feel safe online.\""
+        ],
+        "hint": "Deauth attack frames spike in monitor mode.",
+        "task": "Block deauthentication frames from the rogue AP so clients stay on the safe network.",
+        "software": ["airodump-ng", "iw dev wlan0 set type managed"],
+        "achievement": "Connection Guardian",
+        "skills_gained": ["frame filtering", "monitor-mode analysis"]
+      },
+      {
+        "name": "Secure Handshake Verification",
+        "scenario": "After cleaning up the network, Mira wants to make sure the Wi-Fi is really safe.",
+        "dialogue": [
+          "Mira: \"I want to be sure our Wi-Fi is secure now. A fresh WPA2 handshake will prove the PSK is intact.\"",
+          "Mira: \"Can you help me capture and verify a handshake from the real AP?\""
+        ],
+        "hint": "Force reauth on the real AP to capture a four-way handshake.",
+        "task": "Capture and verify a WPA2 handshake from the genuine AP matches the known key.",
+        "software": ["aireplay-ng", "airodump-ng", "aircrack-ng"],
+        "achievement": "Handshake Verifier",
+        "skills_gained": ["handshake capture", "PSK integrity check"]
+      },
+      {
+        "name": "Beacon Integrity Audit",
+        "scenario": "Phantom networks with odd beacon intervals keep appearing in the café.",
+        "dialogue": [
+          "Mira: \"Strange networks keep popping up with weird settings. Wrong beacon intervals can signal a malicious AP.\"",
+          "Mira: \"Can you help me scan and blacklist any suspicious APs?\""
+        ],
+        "hint": "Compare beacon interval and vendor OUI tags.",
+        "task": "Scan and blacklist any AP broadcasting abnormal beacon intervals or OUIs.",
+        "software": ["airodump-ng --manufacturer", "Wireshark"],
+        "achievement": "Beacon Auditor",
+        "skills_gained": ["beacon analysis", "OUI validation"]
+      },
+      {
+        "name": "MAC-Whitelist Enforcement",
+        "scenario": "The MAC ACL reset left the shop open to any device.",
+        "dialogue": [
+          "Mira: \"Our whitelist got wiped! Now anyone can join the network. We must restore the whitelist to keep malware out.\"",
+          "Mira: \"Can you help me reapply the MAC ACL list and check that only approved devices can connect?\""
+        ],
+        "hint": "Retrieve and reapply the AP’s MAC ACL list.",
+        "task": "Restore the MAC whitelist on the real AP and verify unauthorized MACs cannot connect.",
+        "software": ["macchanger", "ssh"],
+        "achievement": "Whitelist Champion",
+        "skills_gained": ["MAC ACL management", "router config"]
+      }
+    ],
+    "Information Gathering": [
+      {
+        "name": "Threat Host Sweep",
+        "scenario": "Several PCs report odd outbound traffic after Wi-Fi cleanup.",
+        "dialogue": [
+          "Mira: \"Some computers are still acting weird after the Wi-Fi cleanup. I think there might be rogue devices on the network.\"",
+          "Mira: \"Can you help me scan the subnet and find any unknown or suspicious hosts?\""
+        ],
+        "hint": "Use ARP or ping sweep across the subnet.",
+        "task": "Scan the subnet to enumerate live hosts and identify any unknown or rogue MACs.",
+        "software": ["nmap -sn", "arp-scan"],
+        "achievement": "Network Enumerator",
+        "skills_gained": ["ARP scanning", "ping sweeps"]
+      },
+      {
+        "name": "Gateway Interface Probe",
+        "scenario": "The router admin panel is exposed on a non-standard port.",
+        "dialogue": [
+          "Mira: \"I found the router admin panel on a weird port. That could be a backdoor!\"",
+          "Mira: \"Can you help me scan the gateway for open ports and secure any hidden management interfaces?\""
+        ],
+        "hint": "Probe the gateway across high-value ports.",
+        "task": "Scan the gateway for open ports to discover and secure hidden management interfaces.",
+        "software": ["nmap -p 21,22,80,443,8080", "masscan"],
+        "achievement": "Gateway Sleuth",
+        "skills_gained": ["port scanning", "service identification"]
+      },
+      {
+        "name": "DHCP Rogue Detector",
+        "scenario": "One friend got an IP from a malicious DHCP server.",
+        "dialogue": [
+          "Mira: \"Someone's assigning bad IPs—time to find that rogue DHCP!\"",
+          "Mira: \"Can you sniff DHCP traffic and help me disable any unauthorized DHCP servers?\""
+        ],
+        "hint": "Capture only DHCP broadcast packets.",
+        "task": "Sniff DHCP traffic to identify and disable any unauthorized DHCP servers.",
+        "software": ["tcpdump -i wlan0 port 67 or port 68"],
+        "achievement": "DHCP Detective",
+        "skills_gained": ["DHCP packet capture", "tcpdump filtering"]
+      },
+      {
+        "name": "DNS Poison Audit",
+        "scenario": "Billing pages redirect to phishing domains on some PCs.",
+        "dialogue": [
+          "Mira: \"Some of my friends are being redirected to fake billing pages. It smells like DNS poisoning!\"",
+          "Mira: \"Can you help me capture DNS traffic and spot any poisoned entries?\""
+        ],
+        "hint": "Filter for DNS packets to suspicious domains.",
+        "task": "Capture DNS requests/replies to detect and correct any poisoned entries.",
+        "software": ["Wireshark", "dnstop"],
+        "achievement": "DNS Analyst",
+        "skills_gained": ["DNS forensics", "domain filtering"]
+      },
+      {
+        "name": "SSID Footprint Map",
+        "scenario": "New phantom SSIDs keep popping up around the café.",
+        "dialogue": [
+          "Mira: \"There are new SSIDs showing up all the time. I want to map every Wi-Fi SSID in range and flag any suspicious ones.\"",
+          "Mira: \"Can you help me scan and log all SSIDs, and spot any clones?\""
+        ],
+        "hint": "Run a continuous SSID/BSSID scan and log results.",
+        "task": "Map every Wi-Fi SSID in range and flag duplicates or suspicious clones.",
+        "software": ["airodump-ng", "netdiscover"],
+        "achievement": "SSID Cartographer",
+        "skills_gained": ["SSID enumeration", "duplicate detection"]
+      }
+    ],
+    "Vulnerability Analysis": [
+      {
+        "name": "Automated Portal Scan",
+        "scenario": "After network cleanup, Mira suspects the captive portal has flaws.",
+        "dialogue": [
+          "Mira: \"I have a feeling the captive portal still has some bugs. Can you help me scan it for vulnerabilities?\"",
+          "Mira: \"If we find anything, we can patch it before anyone else gets in trouble!\""
+        ],
+        "hint": "Run a credentialed scan for best coverage.",
+        "task": "Use Nessus to scan the captive-portal server and then patch any critical findings.",
+        "software": ["Nessus"],
+        "achievement": "Vuln Hunter",
+        "skills_gained": ["authenticated scanning", "remediation planning"]
+      },
+      {
+        "name": "SSL Certificate Audit",
+        "scenario": "Users still see certificate errors on the login page.",
+        "dialogue": [
+          "Mira: \"People keep getting warnings about the login page's certificate. That's not good!\"",
+          "Mira: \"Can you check the cert chain and help me fix any expired or self-signed certs?\""
+        ],
+        "hint": "Inspect the cert chain either in browser dev-tools or via openssl.",
+        "task": "Identify and replace any expired or mis-issued SSL certificates on the portal.",
+        "software": ["openssl s_client", "Burp Suite"],
+        "achievement": "Cert Inspector",
+        "skills_gained": ["SSL analysis", "certificate management"]
+      },
+      {
+        "name": "SQL Injection Discovery",
+        "scenario": "Form submissions sometimes return database errors.",
+        "dialogue": [
+          "Mira: \"I saw some weird error messages after submitting a form. Could it be SQL injection?\"",
+          "Mira: \"Can you test the portal for injection points and help me fix them?\""
+        ],
+        "hint": "Try a ’ OR ’1’=’1’ payload in form parameters.",
+        "task": "Detect SQL-injection points in the portal and apply proper input sanitization.",
+        "software": ["sqlmap"],
+        "achievement": "SQL Intruder",
+        "skills_gained": ["injection testing", "secure coding"]
+      },
+      {
+        "name": "HTTP Header Harden",
+        "scenario": "The portal allows clickjacking and insecure redirects.",
+        "dialogue": [
+          "Mira: \"I heard the portal is missing some important security headers. That could be risky!\"",
+          "Mira: \"Can you help me check and add the right headers to keep users safe?\""
+        ],
+        "hint": "Check for X-Frame-Options, CSP, HSTS in responses.",
+        "task": "Verify and add proper HTTP security headers on the portal to prevent framing and enforce HTTPS.",
+        "software": ["curl -I", "Burp Suite"],
+        "achievement": "Header Guardian",
+        "skills_gained": ["header configuration", "HTTP security"]
+      },
+      {
+        "name": "Default Credential Remediation",
+        "scenario": "An IoT camera on the network still uses admin/admin.",
+        "dialogue": [
+          "Mira: \"I found a camera still using the default admin password. That's a big risk!\"",
+          "Mira: \"Can you help me find and fix any devices using factory credentials?\""
+        ],
+        "hint": "Look up the device’s default admin credentials online.",
+        "task": "Identify any devices using factory credentials and enforce unique strong passwords.",
+        "software": ["Hydra", "ssh"],
+        "achievement": "Credential Cracker",
+        "skills_gained": ["password policy enforcement", "Hydra auditing"]
+      }
+    ],
+    "Web Applications": [
+      {
+        "name": "Hidden Field Patch",
+        "scenario": "The fake login form captures extra hidden data.",
+        "dialogue": [
+          "Mira: \"I noticed some hidden fields in the login form. That could be used to steal info!\"",
+          "Mira: \"Can you help me find and remove any malicious hidden fields?\""
+        ],
+        "hint": "View source to locate <input type=hidden> fields.",
+        "task": "Identify and remove any malicious hidden form fields, then validate server-side.",
+        "software": ["Burp Suite", "browser dev-tools"],
+        "achievement": "Field Forensics",
+        "skills_gained": ["HTML auditing", "secure form design"]
+      },
+      {
+        "name": "Client-Side Validation Fix",
+        "scenario": "Validation bypass lets users submit harmful payloads.",
+        "dialogue": [
+          "Mira: \"I think the site only checks input with JavaScript. That's not enough!\"",
+          "Mira: \"Can you help me test and add server-side validation?\""
+        ],
+        "hint": "Disable JS to see what unvalidated data is sent.",
+        "task": "Bypass client-side checks to identify missing server-side validation and implement it.",
+        "software": ["browser console", "Tamper Data"],
+        "achievement": "Client-Side Conqueror",
+        "skills_gained": ["validation best practices", "defensive coding"]
+      },
+      {
+        "name": "Open-Redirect Lockdown",
+        "scenario": "Users got phished via an unsafe redirect param.",
+        "dialogue": [
+          "Mira: \"Someone used an open redirect to send users to a phishing site!\"",
+          "Mira: \"Can you help me secure the redirect parameters and test for open-redirects?\""
+        ],
+        "hint": "Manipulate the redirect URL to point elsewhere.",
+        "task": "Secure redirect parameters by whitelisting allowed domains and testing for open-redirects.",
+        "software": ["Burp Suite", "curl"],
+        "achievement": "Redirect Rogue",
+        "skills_gained": ["parameter sanitization", "safe redirects"]
+      },
+      {
+        "name": "Directory Listing Disable",
+        "scenario": "Backup files were exposed in a public directory.",
+        "dialogue": [
+          "Mira: \"I found backup files in a public folder! Directory browsing is on—lock it down!\""
+        ],
+        "hint": "Try accessing /backup/ or /old/ URLs.",
+        "task": "Disable directory listings on the web server and remove sensitive backups.",
+        "software": ["curl -I", "Nikto"],
+        "achievement": "Directory Diver",
+        "skills_gained": ["server config hardening", "file cleanup"]
+      },
+      {
+        "name": "Admin Panel Lockdown",
+        "scenario": "Brute-force unlocked the portal’s admin panel.",
+        "dialogue": [
+          "Mira: \"The admin panel was brute-forced! Weak passwords invited Hydra—let’s secure it.\""
+        ],
+        "hint": "Test common creds with Hydra.",
+        "task": "Configure rate-limiting and strong passwords on the admin panel to thwart brute-force.",
+        "software": ["Hydra", "fail2ban"],
+        "achievement": "Brute Force Specialist",
+        "skills_gained": ["access controls", "intrusion prevention"]
+      }
+    ],
+    "Exploitation Tools": [
+      {
+        "name": "HTTP Login Audit",
+        "scenario": "Default HTTP login allows unauthenticated access.",
+        "dialogue": [
+          "Mira: \"If metasploit can log in, so can an attacker—let’s test it.\"",
+          "Mira: \"Can you help me audit and secure the HTTP login?\""
+        ],
+        "hint": "Use Metasploit’s HTTP login module with known creds.",
+        "task": "Attempt HTTP login with msf auxiliary module, then disable or secure that endpoint.",
+        "software": ["msfconsole", "auxiliary/http_login"],
+        "achievement": "Shell Sniper",
+        "skills_gained": ["exploit testing", "endpoint hardening"]
+      },
+      {
+        "name": "ARP Spoof Mitigation",
+        "scenario": "ARP spoofing allowed session hijacking.",
+        "dialogue": [
+          "Mira: \"If ettercap can MITM, so can real attackers—patch it.\"",
+          "Mira: \"Let's test for ARP spoofing and then secure the network.\""
+        ],
+        "hint": "Deploy spoof module against gateway & victim.",
+        "task": "Perform ARP spoof test, then implement dynamic ARP inspection on the switch.",
+        "software": ["ettercap", "arpwatch"],
+        "achievement": "Traffic Tactician",
+        "skills_gained": ["ARP defense", "infrastructure hardening"]
+      },
+      {
+        "name": "Path Traversal Remediation",
+        "scenario": "A path traversal let us read /etc/passwd.",
+        "dialogue": [
+          "Mira: \"Directory traversal must be blocked—sanitise input.\"",
+          "Mira: \"Can you help me patch the input checks?\""
+        ],
+        "hint": "Try ../../../etc/passwd in URL.",
+        "task": "Exploit path traversal vuln, then add input checks to prevent ../ sequences.",
+        "software": ["curl", "Burp Suite"],
+        "achievement": "Traversal Tracker",
+        "skills_gained": ["vuln patching", "input sanitization"]
+      },
+      {
+        "name": "SearchSploit Validation",
+        "scenario": "A public exploit matched our CMS version.",
+        "dialogue": [
+          "Mira: \"Easy target—patch the vulnerability!\"",
+          "Mira: \"Can you help me find the CVE and apply the patch?\""
+        ],
+        "hint": "SearchSploit for the CVE ID.",
+        "task": "Find relevant CVE via SearchSploit, test exploit, then apply vendor patch.",
+        "software": ["searchsploit", "patch"],
+        "achievement": "Exploit Engineer",
+        "skills_gained": ["CVE research", "patch management"]
+      },
+      {
+        "name": "Custom Payload Defense",
+        "scenario": "A crafted reverse shell succeeded on the portal.",
+        "dialogue": [
+          "Mira: \"If msfvenom worked, we need stricter egress rules.\"",
+          "Mira: \"Can you help me test and block custom payloads?\""
+        ],
+        "hint": "Generate a custom payload with msfvenom.",
+        "task": "Deliver a msfvenom reverse shell, then enforce egress filtering to block it.",
+        "software": ["msfvenom", "iptables"],
+        "achievement": "Payload Pioneer",
+        "skills_gained": ["payload crafting", "network firewalling"]
+      }
+    ],
+    "Password Attacks": [
+      {
+        "name": "WPA2 Crack Enforcement",
+        "scenario": "An attacker cracked the Wi-Fi key using wordlists.",
+        "dialogue": [
+          "Mira: \"We must ensure a strong passphrase and rotate it regularly.\"",
+          "Mira: \"Can you help me test the Wi-Fi key and set a new one?\""
+        ],
+        "hint": "Use aircrack-ng against the handshake .cap file.",
+        "task": "Simulate a WPA2 crack, then set a new 20-character PSK and rotate it.",
+        "software": ["aircrack-ng", "pwgen"],
+        "achievement": "Key Cracker",
+        "skills_gained": ["PSK hardening", "rotation policies"]
+      },
+      {
+        "name": "Basic Auth Audit",
+        "scenario": "HTTP basic auth was brute-forced by Hydra.",
+        "dialogue": [
+          "Mira: \"That login needs multi-factor or lockouts.\"",
+          "Mira: \"Can you help me test and secure the basic auth?\""
+        ],
+        "hint": "Point Hydra at the basic-auth realm.",
+        "task": "Test basic-auth with Hydra, then enable account lockout or MFA.",
+        "software": ["Hydra", "fail2ban"],
+        "achievement": "Auth Annihilator",
+        "skills_gained": ["MFA implementation", "lockout configuration"]
+      },
+      {
+        "name": "SSH Brute-Force Guard",
+        "scenario": "IoT camera credentials were brute-forced.",
+        "dialogue": [
+          "Mira: \"Let’s force-lock that SSH port or use keys.\"",
+          "Mira: \"Can you help me disable password login and enable key-based auth?\""
+        ],
+        "hint": "Use Hydra against SSH port 22.",
+        "task": "Simulate SSH brute-force, then disable password login and enable key-based auth.",
+        "software": ["Hydra", "ssh-keygen"],
+        "achievement": "SSH Stormtrooper",
+        "skills_gained": ["key-based auth", "disable-password login"]
+      },
+      {
+        "name": "Hash Cracking Workflow",
+        "scenario": "MD5 hashes were trivial to crack offline.",
+        "dialogue": [
+          "Mira: \"We need stronger hashing algorithms for storage.\"",
+          "Mira: \"Can you help me migrate to a more secure hash?\""
+        ],
+        "hint": "Use John the Ripper on the hash file.",
+        "task": "Crack an MD5 hash, then migrate storage to bcrypt or SHA-256 salted.",
+        "software": ["John the Ripper", "bcrypt"],
+        "achievement": "Hash Hacker",
+        "skills_gained": ["secure hashing", "salted storage"]
+      },
+      {
+        "name": "Rainbow Table Defense",
+        "scenario": "Rainbow tables eased hash recovery.",
+        "dialogue": [
+          "Mira: \"Salting will render those tables useless.\"",
+          "Mira: \"Can you help me implement per-user salts?\""
+        ],
+        "hint": "Generate a small rainbow table locally.",
+        "task": "Generate a rainbow table attack, then implement per-user salts in password hashes.",
+        "software": ["rtgen", "rcrack"],
+        "achievement": "Rainbow Wrangler",
+        "skills_gained": ["salted hashing", "table mitigation"]
+      }
+    ],
+    "Reverse Engineering": [
+      {
+        "name": "Firmware Extraction Audit",
+        "scenario": "The router’s firmware may contain hidden backdoors.",
+        "dialogue": [
+          "Mira: \"Let’s pull the firmware and inspect it.\"",
+          "Mira: \"Can you help me extract and analyze the image?\""
+        ],
+        "hint": "Use Binwalk to carve out the image.",
+        "task": "Extract the firmware image, analyze in Ghidra, then verify no backdoors remain.",
+        "software": ["Binwalk", "Ghidra"],
+        "achievement": "Firmware Forager",
+        "skills_gained": ["firmware carving", "static analysis"]
+      },
+      {
+        "name": "Credential Hunt & Reset",
+        "scenario": "Hard-coded creds were found in the binary.",
+        "dialogue": [
+          "Mira: \"We need to remove those and enforce secure login.\"",
+          "Mira: \"Can you help me patch out the credentials and require a reset?\""
+        ],
+        "hint": "Search for ASCII strings around ‘admin’.",
+        "task": "Locate embedded credentials, patch them out, and enforce password reset for devices.",
+        "software": ["Ghidra", "strings"],
+        "achievement": "Credential Seeker",
+        "skills_gained": ["binary patching", "password policy"]
+      },
+      {
+        "name": "Auth Bypass Patch",
+        "scenario": "A bypass allowed any password to succeed.",
+        "dialogue": [
+          "Mira: \"That jump instruction must be fixed.\"",
+          "Mira: \"Can you help me patch the firmware and test it?\""
+        ],
+        "hint": "Modify the conditional branch around auth.",
+        "task": "Patch the auth routine to remove bypass, then rebuild and flash firmware.",
+        "software": ["Ghidra", "radare2"],
+        "achievement": "Patch Paladin",
+        "skills_gained": ["control-flow editing", "firmware building"]
+      },
+      {
+        "name": "Token Discovery Remediation",
+        "scenario": "Secret tokens in firmware unlocked debug console.",
+        "dialogue": [
+          "Mira: \"Those tokens are too powerful—let’s revoke them.\"",
+          "Mira: \"Can you help me find and rotate all embedded tokens?\""
+        ],
+        "hint": "Use strings to find embedded URLs or tokens.",
+        "task": "Identify embedded tokens, revoke or rotate them, and update firmware.",
+        "software": ["strings", "grep"],
+        "achievement": "Token Tracker",
+        "skills_gained": ["token management", "revocation procedures"]
+      },
+      {
+        "name": "Rebuild & Secure Flash",
+        "scenario": "Our patched firmware must be deployed securely.",
+        "dialogue": [
+          "Mira: \"Let’s finalize and sign the firmware before flashing.\"",
+          "Mira: \"Can you help me rebuild and securely flash it to devices?\""
+        ],
+        "hint": "Use vendor toolchain and sign images.",
+        "task": "Rebuild the patched firmware with code signing and securely flash it to devices.",
+        "software": ["Make", "ubi-utils", "openssl"],
+        "achievement": "Flash Facilitator",
+        "skills_gained": ["code signing", "secure flashing"]
+      }
+    ],
+    "Social Engineering": [
+      {
+        "name": "Phishing Campaign Audit",
+        "scenario": "Several staff clicked malicious links.",
+        "dialogue": [
+          "Mira: \"We need to train them and remove that fake page.\"",
+          "Mira: \"Can you help me identify and take down the phishing site?\""
+        ],
+        "hint": "Analyze email headers and landing pages.",
+        "task": "Identify and take down the phishing site, then run a staff awareness session.",
+        "software": ["Thunderbird", "PhishTool"],
+        "achievement": "Email Illusionist",
+        "skills_gained": ["site takedown", "security training"]
+      },
+      {
+        "name": "CSRF Defense Implementation",
+        "scenario": "CSRF tokens were missing, letting attackers act as victims.",
+        "dialogue": [
+          "Mira: \"We must enforce anti-CSRF measures.\"",
+          "Mira: \"Can you help me implement and test CSRF tokens?\""
+        ],
+        "hint": "Check for missing or static CSRF tokens.",
+        "task": "Implement proper CSRF tokens in forms and validate them server-side.",
+        "software": ["Burp Suite", "ngrok"],
+        "achievement": "CSRF Conjurer",
+        "skills_gained": ["token generation", "server validation"]
+      },
+      {
+        "name": "Voicemail Spoof Detection",
+        "scenario": "Fake IT calls tricked staff.",
+        "dialogue": [
+          "Mira: \"Let’s implement caller-ID verification.\"",
+          "Mira: \"Can you help me deploy spoof detection and train the team?\""
+        ],
+        "hint": "Review voicemail headers and caller info.",
+        "task": "Deploy VOIP spoof detection and train staff on verification protocols.",
+        "software": ["Audacity", "spoofmyphone.com"],
+        "achievement": "Voice Ventriloquist",
+        "skills_gained": ["caller-ID verification", "policy creation"]
+      },
+      {
+        "name": "BLE Beacon Audit",
+        "scenario": "Free-Coffee beacon spread malware.",
+        "dialogue": [
+          "Mira: \"We need to scan for unauthorized BLE beacons.\"",
+          "Mira: \"Can you help me detect and block rogue beacons?\""
+        ],
+        "hint": "Use hcitool to list beacons in range.",
+        "task": "Detect rogue BLE beacons and enforce beacon authentication policies.",
+        "software": ["hcitool", "bluetoothctl"],
+        "achievement": "Beacon Bard",
+        "skills_gained": ["BLE scanning", "access control"]
+      },
+      {
+        "name": "USB Drop Mitigation",
+        "scenario": "A dropped USB infected multiple PCs.",
+        "dialogue": [
+          "Mira: \"We must disable autorun and educate staff.\"",
+          "Mira: \"Can you help me set up policies and run a training session?\""
+        ],
+        "hint": "Check Group Policy for autorun settings.",
+        "task": "Disable USB autorun on all endpoints and run a user awareness campaign.",
+        "software": ["Group Policy Editor", "Metasploit"],
+        "achievement": "USB Strategist",
+        "skills_gained": ["endpoint hardening", "user training"]
+      }
+    ],
+    "Sniffing & Spoofing": [
+      {
+        "name": "Guest Traffic Cleanup",
+        "scenario": "Clear-text credentials leaked on guest VLAN.",
+        "dialogue": [
+          "Mira: \"We must secure that network.\"",
+          "Mira: \"Can you help me sniff guest traffic and enforce HTTPS?\""
+        ],
+        "hint": "Capture HTTP and FTP flows for analysis.",
+        "task": "Sniff guest traffic, identify leaks, then enforce HTTPS-only and FTP disable.",
+        "software": ["tcpdump", "Wireshark"],
+        "achievement": "Sniffing Novice",
+        "skills_gained": ["traffic analysis", "policy enforcement"]
+      },
+      {
+        "name": "DNS Poison Remediation",
+        "scenario": "Clients redirected to malicious domains.",
+        "dialogue": [
+          "Mira: \"Let’s flush poisoned entries and secure DNS.\"",
+          "Mira: \"Can you help me detect and fix DNS poisoning?\""
+        ],
+        "hint": "Look for mismatched DNS replies.",
+        "task": "Detect DNS poisoning, flush cache, and enforce DNSSEC or secure DNS.",
+        "software": ["Wireshark", "rndc"],
+        "achievement": "DNS Defender",
+        "skills_gained": ["DNSSEC", "cache management"]
+      },
+      {
+        "name": "ARP Spoof Guard",
+        "scenario": "An attacker hijacked traffic via ARP spoofing.",
+        "dialogue": [
+          "Mira: \"We need dynamic ARP inspection on that switch.\"",
+          "Mira: \"Can you help me test and enable ARP defense?\""
+        ],
+        "hint": "Identify ARP reply anomalies in captures.",
+        "task": "Perform ARP spoof test, then enable Dynamic ARP Inspection on network devices.",
+        "software": ["arpspoof", "switch CLI"],
+        "achievement": "MITM Operative",
+        "skills_gained": ["network hardening", "ARP defense"]
+      },
+      {
+        "name": "HTTP Injection Defense",
+        "scenario": "Session cookies were stolen via JS injection.",
+        "dialogue": [
+          "Mira: \"We must sanitize proxy injections.\"",
+          "Mira: \"Can you help me test for JS injection and add CSP?\""
+        ],
+        "hint": "Filter for suspicious JS in HTTP flows.",
+        "task": "Test JS injection via Bettercap, then implement CSP and input sanitization.",
+        "software": ["Bettercap", "scapy"],
+        "achievement": "Injection Artist",
+        "skills_gained": ["CSP configuration", "payload filtering"]
+      },
+      {
+        "name": "DHCP Spoof Block",
+        "scenario": "Clients got wrong gateway from a rogue DHCP.",
+        "dialogue": [
+          "Mira: \"Let’s enforce DHCP snooping.\"",
+          "Mira: \"Can you help me simulate a DHCP spoof and secure the switches?\""
+        ],
+        "hint": "Detect multiple DHCP offers in captures.",
+        "task": "Simulate DHCP spoof attack, then configure DHCP snooping on switches.",
+        "software": ["Yersinia", "switch CLI"],
+        "achievement": "Gateway Guru",
+        "skills_gained": ["switch security", "DHCP snooping"]
+      }
+    ],
+    "Post Exploitation": [
+      {
+        "name": "Persistent Cronjob Removal",
+        "scenario": "A malicious cronjob was discovered on the portal.",
+        "dialogue": [
+          "Mira: \"We must remove that job and secure future entries.\"",
+          "Mira: \"Can you help me restrict crontab to admins only?\""
+        ],
+        "hint": "Check /etc/crontab and user crontabs.",
+        "task": "Remove the malicious cron entry, then restrict crontab to admins only.",
+        "software": ["crontab", "ssh"],
+        "achievement": "Cron Commander",
+        "skills_gained": ["crontab management", "privilege restriction"]
+      },
+      {
+        "name": "Hash Dump Safeguard",
+        "scenario": "Password hashes were staged for cracking.",
+        "dialogue": [
+          "Mira: \"We need to enforce hash encryption and access control.\"",
+          "Mira: \"Can you help me delete unauthorized dumps and lock down permissions?\""
+        ],
+        "hint": "Look for /etc/shadow dumps.",
+        "task": "Delete unauthorized hash dumps and enforce strict file permissions.",
+        "software": ["chmod", "chown"],
+        "achievement": "Hash Harvester",
+        "skills_gained": ["file permission management", "access auditing"]
+      },
+      {
+        "name": "Backdoor Account Cleanup",
+        "scenario": "An unknown admin account exists on the router.",
+        "dialogue": [
+          "Mira: \"We must remove that account and audit new ones.\"",
+          "Mira: \"Can you help me rotate all admin passwords and monitor accounts?\""
+        ],
+        "hint": "Check /etc/passwd and /etc/shadow.",
+        "task": "Delete the backdoor user, rotate all admin passwords, and implement account monitoring.",
+        "software": ["nano", "ssh"],
+        "achievement": "Account Architect",
+        "skills_gained": ["user auditing", "password rotation"]
+      },
+      {
+        "name": "Log Integrity Restoration",
+        "scenario": "Access logs were wiped after the breach.",
+        "dialogue": [
+          "Mira: \"We need reliable logging to detect future attacks.\"",
+          "Mira: \"Can you help me restore logs and set up immutable logging?\""
+        ],
+        "hint": "Truncate then restore from backups if available.",
+        "task": "Restore logs from backups and configure immutable logging policies.",
+        "software": ["rsync", "auditd"],
+        "achievement": "Log Eraser",
+        "skills_gained": ["backup restoration", "audit configuration"]
+      },
+      {
+        "name": "Covert Exfil Block",
+        "scenario": "Data was exfiltrated over DNS tunnels.",
+        "dialogue": [
+          "Mira: \"We must detect and block covert channels.\"",
+          "Mira: \"Can you help me monitor for tunneling and set up rate-limits?\""
+        ],
+        "hint": "Look for unusual DNS query patterns.",
+        "task": "Implement DNS query rate-limits and monitor for tunneling signatures.",
+        "software": ["dnscat2", "Suricata"],
+        "achievement": "Exfil Expert",
+        "skills_gained": ["intrusion detection", "anomaly monitoring"]
+      }
+    ],
+    "Forensics": [
+      {
+        "name": "Auth Log Recovery",
+        "scenario": "After the breach, the auth.log file was wiped to hide tampering.",
+        "dialogue": [
+          "Mira: \"Without auth logs, I can’t see who logged in during the attack.\"",
+          "Mira: \"Can you help me recover deleted log entries and check their integrity?\""
+        ],
+        "hint": "Use file-recovery tools to undelete log entries from the disk.",
+        "task": "Recover deleted '/var/log/auth.log' entries using extundelete or TestDisk, then validate their integrity.",
+        "software": ["extundelete", "TestDisk"],
+        "achievement": "Log Rescuer",
+        "skills_gained": ["file recovery", "partition analysis"]
+      },
+      {
+        "name": "Memory Dump Analysis",
+        "scenario": "A memory snapshot taken during the incident may hold evidence of resident malware.",
+        "dialogue": [
+          "Mira: \"Volatility will show me any hidden processes still lurking in RAM.\"",
+          "Mira: \"Can you help me analyze the memory dump and terminate unauthorized processes?\""
+        ],
+        "hint": "Load the RAM dump into Volatility and list running processes.",
+        "task": "Analyze a memory dump with Volatility or Rekall to identify and terminate unauthorized processes.",
+        "software": ["volatility", "Rekall"],
+        "achievement": "Memory Maven",
+        "skills_gained": ["memory forensics", "process analysis"]
+      },
+      {
+        "name": "Browser Cache Inspection",
+        "scenario": "Some users report that credentials reappear even after logout—cached pages may be leaking data.",
+        "dialogue": [
+          "Mira: \"The browser cache might still hold stolen credentials—let’s clear and inspect it.\"",
+          "Mira: \"Can you help me purge any stored credentials from the cache?\""
+        ],
+        "hint": "Use a cache-viewer or sqlite3 to extract saved form data from the cache database.",
+        "task": "Inspect and purge browser cache artifacts (e.g., via BrowserHistoryView or sqlite3) to remove any stored credentials.",
+        "software": ["BrowserHistoryView", "sqlite3"],
+        "achievement": "Cache Sleuth",
+        "skills_gained": ["artifact parsing", "cache cleanup"]
+      },
+      {
+        "name": "ARP Cache Timeline",
+        "scenario": "You need to prove exactly when the rogue AP first appeared on the network.",
+        "dialogue": [
+          "Mira: \"ARP cache timestamps will show me the moment the malicious MAC joined.\"",
+          "Mira: \"Can you help me extract and correlate ARP cache entries?\""
+        ],
+        "hint": "Extract timestamped entries from the ARP cache or use system audit logs.",
+        "task": "Extract and timestamp ARP cache entries (e.g., via `arp -a` and parsing) to correlate device connections and isolate the rogue MAC.",
+        "software": ["arp", "grep", "awk"],
+        "achievement": "ARP Archivist",
+        "skills_gained": ["cache analysis", "timestamp inference"]
+      },
+      {
+        "name": "Event Timeline Build",
+        "scenario": "Logs and packet captures are scattered—Mira needs a unified view of the attack.",
+        "dialogue": [
+          "Mira: \"A single timeline will reveal the full sequence and help us shore up defenses.\"",
+          "Mira: \"Can you help me merge syslog and pcap events into one timeline?\""
+        ],
+        "hint": "Use Plaso (log2timeline) to merge syslog, pcap, and other artifacts into one timeline.",
+        "task": "Generate a merged timeline of syslog and pcap events using Plaso, then review for intrusion markers and secure any gaps.",
+        "software": ["Plaso", "log2timeline"],
+        "achievement": "Timeline Tactician",
+        "skills_gained": ["timeline correlation", "multi-source forensics"]
+      }
+    ]
+  }
+}
+

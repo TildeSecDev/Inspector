@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Network Editor — Inspector</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header><h2 style="margin:0">Inspector — Network Editor</h2></header>
+    <nav style="align-items:center">
+      <button id="loadNet">Load Network</button>
+      <button id="saveNet">Save Network</button>
+      <button id="importExample">Import Example</button>
+      <button id="simulateBtn">Simulate</button>
+      <div style="flex:1"></div>
+      <button id="back">Back</button>
+    </nav>
+    <main>
+      <div class="editor-layout">
+        <aside class="palette">
+          <h4>Devices</h4>
+          <div class="device" draggable="true" data-type="router">Router</div>
+          <div class="device" draggable="true" data-type="switch">Switch</div>
+          <div class="device" draggable="true" data-type="host">Host</div>
+          <div class="device" draggable="true" data-type="firewall">Firewall</div>
+        </aside>
+
+        <div class="canvas-wrap">
+          <div class="card">
+            <div class="controls small">
+              <span>Drag devices onto the canvas to create nodes. Click a node to select and edit its properties.</span>
+            </div>
+            <canvas id="topology"></canvas>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h4>Inspector</h4>
+          <div id="inspector">No device selected</div>
+          <h4 style="margin-top:12px">Interfaces</h4>
+          <div id="interfaces" class="small">Select a device to view interfaces</div>
+          <h4 style="margin-top:12px">Hacking Tools / Logs</h4>
+          <div id="hackingLog" class="log"></div>
+          <div style="margin-top:8px">
+            <button id="scanBtn">Port Scan Selected</button>
+            <button id="exploitBtn">Exploit Selected</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+    <script src="network.js"></script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "stepNumber": 28,
+  "title": "SSH Brute-Force Guard",
+  "description": "IoT camera credentials were brute-forced.<br><br><b>Objective:</b> Simulate SSH brute-force, then disable password login and enable key-based auth.",
+  "dialogue": [
+    "Mira: \"Let's force-lock that SSH port or use keys.\"",
+    "Mira: \"Can you help me disable password login and enable key-based auth?\""
+  ],
+  "hints": [
+    "Use Hydra against SSH port 22.",
+    "Use ssh-keygen for key generation."
+  ],
+  "validation": {
+    "command": "Hydra",
+    "type": "contains"
+  },
+  "achievement": "SSH Stormtrooper",
+  "skills_gained": ["key-based auth", "disable-password login"]
+}

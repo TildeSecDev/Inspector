@@ -1,0 +1,19 @@
+{
+  "stepNumber": 13,
+  "title": "SQL Injection Discovery",
+  "description": "Form submissions sometimes return database errors.<br><br><b>Objective:</b> Detect SQL-injection points in the portal and apply proper input sanitization.",
+  "dialogue": [
+    "Mira: \"I saw some weird error messages after submitting a form. Could it be SQL injection?\"",
+    "Mira: \"Can you test the portal for injection points and help me fix them?\""
+  ],
+  "hints": [
+    "Try a ' OR '1'='1 payload in form parameters.",
+    "Use sqlmap for automated testing."
+  ],
+  "validation": {
+    "command": "sqlmap",
+    "type": "contains"
+  },
+  "achievement": "SQL Intruder",
+  "skills_gained": ["injection testing", "secure coding"]
+}

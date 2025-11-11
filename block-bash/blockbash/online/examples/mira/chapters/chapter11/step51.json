@@ -1,0 +1,19 @@
+{
+  "stepNumber": 51,
+  "title": "Auth Log Recovery",
+  "description": "After the breach, the auth.log file was wiped to hide tampering.<br><br><b>Objective:</b> Recover deleted '/var/log/auth.log' entries using extundelete or TestDisk, then validate their integrity.",
+  "dialogue": [
+    "Mira: \"Without auth logs, I can't see who logged in during the attack.\"",
+    "Mira: \"Can you help me recover deleted log entries and check their integrity?\""
+  ],
+  "hints": [
+    "Use file-recovery tools to undelete log entries from the disk.",
+    "Use extundelete or TestDisk."
+  ],
+  "validation": {
+    "command": "extundelete",
+    "type": "contains"
+  },
+  "achievement": "Log Rescuer",
+  "skills_gained": ["file recovery", "partition analysis"]
+}

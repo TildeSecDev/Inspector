@@ -1,0 +1,19 @@
+{
+  "stepNumber": 45,
+  "title": "DHCP Spoof Block",
+  "description": "Clients got wrong gateway from a rogue DHCP.<br><br><b>Objective:</b> Simulate DHCP spoof attack, then configure DHCP snooping on switches.",
+  "dialogue": [
+    "Mira: \"Let's enforce DHCP snooping.\"",
+    "Mira: \"Can you help me simulate a DHCP spoof and secure the switches?\""
+  ],
+  "hints": [
+    "Detect multiple DHCP offers in captures.",
+    "Use Yersinia or switch CLI."
+  ],
+  "validation": {
+    "command": "Yersinia",
+    "type": "contains"
+  },
+  "achievement": "Gateway Guru",
+  "skills_gained": ["switch security", "DHCP snooping"]
+}

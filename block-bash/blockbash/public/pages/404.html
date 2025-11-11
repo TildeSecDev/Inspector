@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="title">404 Not Found - Inspector</title>
+  <link rel="stylesheet" href="/css/welcome.css">
+  <script defer src="/js/i18n.js"></script>
+  <style>
+    /* Terminal-style 404 page matching welcome.html theme */
+    body {
+      background: #1d1f21; /* Dark terminal background */
+      margin: 0;
+      padding: 0;
+      font-family: 'Liberation Mono', 'Courier New', monospace;
+      color: #d8dee9; /* Nord light text */
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background INSPECTOR text pattern like welcome.html */
+    .inspector-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .inspector-bg-text {
+      position: absolute;
+      font-size: 72px;
+      font-weight: 900;
+      color: rgba(216, 222, 233, 0.05); /* Very faint Nord text */
+      white-space: nowrap;
+      user-select: none;
+      pointer-events: none;
+      font-family: 'Liberation Mono', monospace;
+    }
+
+    /* Terminal container */
+    .terminal-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* Terminal window frame */
+    .terminal-window {
+      background: rgba(46, 52, 64, 0.95); /* Nord dark with transparency */
+      border: 2px solid #4c566a; /* Nord comment color */
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      max-width: 800px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Terminal header bar */
+    .terminal-header {
+      background: #3b4252; /* Nord darker */
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #4c566a;
+    }
+
+    .terminal-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+    }
+
+    .terminal-btn.close { background: #bf616a; } /* Nord red */
+    .terminal-btn.minimize { background: #ebcb8b; } /* Nord yellow */
+    .terminal-btn.maximize { background: #a3be8c; } /* Nord green */
+
+    .terminal-title {
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 12px;
+      color: #d8dee9;
+      font-family: 'Liberation Mono', monospace;
+    }
+
+    /* Terminal content */
+    .terminal-content {
+      padding: 24px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ASCII 404 with blinking cursor */
+    .ascii-404 {
+      font-family: 'Liberation Mono', 'Courier New', monospace;
+      font-size: clamp(16px, 4vw, 32px);
+      line-height: 1.2;
+      color: #bf616a; /* Nord red for error */
+      text-align: center;
+      white-space: pre;
+      margin-bottom: 2rem;
+    }
+
+    .cursor {
+      animation: blink 1s infinite;
+      background: #d8dee9;
+      color: #2e3440;
+      display: inline-block;
+      width: 0.6em;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Terminal prompt style messages */
+    .terminal-line {
+      font-family: 'Liberation Mono', monospace;
+      margin: 0.5rem 0;
+      color: #d8dee9;
+      text-align: left;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .prompt {
+      color: #a3be8c; /* Nord green */
+    }
+
+    .error {
+      color: #bf616a; /* Nord red */
+    }
+
+    .warning {
+      color: #ebcb8b; /* Nord yellow */
+    }
+
+    /* Navigation buttons styled like terminal commands */
+    .terminal-nav {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-family: 'Liberation Mono', monospace;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .terminal-cmd {
+      display: block;
+      text-decoration: none;
+      color: #88c0d0; /* Nord cyan */
+      padding: 0.5rem 0;
+      border: none;
+      background: none;
+      font-family: inherit;
+      font-size: inherit;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .terminal-cmd:hover {
+      color: #8fbcbb; /* Nord teal */
+      text-decoration: underline;
+    }
+
+    .terminal-cmd:before {
+      content: "$ ";
+      color: #a3be8c; /* Nord green prompt */
+    }
+
+    /* Scanline effect for authentic terminal feel */
+    .scanlines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(216, 222, 233, 0.02) 2px,
+        rgba(216, 222, 233, 0.02) 4px
+      );
+      pointer-events: none;
+      z-index: 15;
+    }
+  </style>
+</head>
+<body data-page="404">
+  <!-- Background INSPECTOR pattern like welcome.html -->
+  <div class="inspector-bg">
+    <div class="inspector-bg-text" style="top:0;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:10vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:22vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:34vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:46vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:58vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:70vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:84vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+    <div class="inspector-bg-text" style="top:96vh;left:0;">INSPECTOR INSPECTOR INSPECTOR INSPECTOR INSPECTOR</div>
+  </div>
+
+  <!-- Scanline effect -->
+  <div class="scanlines"></div>
+
+  <div class="terminal-container">
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-controls">
+          <div class="terminal-btn close"></div>
+          <div class="terminal-btn minimize"></div>
+          <div class="terminal-btn maximize"></div>
+        </div>
+        <div class="terminal-title">inspector@tildesec: ~</div>
+      </div>
+      
+      <div class="terminal-content">
+        <div class="ascii-404">
+██╗  ██╗ ██████╗ ██╗  ██╗
+██║  ██║██╔═████╗██║  ██║
+███████║██║██╔██║███████║
+╚════██║████╔╝██║╚════██║
+     ██║╚██████╔╝     ██║
+     ╚═╝ ╚═════╝      ╚═╝<span class="cursor">█</span></div>
+
+        <div class="terminal-line">
+          <span class="prompt">tildesec@inspector:~$</span> ls -la /requested/resource
+        </div>
+        <div class="terminal-line error">
+          ls: cannot access '/requested/resource': No such file or directory
+        </div>
+        <div class="terminal-line">
+          <span class="prompt">tildesec@inspector:~$</span> cat /var/log/access.log | grep 404
+        </div>
+        <div class="terminal-line warning">
+          [ERROR] 404 - Resource not found: The page you requested has gone dark
+        </div>
+        <div class="terminal-line">
+          <span class="prompt">tildesec@inspector:~$</span> echo "Available navigation options:"
+        </div>
+
+        <div class="terminal-nav">
+          <a href="/" class="terminal-cmd" data-i18n="actions.home">cd /home && ./start_inspector.sh</a>
+          <a href="/editor" class="terminal-cmd" data-i18n="actions.editor">./launch_editor.sh --fullscreen</a>
+          <a href="javascript:history.back()" class="terminal-cmd">cd .. # Go back</a>
+        </div>
+
+        <div class="terminal-line" style="margin-top: 1.5rem;">
+          <span class="prompt">tildesec@inspector:~$</span> <span class="cursor">█</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

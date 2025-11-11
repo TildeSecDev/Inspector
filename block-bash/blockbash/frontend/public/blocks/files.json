@@ -1,0 +1,38 @@
+[
+  {
+    "name": "List Files",
+    "class": "block",
+    "draggable": true,
+    "blockType": "ls",
+    "data-category": "files",
+    "icon": "fa fa-folder-open",
+    "innerHTML": "<div class=\"block-title\">List Files</div><div class=\"block-details files-details\" style=\"display:none;\"><p class=\"explanation\">List files in a directory. Optionally specify a path.</p><input type=\"text\" class=\"ls-path\" placeholder=\"Path (optional)\"></div>"
+  },
+  {
+    "name": "Copy File",
+    "class": "block",
+    "draggable": true,
+    "blockType": "cp",
+    "data-category": "files",
+    "icon": "fa fa-copy",
+    "innerHTML": "<div class=\"block-title\">Copy File</div><div class=\"block-details files-details\" style=\"display:none;\"><p class=\"explanation\">Copy a file from source to destination.</p><input type=\"text\" class=\"cp-src\" placeholder=\"Source\"><input type=\"text\" class=\"cp-dest\" placeholder=\"Destination\"></div>"
+  },
+  {
+    "name": "Move File",
+    "class": "block",
+    "draggable": true,
+    "blockType": "mv",
+    "data-category": "files",
+    "icon": "fa fa-arrows-alt",
+    "innerHTML": "<div class=\"block-title\">Move File</div><div class=\"block-details files-details\" style=\"display:none;\"><p class=\"explanation\">Move a file from source to destination.</p><input type=\"text\" class=\"mv-src\" placeholder=\"Source\"><input type=\"text\" class=\"mv-dest\" placeholder=\"Destination\"></div>"
+  },
+  {
+    "name": "Remove File",
+    "class": "block",
+    "draggable": true,
+    "blockType": "rm",
+    "data-category": "files",
+    "icon": "fa fa-trash",
+    "innerHTML": "<div class=\"block-title\">Remove File</div><div class=\"block-details files-details\" style=\"display:none;\"><p class=\"explanation\">Remove (delete) a file or directory.</p><input type=\"text\" class=\"rm-path\" placeholder=\"Path\"></div>"
+  }
+]

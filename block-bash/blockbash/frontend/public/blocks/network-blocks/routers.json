@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Router 1941",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "router-1941",
+    "data-category": "routers",
+    "nestable": false,
+    "icon": "fa fa-sitemap",
+    "deviceType": "router",
+    "ports": ["ethernet", "serial", "console"],
+    "innerHTML": "<div class=\"network-block-title\">Router 1941</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco 1941 Integrated Services Router</p><input type=\"text\" class=\"device-name\" placeholder=\"Router Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"text\" class=\"subnet-mask\" placeholder=\"Subnet Mask\"><textarea class=\"routing-config\" placeholder=\"Routing Configuration\"></textarea></div>"
+  },
+  {
+    "name": "Router 2811",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "router-2811",
+    "data-category": "routers",
+    "nestable": false,
+    "icon": "fa fa-sitemap",
+    "deviceType": "router",
+    "ports": ["ethernet", "serial", "console"],
+    "innerHTML": "<div class=\"network-block-title\">Router 2811</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco 2811 Integrated Services Router</p><input type=\"text\" class=\"device-name\" placeholder=\"Router Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"text\" class=\"subnet-mask\" placeholder=\"Subnet Mask\"><textarea class=\"routing-config\" placeholder=\"Routing Configuration\"></textarea></div>"
+  },
+  {
+    "name": "Router 2911",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "router-2911",
+    "data-category": "routers",
+    "nestable": false,
+    "icon": "fa fa-sitemap",
+    "deviceType": "router",
+    "ports": ["ethernet", "serial", "console"],
+    "innerHTML": "<div class=\"network-block-title\">Router 2911</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco 2911 Integrated Services Router</p><input type=\"text\" class=\"device-name\" placeholder=\"Router Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"text\" class=\"subnet-mask\" placeholder=\"Subnet Mask\"><textarea class=\"routing-config\" placeholder=\"Routing Configuration\"></textarea></div>"
+  },
+  {
+    "name": "Generic Router",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "generic-router",
+    "data-category": "routers",
+    "nestable": false,
+    "icon": "fa fa-sitemap",
+    "deviceType": "router",
+    "ports": ["ethernet", "serial", "console"],
+    "innerHTML": "<div class=\"network-block-title\">Generic Router</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Generic router with basic routing capabilities</p><input type=\"text\" class=\"device-name\" placeholder=\"Router Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"text\" class=\"subnet-mask\" placeholder=\"Subnet Mask\"><select class=\"routing-protocol\"><option value=\"static\">Static Routing</option><option value=\"rip\">RIP</option><option value=\"ospf\">OSPF</option><option value=\"eigrp\">EIGRP</option><option value=\"bgp\">BGP</option></select></div>"
+  },
+  {
+    "name": "Multifunctional Router",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "multifunction-router",
+    "data-category": "routers",
+    "nestable": false,
+    "icon": "fa fa-share-alt",
+    "deviceType": "router",
+    "ports": ["ethernet", "serial", "console", "switch-ports"],
+    "innerHTML": "<div class=\"network-block-title\">Multifunctional Router</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Router with built-in switch modules and additional services</p><input type=\"text\" class=\"device-name\" placeholder=\"Router Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"text\" class=\"subnet-mask\" placeholder=\"Subnet Mask\"><input type=\"number\" class=\"switch-ports\" placeholder=\"Number of Switch Ports\" min=\"4\" max=\"48\" value=\"24\"><select class=\"additional-services\"><option value=\"dhcp\">DHCP Server</option><option value=\"nat\">NAT/PAT</option><option value=\"firewall\">Basic Firewall</option><option value=\"vpn\">VPN Server</option></select></div>"
+  }
+]

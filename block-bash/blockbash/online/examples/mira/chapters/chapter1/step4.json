@@ -1,0 +1,19 @@
+{
+  "stepNumber": 4,
+  "title": "Beacon Integrity Audit",
+  "description": "Phantom networks with odd beacon intervals keep appearing in the café.<br><br><b>Objective:</b> Scan and blacklist any AP broadcasting abnormal beacon intervals or OUIs.",
+  "dialogue": [
+    "Mira: \"Strange networks keep popping up with weird settings. Wrong beacon intervals can signal a malicious AP.\"",
+    "Mira: \"Can you help me scan and blacklist any suspicious APs?\""
+  ],
+  "hints": [
+    "Compare beacon interval and vendor OUI tags.",
+    "Use airodump-ng --manufacturer and Wireshark."
+  ],
+  "validation": {
+    "command": "airodump-ng --manufacturer",
+    "type": "contains"
+  },
+  "achievement": "Beacon Auditor",
+  "skills_gained": ["beacon analysis", "OUI validation"]
+}

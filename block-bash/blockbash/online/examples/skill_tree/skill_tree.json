@@ -1,0 +1,9 @@
+{
+  "stepNumber": 1,
+  "title": "Skill Tree Map",
+  "description": "View your cybersecurity skill tree. Hover over a skill to see requirements and achievements.",
+  "hints": [
+    "Scroll to explore all topics.",
+    "Hover over a skill node to see requirements and achievements."
+  ]
+}

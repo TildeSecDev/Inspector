@@ -1,0 +1,13 @@
+{
+  "stepNumber": 3,
+  "title": "Port Scan",
+  "description": "Discover open ports on a target host.",
+  "hints": [
+    "Scan common TCP ports.",
+    "Use SYN or connect scan."
+  ],
+  "blocks": ["Set Target Host", "Select Port Range", "Start Scan"],
+  "achievement": "Port Sleuth",
+  "skill": "Port Scanning",
+  "points": 10
+}

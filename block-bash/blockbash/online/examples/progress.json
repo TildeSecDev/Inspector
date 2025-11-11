@@ -1,0 +1,363 @@
+{
+  "skills": [
+    {
+      "name": "Host Discovery",
+      "topic": "Information Gathering",
+      "pointsRequired": null,
+      "tasks": [
+        "Ping Sweep",
+        "ARP Scan",
+        "Threat Host Sweep"
+      ],
+      "achievements": [
+        "network_cartographer.svg",
+        "mac_mapper.svg",
+        "network_enumerator.svg"
+      ]
+    },
+    {
+      "name": "Port Scanning",
+      "topic": "Information Gathering",
+      "pointsRequired": null,
+      "tasks": [
+        "Port Scan",
+        "Service Version Detection",
+        "Gateway Interface Probe"
+      ],
+      "achievements": [
+        "port_sleuth.svg",
+        "service_profiler.svg",
+        "gateway_sleuth.svg"
+      ]
+    },
+    {
+      "name": "DNS Analysis",
+      "topic": "Information Gathering",
+      "pointsRequired": null,
+      "tasks": [
+        "DNS Enumeration",
+        "DNS Poison Audit"
+      ],
+      "achievements": [
+        "dns_detective.svg",
+        "dns_analyst.svg"
+      ]
+    },
+    {
+      "name": "Network Mapping",
+      "topic": "Information Gathering",
+      "pointsRequired": null,
+      "tasks": [
+        "Traceroute Mapping",
+        "SSID Footprint Map"
+      ],
+      "achievements": [
+        "route_mapper.svg",
+        "ssid_cartographer.svg"
+      ]
+    },
+    {
+      "name": "Web Vulnerability Scanning",
+      "topic": "Vulnerability Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Web Vulnerability Scan",
+        "Automated Portal Scan"
+      ],
+      "achievements": [
+        "web_hunter.svg",
+        "vuln_hunter.svg"
+      ]
+    },
+    {
+      "name": "SSL Analysis",
+      "topic": "Vulnerability Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "SSL/TLS Configuration Audit",
+        "SSL Certificate Audit"
+      ],
+      "achievements": [
+        "ssl_auditor.svg",
+        "cert_inspector.svg"
+      ]
+    },
+    {
+      "name": "SQLi Testing",
+      "topic": "Vulnerability Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "SQL Injection Test",
+        "SQL Injection Discovery"
+      ],
+      "achievements": [
+        "injection_investigator.svg",
+        "sql_intruder.svg"
+      ]
+    },
+    {
+      "name": "Header Analysis",
+      "topic": "Vulnerability Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Header Security Audit",
+        "HTTP Header Harden"
+      ],
+      "achievements": [
+        "header_hero.svg",
+        "header_guardian.svg"
+      ]
+    },
+    {
+      "name": "Credential Testing",
+      "topic": "Vulnerability Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Default Credential Scan",
+        "Default Credential Remediation"
+      ],
+      "achievements": [
+        "credential_checker.svg",
+        "credential_cracker.svg"
+      ]
+    },
+    {
+      "name": "Form Analysis",
+      "topic": "Web Application Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Hidden Field Discovery",
+        "Hidden Field Patch"
+      ],
+      "achievements": [
+        "field_finder.svg",
+        "field_forensics.svg"
+      ]
+    },
+    {
+      "name": "Input Validation",
+      "topic": "Web Application Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Client-Side Validation Bypass",
+        "Client-Side Validation Fix"
+      ],
+      "achievements": [
+        "validation_bypasser.svg",
+        "client_side_conqueror.svg"
+      ]
+    },
+    {
+      "name": "Redirect Testing",
+      "topic": "Web Application Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Open Redirect Detection",
+        "Open-Redirect Lockdown"
+      ],
+      "achievements": [
+        "redirect_detector.svg",
+        "redirect_rogue.svg"
+      ]
+    },
+    {
+      "name": "Directory Analysis",
+      "topic": "Web Application Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Directory Listing Check",
+        "Directory Listing Disable"
+      ],
+      "achievements": [
+        "directory_discoverer.svg",
+        "directory_diver.svg"
+      ]
+    },
+    {
+      "name": "Brute-force Defense",
+      "topic": "Web Application Analysis",
+      "pointsRequired": null,
+      "tasks": [
+        "Rate Limiting Test",
+        "Admin Panel Lockdown"
+      ],
+      "achievements": [
+        "rate_limiter.svg",
+        "brute_force_specialist.svg"
+      ]
+    },
+    {
+      "name": "Database Enumeration",
+      "topic": "Database Assessment",
+      "pointsRequired": null,
+      "tasks": [
+        "Database Banner Grabbing",
+        "Database Enumeration"
+      ],
+      "achievements": [
+        "db_profiler.svg",
+        "schema_explorer.svg"
+      ]
+    },
+    {
+      "name": "Credential Testing (DB)",
+      "topic": "Database Assessment",
+      "pointsRequired": null,
+      "tasks": [
+        "Default Credential Test"
+      ],
+      "achievements": [
+        "db_credential_checker.svg"
+      ]
+    },
+    {
+      "name": "SQL Injection Testing (DB)",
+      "topic": "Database Assessment",
+      "pointsRequired": null,
+      "tasks": [
+        "SQL Injection Probe"
+      ],
+      "achievements": [
+        "sqli_prober.svg"
+      ]
+    },
+    {
+      "name": "Password Cracking",
+      "topic": "Password Attacks",
+      "pointsRequired": null,
+      "tasks": [
+        "Password Brute-Force",
+        "Dictionary Attack",
+        "Hash Cracking",
+        "Rainbow Table Attack"
+      ],
+      "achievements": [
+        "brute_force_breaker.svg",
+        "dictionary_diver.svg",
+        "hash_hacker.svg",
+        "rainbow_raider.svg"
+      ]
+    },
+    {
+      "name": "Account Testing",
+      "topic": "Password Attacks",
+      "pointsRequired": null,
+      "tasks": [
+        "Password Spray"
+      ],
+      "achievements": [
+        "spray_specialist.svg"
+      ]
+    },
+    {
+      "name": "Wireless Setup",
+      "topic": "Wireless Attacks",
+      "pointsRequired": null,
+      "tasks": [
+        "Enable Monitor Mode",
+        "Restore Managed Mode"
+      ],
+      "achievements": [
+        "monitor_mode_master.svg",
+        "mode_restorer.svg"
+      ]
+    },
+    {
+      "name": "Packet Analysis",
+      "topic": "Wireless Attacks",
+      "pointsRequired": null,
+      "tasks": [
+        "Packet Capture"
+      ],
+      "achievements": [
+        "packet_collector.svg"
+      ]
+    },
+    {
+      "name": "Firmware Analysis",
+      "topic": "Reverse Engineering",
+      "pointsRequired": null,
+      "tasks": [
+        "Firmware Extraction",
+        "Firmware Extraction Audit"
+      ],
+      "achievements": [
+        "firmware_forager.svg"
+      ]
+    },
+    {
+      "name": "Exploit Research",
+      "topic": "Exploitation Tools",
+      "pointsRequired": null,
+      "tasks": [
+        "Exploit Search",
+        "SearchSploit Validation"
+      ],
+      "achievements": [
+        "exploit_explorer.svg",
+        "exploit_engineer.svg"
+      ]
+    },
+    {
+      "name": "Traffic Analysis",
+      "topic": "Sniffing & Spoofing",
+      "pointsRequired": null,
+      "tasks": [
+        "Packet Sniffing",
+        "Guest Traffic Cleanup"
+      ],
+      "achievements": [
+        "packet_sniffer.svg",
+        "sniffing_novice.svg"
+      ]
+    },
+    {
+      "name": "Privilege Escalation",
+      "topic": "Post Exploitation",
+      "pointsRequired": null,
+      "tasks": [
+        "Privilege Escalation"
+      ],
+      "achievements": [
+        "privilege_escalator.svg"
+      ]
+    },
+    {
+      "name": "Disk Imaging",
+      "topic": "Forensics",
+      "pointsRequired": null,
+      "tasks": [
+        "Disk Image Acquisition"
+      ],
+      "achievements": [
+        "disk_imager.svg"
+      ]
+    },
+    {
+      "name": "Reporting",
+      "topic": "Reporting Tools",
+      "pointsRequired": null,
+      "tasks": [
+        "Executive Summary Creation",
+        "Final Report Delivery"
+      ],
+      "achievements": [
+        "summary_specialist.svg",
+        "report_deliverer.svg"
+      ]
+    },
+    {
+      "name": "Phishing Simulation",
+      "topic": "Social Engineering Tools",
+      "pointsRequired": null,
+      "tasks": [
+        "Phishing Email Creation",
+        "Malicious Link Tracking"
+      ],
+      "achievements": [
+        "phishing_planner.svg",
+        "link_tracker.svg"
+      ]
+    }
+  ]
+}

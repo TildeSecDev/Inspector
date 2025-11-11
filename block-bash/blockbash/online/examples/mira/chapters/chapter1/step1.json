@@ -1,0 +1,22 @@
+{
+  "stepNumber": 1,
+  "title": "Spoofed SSID Cleanup",
+  "description": "Oh no! Alice, Mira's best friend, just got hit with sneaky spyware after connecting to what she thought was the café's safe Wi-Fi. But wait—there are TWO networks with the same name! One's a wolf in sheep's clothing, and it's up to you to sniff it out and take it down before more friends get caught in the trap.<br><br><b>Objective:</b> Become a Wi-Fi detective! Use airodump-ng to spot the fake AP and aireplay-ng to kick it off the network like a bouncer at a club.",
+  "dialogue": [
+    "Mira: \"Hey, detective! Alice just got bombarded with creepy pop-ups after grabbing coffee. She swore she connected to 'CoffeeShopWifi', but I spotted something fishy—two networks with the exact same name!\"",
+    "Mira: \"One's legit, the other's a sneaky imposter trying to steal data. Can you help me hunt it down and shut it down? Alice is freaking out, and we can't let this digital bandit win!\"",
+    "Mira: \"Let's turn the tables and show this rogue AP who's boss!\""
+  ],
+  "hints": [
+    "Look for two APs with identical SSIDs but different MAC addresses—like twins with different fingerprints!",
+    "Fire up airodump-ng to scan the airwaves, then use aireplay-ng to deauth the bad guy and send it packing.",
+    "Pro tip: Monitor mode is your secret weapon—switch your Wi-Fi card to spy mode!"
+  ],
+  "validation": {
+    "command": "airodump-ng",
+    "type": "contains"
+  },
+  "achievement": "Rogue AP Remediator",
+  "skills_gained": ["identifying malicious SSIDs", "AP deactivation"],
+  "avatar": "/assets/workshop/avatars/mira/mira_6.png"
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drag and Drop Debug</title>
+    <style>
+        .block {
+            width: 100px;
+            height: 50px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            margin: 10px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .drop-area {
+            width: 300px;
+            height: 200px;
+            border: 2px dashed #666;
+            margin: 20px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drag and Drop Test</h1>
+    
+    <div class="block" draggable="true" data-type="test">Test Block</div>
+    
+    <div class="drop-area">Drop Here</div>
+    
+    <script>
+        const block = document.querySelector('.block');
+        const dropArea = document.querySelector('.drop-area');
+        
+        block.addEventListener('dragstart', (e) => {
+            console.log('Drag started');
+            e.dataTransfer.setData('text/plain', JSON.stringify({type: 'test', name: 'test block'}));
+        });
+        
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            console.log('Drag over');
+            e.dataTransfer.dropEffect = 'copy';
+        });
+        
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            console.log('Drop detected');
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            console.log('Dropped data:', data);
+            dropArea.innerHTML = 'Dropped: ' + data.name;
+        });
+        
+        console.log('Debug page loaded');
+    </script>
+</body>
+</html>

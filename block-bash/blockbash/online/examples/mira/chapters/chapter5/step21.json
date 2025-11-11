@@ -1,0 +1,21 @@
+{
+  "stepNumber": 21,
+  "title": "HTTP Login Audit",
+  "description": "The HTTP login is like a flimsy lock on the café's back door—if Metasploit can pick it, any hacker could waltz right in! Let's turn the tables and test it ourselves, then fortify it like a digital fortress.<br><br><b>Objective:</b> Become the exploit master! Use Metasploit's auxiliary modules to test the HTTP login, expose the weaknesses, and lock it down tighter than a bank vault.",
+  "dialogue": [
+    "Mira: \"Whoa, if Metasploit can just stroll through the HTTP login like it's no big deal, we're in trouble! Let's test it and turn it into an impenetrable wall.\"",
+    "Mira: \"You're the exploit expert—fire up msfconsole and show me how we'd break in, then we'll fix it so no one else can!\"",
+    "Mira: \"This is like being a spy testing the enemy's defenses—super cool!\""
+  ],
+  "hints": [
+    "Metasploit's auxiliary modules are your secret gadgets—use http_login to probe the endpoint.",
+    "Launch msfconsole, load the module, set your targets, and let it do the dirty work!",
+    "Once you find the weak spots, patch them up—maybe add authentication or rate limiting."
+  ],
+  "validation": {
+    "command": "msfconsole",
+    "type": "contains"
+  },
+  "achievement": "Shell Sniper",
+  "skills_gained": ["exploit testing", "endpoint hardening"]
+}

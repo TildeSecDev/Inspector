@@ -1,0 +1,19 @@
+{
+  "stepNumber": 55,
+  "title": "Event Timeline Build",
+  "description": "Logs and packet captures are scattered—Mira needs a unified view of the attack.<br><br><b>Objective:</b> Generate a merged timeline of syslog and pcap events using Plaso, then review for intrusion markers and secure any gaps.",
+  "dialogue": [
+    "Mira: \"A single timeline will reveal the full sequence and help us shore up defenses.\"",
+    "Mira: \"Can you help me merge syslog and pcap events into one timeline?\""
+  ],
+  "hints": [
+    "Use Plaso (log2timeline) to merge syslog, pcap, and other artifacts into one timeline.",
+    "Use Plaso and log2timeline."
+  ],
+  "validation": {
+    "command": "Plaso",
+    "type": "contains"
+  },
+  "achievement": "Timeline Tactician",
+  "skills_gained": ["timeline correlation", "multi-source forensics"]
+}

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Workshop Sandbox</title>
+  <style>
+    /* --- Layout inspired by workshop-container --- */
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      background: #232946; color: #ffe066;
+      font-family: 'Segoe UI', 'Kanit', 'Tomorrow', monospace;
+    }
+    #sandbox-root {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      background: #232946;
+      padding: 32px 0;
+    }
+    #workshop-container {
+      background: #181c24;
+      border-radius: 18px;
+      box-shadow: 0 4px 32px #000a;
+      border: 3px solid #ffe066;
+      width: 900px;
+      min-height: 600px;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+    #workshop-preview {
+      flex: 2;
+      background: #232946;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+    }
+    #preview-bg {
+      width: 100%;
+      height: 320px;
+      background: #232946 center/cover no-repeat;
+      border-bottom: 2px solid #ffe066;
+      position: relative;
+    }
+    #preview-sprite {
+      position: absolute;
+      left: 50px; bottom: 40px;
+      width: 96px; height: 96px;
+      background: url('/assets/workshop/avatars/mira/mira_6.png') 0 0 no-repeat;
+      background-size: 576px 96px;
+      border-radius: 10px;
+      border: 2px solid #ffe066;
+      image-rendering: pixelated;
+      display: none;
+      transition: left 0.3s, bottom 0.3s, filter 0.3s, background-color 0.3s;
+    }
+    #preview-dialogue {
+      width: 90%;
+      min-height: 60px;
+      background: rgba(30,30,40,0.95);
+      border: 2px solid #ffe066;
+      border-radius: 16px;
+      color: #fff;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 24px #000a;
+      padding: 18px 24px;
+      margin: 16px auto 0 auto;
+      z-index: 4;
+      display: none;
+    }
+    #preview-hint {
+      width: 80%;
+      background: rgba(45,165,220,0.7);
+      color: #ffe066;
+      font-size: 1rem;
+      border-radius: 8px;
+      margin: 12px auto 0 auto;
+      padding: 10px 16px;
+      z-index: 4;
+      display: none;
+    }
+    #test-controls {
+      margin: 18px 0 0 0;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      display: none;
+    }
+    #test-controls button {
+      background: #ffe066; color: #232946; border: none; border-radius: 6px; padding: 8px 18px; font-weight: bold;
+      cursor: pointer; font-size: 1rem;
+    }
+    #test-controls button:hover { background: #fff3b0; }
+    /* --- Sidebar --- */
+    #workshop-sidebar {
+      flex: 1;
+      background: #232946;
+      border-left: 2px solid #ffe066;
+      padding: 24px 18px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 260px;
+      max-width: 400px;
+      overflow-y: auto;
+    }
+    .sidebar-section {
+      margin-bottom: 18px;
+    }
+    .sidebar-section label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    .sidebar-section input, .sidebar-section select, .sidebar-section textarea {
+      width: 100%; margin-bottom: 10px; padding: 7px 10px; border-radius: 6px; border: none; font-size: 1rem;
+      background: #181c24; color: #ffe066;
+    }
+    .sidebar-section input[type="range"] {
+      width: 100%;
+    }
+    .sidebar-section input[type="color"] {
+      padding: 0; height: 32px;
+    }
+    .sidebar-section button {
+      background: #ffe066; color: #232946; border: none; border-radius: 6px; padding: 8px 18px; font-weight: bold;
+      cursor: pointer; font-size: 1rem; margin-right: 8px;
+    }
+    .sidebar-section button:hover { background: #fff3b0; }
+    .step-list {
+      background: #181c24;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 12px;
+      min-height: 80px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .step-item {
+      background: #2d323c;
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border-left: 4px solid #ffe066;
+      transition: background 0.2s;
+    }
+    .step-item.selected { background: #ffe066; color: #232946; }
+    @media (max-width: 1100px) {
+      #workshop-container { width: 98vw; min-width: 0; }
+      #workshop-sidebar { min-width: 0; }
+    }
+    @media (max-width: 900px) {
+      #sandbox-root { padding: 0; }
+      #workshop-container { flex-direction: column; width: 100vw; min-width: 0; }
+      #workshop-sidebar { border-left: none; border-top: 2px solid #ffe066; }
+    }
+  </style>
+</head>
+<body>
+  <div id="sandbox-root">
+    <div id="workshop-container">
+      <div id="workshop-preview">
+        <div id="preview-bg">
+          <div id="preview-sprite"></div>
+        </div>
+        <div id="preview-dialogue"></div>
+        <div id="preview-hint"></div>
+        <div id="test-controls">
+          <button id="prev-step-btn">&lt; Prev</button>
+          <button id="next-step-btn">Next &gt;</button>
+          <button id="exit-test-btn" style="background:#e66;">Exit Test</button>
+        </div>
+      </div>
+      <div id="workshop-sidebar">
+        <div class="sidebar-section">
+          <h2>Workshop Steps</h2>
+          <button id="add-step-btn">+ Add Step</button>
+          <div class="step-list" id="steps-list"></div>
+        </div>
+        <div class="sidebar-section">
+          <h3>Step Editor</h3>
+          <label>Background:
+            <select id="bg-select"></select>
+          </label>
+          <label>Sprite:
+            <select id="sprite-select">
+              <option value="front">Mira Front</option>
+              <option value="back">Mira Back</option>
+            </select>
+          </label>
+          <label>Sprite X:
+            <input type="range" id="sprite-x" min="0" max="700" value="50">
+          </label>
+          <label>Sprite Y:
+            <input type="range" id="sprite-y" min="0" max="200" value="40">
+          </label>
+          <label>Sprite HSL:
+            <input type="color" id="sprite-hsl" value="#ffe066">
+          </label>
+          <label>Fade:
+            <input type="range" id="sprite-fade" min="0" max="1" step="0.01" value="1">
+          </label>
+          <label>Dialogue:
+            <textarea id="dialogue-input" rows="2" placeholder="Enter dialogue..."></textarea>
+          </label>
+          <label>Hint:
+            <input type="text" id="hint-input" placeholder="Enter hint...">
+          </label>
+          <label>Step Type:
+            <select id="step-type">
+              <option value="dialogue">Dialogue Only</option>
+              <option value="command">Command Input</option>
+              <option value="text">Text Input</option>
+            </select>
+          </label>
+          <label id="command-label" style="display:none;">Command to Validate:
+            <input type="text" id="command-validate" placeholder="e.g. ping 8.8.8.8">
+          </label>
+          <label id="text-label" style="display:none;">Text to Validate:
+            <input type="text" id="text-validate" placeholder="e.g. correct answer">
+          </label>
+          <div>
+            <button id="save-step-btn">Save Step</button>
+            <button id="delete-step-btn" style="background:#e66;">Delete Step</button>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <button id="test-mode-btn">Test Workshop</button>
+          <button id="download-btn">Download Workshop (.TildeSec)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // --- Workshop Data ---
+    let steps = [];
+    let selectedStep = -1;
+    let testMode = false;
+    let testStepIdx = 0;
+
+    // --- Backgrounds ---
+    const backgrounds = [
+      'bg_castleonthehill.png',
+      'bg_cavestory.png',
+      'bg_coffeeshop.png',
+      'bg_outsidecoffeeshop.png'
+    ];
+    const bgSelect = document.getElementById('bg-select');
+    backgrounds.forEach(bg => {
+      const opt = document.createElement('option');
+      opt.value = '/assets/workshop/backgrounds/' + bg;
+      opt.textContent = bg;
+      bgSelect.appendChild(opt);
+    });
+
+    // --- Sprite Preview ---
+    function setSpritePreview(sprite, x, y, hsl, fade) {
+      const el = document.getElementById('preview-sprite');
+      if (sprite === 'front') {
+        el.style.backgroundImage = "url('/assets/workshop/avatars/mira/mira_6.png')";
+        el.style.backgroundPosition = '-96px 0px';
+      } else {
+        el.style.backgroundImage = "url('/assets/workshop/avatars/mira/mira_6_back.png')";
+        el.style.backgroundPosition = '-96px 0px';
+      }
+      el.style.left = `${x}px`;
+      el.style.bottom = `${y}px`;
+      el.style.backgroundColor = hsl;
+      el.style.filter = `opacity(${fade})`;
+      el.style.display = 'block';
+    }
+
+    // --- Step List UI ---
+    function renderStepsList() {
+      const list = document.getElementById('steps-list');
+      list.innerHTML = '';
+      steps.forEach((step, i) => {
+        const div = document.createElement('div');
+        div.className = 'step-item' + (i === selectedStep ? ' selected' : '');
+        div.textContent = `#${i+1}: ${step.type} | "${step.dialogue.slice(0,30)}"`;
+        div.onclick = () => selectStep(i);
+        list.appendChild(div);
+      });
+    }
+    function selectStep(i) {
+      selectedStep = i;
+      const step = steps[i];
+      bgSelect.value = step.bg;
+      document.getElementById('sprite-select').value = step.sprite;
+      document.getElementById('sprite-x').value = step.x;
+      document.getElementById('sprite-y').value = step.y;
+      document.getElementById('sprite-hsl').value = step.hsl;
+      document.getElementById('sprite-fade').value = step.fade;
+      document.getElementById('dialogue-input').value = step.dialogue;
+      document.getElementById('hint-input').value = step.hint;
+      document.getElementById('step-type').value = step.type;
+      document.getElementById('command-validate').value = step.command || '';
+      document.getElementById('text-validate').value = step.text || '';
+      updatePreview();
+      renderStepsList();
+    }
+
+    // --- Add/Edit/Delete Steps ---
+    document.getElementById('add-step-btn').onclick = () => {
+      steps.push({
+        bg: '/assets/workshop/backgrounds/bg_castleonthehill.png',
+        sprite: 'front',
+        x: 50,
+        y: 40,
+        hsl: '#ffe066',
+        fade: 1,
+        dialogue: '',
+        hint: '',
+        type: 'dialogue',
+        command: '',
+        text: ''
+      });
+      selectedStep = steps.length - 1;
+      renderStepsList();
+      selectStep(selectedStep);
+    };
+    document.getElementById('save-step-btn').onclick = () => {
+      if (selectedStep < 0) return;
+      const step = steps[selectedStep];
+      step.bg = bgSelect.value;
+      step.sprite = document.getElementById('sprite-select').value;
+      step.x = parseInt(document.getElementById('sprite-x').value, 10);
+      step.y = parseInt(document.getElementById('sprite-y').value, 10);
+      step.hsl = document.getElementById('sprite-hsl').value;
+      step.fade = parseFloat(document.getElementById('sprite-fade').value);
+      step.dialogue = document.getElementById('dialogue-input').value;
+      step.hint = document.getElementById('hint-input').value;
+      step.type = document.getElementById('step-type').value;
+      step.command = document.getElementById('command-validate').value;
+      step.text = document.getElementById('text-validate').value;
+      renderStepsList();
+      updatePreview();
+    };
+    document.getElementById('delete-step-btn').onclick = () => {
+      if (selectedStep < 0) return;
+      steps.splice(selectedStep, 1);
+      selectedStep = steps.length - 1;
+      renderStepsList();
+      if (selectedStep >= 0) selectStep(selectedStep);
+      else clearPreview();
+    };
+
+    // --- Step Type Logic ---
+    document.getElementById('step-type').onchange = function() {
+      const v = this.value;
+      document.getElementById('command-label').style.display = v === 'command' ? '' : 'none';
+      document.getElementById('text-label').style.display = v === 'text' ? '' : 'none';
+    };
+
+    // --- Live Preview ---
+    function updatePreview() {
+      if (selectedStep < 0) return clearPreview();
+      const step = steps[selectedStep];
+      // Background
+      document.getElementById('preview-bg').style.backgroundImage = `url('${step.bg}')`;
+      // Sprite
+      setSpritePreview(step.sprite, step.x, step.y, step.hsl, step.fade);
+      // Dialogue
+      const dlg = document.getElementById('preview-dialogue');
+      dlg.textContent = step.dialogue;
+      dlg.style.display = step.dialogue ? 'block' : 'none';
+      // Hint
+      const hint = document.getElementById('preview-hint');
+      hint.textContent = step.hint;
+      hint.style.display = step.hint ? 'block' : 'none';
+    }
+    function clearPreview() {
+      document.getElementById('preview-bg').style.backgroundImage = '';
+      document.getElementById('preview-sprite').style.display = 'none';
+      document.getElementById('preview-dialogue').style.display = 'none';
+      document.getElementById('preview-hint').style.display = 'none';
+    }
+    // Update preview on input change
+    ['sprite-select','sprite-x','sprite-y','sprite-hsl','sprite-fade','dialogue-input','hint-input','bg-select'].forEach(id => {
+      document.getElementById(id).oninput = updatePreview;
+    });
+
+    // --- Test Mode ---
+    document.getElementById('test-mode-btn').onclick = () => {
+      if (steps.length === 0) return alert('Add at least one step!');
+      testMode = true;
+      testStepIdx = 0;
+      document.getElementById('workshop-sidebar').style.display = 'none';
+      document.getElementById('test-controls').style.display = 'flex';
+      showTestStep();
+    };
+    document.getElementById('exit-test-btn').onclick = () => {
+      testMode = false;
+      document.getElementById('workshop-sidebar').style.display = '';
+      document.getElementById('test-controls').style.display = 'none';
+      updatePreview();
+    };
+    document.getElementById('prev-step-btn').onclick = () => {
+      if (testStepIdx > 0) testStepIdx--;
+      showTestStep();
+    };
+    document.getElementById('next-step-btn').onclick = () => {
+      if (testStepIdx < steps.length - 1) testStepIdx++;
+      showTestStep();
+    };
+    function showTestStep() {
+      const step = steps[testStepIdx];
+      document.getElementById('preview-bg').style.backgroundImage = `url('${step.bg}')`;
+      setSpritePreview(step.sprite, step.x, step.y, step.hsl, step.fade);
+      document.getElementById('preview-dialogue').textContent = step.dialogue;
+      document.getElementById('preview-dialogue').style.display = step.dialogue ? 'block' : 'none';
+      document.getElementById('preview-hint').textContent = step.hint;
+      document.getElementById('preview-hint').style.display = step.hint ? 'block' : 'none';
+    }
+
+    // --- Download as .TildeSec (zip) ---
+    document.getElementById('download-btn').onclick = async () => {
+      if (steps.length === 0) return alert('Add at least one step!');
+      const manifest = {
+        title: "My Workshop",
+        author: "Workshop Sandbox User",
+        description: "Created with Workshop Sandbox",
+        steps: steps.map((_, i) => `steps/step${i+1}.json`),
+        assets: {
+          background: steps[0]?.bg || "",
+          css: "style.css",
+          js: "logic.js"
+        },
+        startStep: 0
+      };
+      const files = {
+        'manifest.json': JSON.stringify(manifest, null, 2)
+      };
+      steps.forEach((step, i) => {
+        files[`steps/step${i+1}.json`] = JSON.stringify({
+          stepNumber: i + 1,
+          title: `Step ${i + 1}`,
+          description: step.dialogue,
+          image: step.bg,
+          sprite: step.sprite,
+          x: step.x,
+          y: step.y,
+          hsl: step.hsl,
+          fade: step.fade,
+          hints: [step.hint],
+          validation: step.type === 'command'
+            ? { command: step.command, type: 'exact' }
+            : step.type === 'text'
+              ? { text: step.text, type: 'exact' }
+              : {}
+        }, null, 2);
+      });
+      const files = {};
+      files['style.css'] = `body { background: #232946; color: #ffe066; font-family: 'Kanit', 'Tomorrow', monospace; }\n`;
+      files['logic.js'] = `console.log('Workshop loaded');\n`;
+      files['validate.js'] = `function validate({ command, text }) {\n  return { pass: true };\n}\n`;
+      fetch('examples/demorpg/index_template.html')
+      .then(response => response.text())
+      .then(html => {
+        files['index.html'] = html;
+        // proceed with using `files`
+      });
+      // Use JSZip to create .TildeSec
+      const zip = new window.JSZip();
+      for (const [name, content] of Object.entries(files)) {
+        if (name.startsWith('steps/')) {
+          zip.folder('steps').file(name.replace('steps/', ''), content);
+        } else {
+          zip.file(name, content);
+        }
+      }
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'my_workshop.TildeSec';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+
+    // --- Init ---
+    renderStepsList();
+    // Load JSZip for export
+    (function loadJSZip() {
+      if (!window.JSZip) {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        document.head.appendChild(s);
+      }
+    })();
+  </script>
+</body>
+</html>

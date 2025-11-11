@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Switch 2960",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "switch-2960",
+    "data-category": "switches",
+    "nestable": false,
+    "icon": "fa fa-th-large",
+    "deviceType": "switch",
+    "ports": ["ethernet", "console"],
+    "innerHTML": "<div class=\"network-block-title\">Switch 2960</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco Catalyst 2960 Layer 2 Switch</p><input type=\"text\" class=\"device-name\" placeholder=\"Switch Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"number\" class=\"port-count\" placeholder=\"Port Count\" min=\"8\" max=\"48\" value=\"24\"><input type=\"text\" class=\"vlan-config\" placeholder=\"VLAN Configuration\"></div>"
+  },
+  {
+    "name": "Switch 3560",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "switch-3560",
+    "data-category": "switches",
+    "nestable": false,
+    "icon": "fa fa-th-large",
+    "deviceType": "switch",
+    "ports": ["ethernet", "console"],
+    "innerHTML": "<div class=\"network-block-title\">Switch 3560</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco Catalyst 3560 Layer 2/3 Switch</p><input type=\"text\" class=\"device-name\" placeholder=\"Switch Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"number\" class=\"port-count\" placeholder=\"Port Count\" min=\"8\" max=\"48\" value=\"24\"><input type=\"text\" class=\"vlan-config\" placeholder=\"VLAN Configuration\"><select class=\"switching-mode\"><option value=\"layer2\">Layer 2 Only</option><option value=\"layer3\">Layer 3 Enabled</option></select></div>"
+  },
+  {
+    "name": "Switch 3750",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "switch-3750",
+    "data-category": "switches",
+    "nestable": false,
+    "icon": "fa fa-th-large",
+    "deviceType": "switch",
+    "ports": ["ethernet", "console", "stackwise"],
+    "innerHTML": "<div class=\"network-block-title\">Switch 3750</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco Catalyst 3750 Stackable Switch</p><input type=\"text\" class=\"device-name\" placeholder=\"Switch Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"number\" class=\"port-count\" placeholder=\"Port Count\" min=\"12\" max=\"48\" value=\"24\"><input type=\"text\" class=\"vlan-config\" placeholder=\"VLAN Configuration\"><input type=\"number\" class=\"stack-member\" placeholder=\"Stack Member ID\" min=\"1\" max=\"9\" value=\"1\"></div>"
+  },
+  {
+    "name": "Layer-3 Switch 3560XL",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "switch-3560xl",
+    "data-category": "switches",
+    "nestable": false,
+    "icon": "fa fa-server",
+    "deviceType": "layer3-switch",
+    "ports": ["ethernet", "console"],
+    "innerHTML": "<div class=\"network-block-title\">Layer-3 Switch 3560XL</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco Catalyst 3560XL Layer 3 Switch with routing capabilities</p><input type=\"text\" class=\"device-name\" placeholder=\"Switch Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"number\" class=\"port-count\" placeholder=\"Port Count\" min=\"12\" max=\"48\" value=\"24\"><input type=\"text\" class=\"vlan-config\" placeholder=\"VLAN Configuration\"><select class=\"routing-protocol\"><option value=\"static\">Static Routing</option><option value=\"ospf\">OSPF</option><option value=\"eigrp\">EIGRP</option></select></div>"
+  },
+  {
+    "name": "Layer-3 Switch 3750G",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "switch-3750g",
+    "data-category": "switches",
+    "nestable": false,
+    "icon": "fa fa-server",
+    "deviceType": "layer3-switch",
+    "ports": ["ethernet", "console", "stackwise"],
+    "innerHTML": "<div class=\"network-block-title\">Layer-3 Switch 3750G</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Cisco Catalyst 3750G Gigabit Layer 3 Switch</p><input type=\"text\" class=\"device-name\" placeholder=\"Switch Name\"><input type=\"text\" class=\"mgmt-ip\" placeholder=\"Management IP\"><input type=\"number\" class=\"port-count\" placeholder=\"Port Count\" min=\"12\" max=\"48\" value=\"24\"><input type=\"text\" class=\"vlan-config\" placeholder=\"VLAN Configuration\"><select class=\"routing-protocol\"><option value=\"static\">Static Routing</option><option value=\"ospf\">OSPF</option><option value=\"eigrp\">EIGRP</option></select><input type=\"number\" class=\"stack-member\" placeholder=\"Stack Member ID\" min=\"1\" max=\"9\" value=\"1\"></div>"
+  },
+  {
+    "name": "Hub 10-port",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "hub-10port",
+    "data-category": "switches",
+    "nestable": false,
+    "icon": "fa fa-circle-o",
+    "deviceType": "hub",
+    "ports": ["ethernet"],
+    "innerHTML": "<div class=\"network-block-title\">Hub 10-port</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">10-port Ethernet hub (collision domain)</p><input type=\"text\" class=\"device-name\" placeholder=\"Hub Name\"><input type=\"text\" class=\"speed\" placeholder=\"Speed (10Mbps)\" value=\"10Mbps\" readonly><p class=\"warning\">Note: Hubs create a single collision domain</p></div>"
+  },
+  {
+    "name": "Hub 24-port",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "hub-24port",
+    "data-category": "switches",
+    "nestable": false,
+    "icon": "fa fa-circle-o",
+    "deviceType": "hub",
+    "ports": ["ethernet"],
+    "innerHTML": "<div class=\"network-block-title\">Hub 24-port</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">24-port Ethernet hub (collision domain)</p><input type=\"text\" class=\"device-name\" placeholder=\"Hub Name\"><input type=\"text\" class=\"speed\" placeholder=\"Speed (10Mbps)\" value=\"10Mbps\" readonly><p class=\"warning\">Note: Hubs create a single collision domain</p></div>"
+  }
+]

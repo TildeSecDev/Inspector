@@ -1,0 +1,19 @@
+{
+  "stepNumber": 52,
+  "title": "Memory Dump Analysis",
+  "description": "A memory snapshot taken during the incident may hold evidence of resident malware.<br><br><b>Objective:</b> Analyze a memory dump with Volatility or Rekall to identify and terminate unauthorized processes.",
+  "dialogue": [
+    "Mira: \"Volatility will show me any hidden processes still lurking in RAM.\"",
+    "Mira: \"Can you help me analyze the memory dump and terminate unauthorized processes?\""
+  ],
+  "hints": [
+    "Load the RAM dump into Volatility and list running processes.",
+    "Use volatility or Rekall."
+  ],
+  "validation": {
+    "command": "volatility",
+    "type": "contains"
+  },
+  "achievement": "Memory Maven",
+  "skills_gained": ["memory forensics", "process analysis"]
+}

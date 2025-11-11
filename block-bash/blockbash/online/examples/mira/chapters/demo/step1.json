@@ -1,0 +1,12 @@
+{
+  "step": 1,
+  "dialogue": "Mira: \"Is the target alive? Drag the <span class='demo-glossary' data-gloss='ping'>🟦 ping</span> block into the workspace and press RUN to test the IP.\"",
+  "miraFrame": 1,
+  "terminal": "man ping",
+  "showTable": false,
+  "showMusic": false,
+  "hint": "Ping: A basic tool to test whether a device is reachable on a network. Sends ICMP packets and checks if the device replies.",
+  "glossary": {
+    "ping": "Ping: A basic tool to test whether a device is reachable on a network. Sends ICMP packets and checks if the device replies."
+  }
+}

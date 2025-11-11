@@ -1,0 +1,63 @@
+/* Leaderboard Popup Styles */
+.leaderboard-popup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+}
+.leaderboard-popup-content {
+  background: #fff;
+  color: #222;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 32px 36px 24px 36px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.leaderboard-popup-close {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: #888;
+  cursor: pointer;
+}
+#leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 1.08em;
+  font-weight: 500;
+}
+.leaderboard-row .rank {
+  width: 38px;
+  text-align: right;
+  color: #0074d9;
+  font-weight: bold;
+}
+.leaderboard-row .name {
+  flex: 1;
+  color: #333;
+}
+.leaderboard-row .points {
+  color: #888;
+  font-size: 0.98em;
+}

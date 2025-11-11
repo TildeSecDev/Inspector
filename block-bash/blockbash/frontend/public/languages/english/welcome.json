@@ -1,0 +1,23 @@
+{
+  "welcome.title": "Inspector Login",
+  "bg.brand": "INSPECTOR",
+  "binder.login.cover": "LOGIN",
+  "binder.register.cover": "REGISTER",
+
+  "login.title": "Login",
+  "login.email.placeholder": "Email or Username",
+  "login.password.placeholder": "Password",
+  "login.submit": "Login",
+
+  "register.title": "Register",
+  "register.name.placeholder": "Name",
+  "register.email.placeholder": "Email",
+  "register.password.placeholder": "Password",
+  "register.org.placeholder": "Select Organization",
+  "register.org.school": "School",
+  "register.org.company": "Company",
+  "register.org.other": "Other",
+  "register.submit": "Register",
+
+  "toast.caseAccepted": "Case Accepted"
+}

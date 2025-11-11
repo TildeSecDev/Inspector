@@ -1,0 +1,450 @@
+/* Workspace CSS */
+.workspace {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+  background-image: url("https://www.transparenttextures.com/patterns/tiny-grid.png");
+  overflow: hidden;
+  border-left: 1px solid #d0d0d0;
+  border-right: 1px solid #d0d0d0;
+}
+
+/* Workspace header with tabs and collapse button */
+.workspace-header {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  background: rgba(30, 30, 30, 0.95);
+  border-bottom: 1px solid #444;
+  padding: 5px 10px;
+  position: relative;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-shrink: 0;
+  justify-content: space-between; /* Ensure collapse button stays visible */
+  min-height: 45px; /* Ensure adequate height */
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent content from expanding beyond limits */
+}
+
+/* Resizable workshop panel */
+.workshop-resizer {
+  width: 4px;
+  background: #333;
+  cursor: col-resize;
+  transition: background 0.2s;
+  border-left: 1px solid #444;
+  border-right: 1px solid #444;
+  flex-shrink: 0;
+}
+
+.workshop-resizer:hover {
+  background: #6a7df9;
+}
+
+.workshop-resizer.resizing {
+  background: #6a7df9;
+}
+
+.workshop-panel {
+  min-width: 200px;
+  max-width: 800px;
+  width: 400px;
+  transition: width 0.3s ease;
+  flex-shrink: 0;
+}
+
+.workshop-panel.collapsed {
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Canvas Tabs */
+.canvas-tabs {
+  display: flex;
+  flex: 1; /* Take available space but leave room for collapse button */
+  max-width: calc(100% - 60px); /* Reserve more space for collapse button */
+  background-color: #e9ecef;
+  border-bottom: 1px solid #dee2e6;
+  padding: 0;
+  margin: 0;
+}
+
+.canvas-tab {
+  flex: 1;
+  padding: 12px 20px;
+  background-color: #f8f9fa;
+  border: none;
+  border-right: 1px solid #dee2e6;
+  cursor: pointer;
+  font-family: 'Tomorrow', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #495057;
+  transition: all 0.3s ease;
+  white-space: nowrap; /* Prevent text wrapping */
+  min-width: 0; /* Allow flex items to shrink below content size */
+  overflow: hidden; /* Hide overflow text if needed */
+  text-overflow: ellipsis; /* Add ellipsis for very long text */
+}
+
+.canvas-tab:last-child {
+  border-right: none;
+}
+
+.canvas-tab:hover {
+  background-color: #e9ecef;
+  color: #212529;
+}
+
+.canvas-tab.active {
+  background-color: #ffffff;
+  color: #4e5dc1;
+  border-bottom: 2px solid #4e5dc1;
+  font-weight: 600;
+}
+
+/* Theme-specific canvas tab styling */
+[data-theme="dark"] .canvas-tabs {
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #444;
+}
+
+[data-theme="dark"] .canvas-tab {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-right: 1px solid #444;
+}
+
+[data-theme="dark"] .canvas-tab:hover {
+  background-color: #333333;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .canvas-tab.active {
+  background-color: #4e5dc1;
+  color: #ffffff;
+  border-bottom: 2px solid #ffe066;
+}
+
+[data-theme="light"] .canvas-tabs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+[data-theme="light"] .canvas-tab {
+  background-color: #ffffff;
+  color: #495057;
+  border-right: 1px solid #dee2e6;
+}
+
+[data-theme="light"] .canvas-tab:hover {
+  background-color: #e9ecef;
+  color: #212529;
+}
+
+[data-theme="light"] .canvas-tab.active {
+  background-color: #4e5dc1;
+  color: #ffffff;
+  border-bottom: 2px solid #4e5dc1;
+}
+
+.workspace.terminal-hidden .console {
+  display: none !important;
+}
+
+.workspace.terminal-hidden .canvas {
+  height: 100% !important;
+  min-height: 300px;
+}
+
+#peek-terminal-btn {
+  display: none;
+}
+
+.workspace.terminal-hidden #peek-terminal-btn {
+  display: block !important;
+}
+
+/* Canvas and content area */
+.canvas {
+  flex: 1;
+  position: relative;
+  background-color: #f5f5f5;
+  background-image: url("https://www.transparenttextures.com/patterns/tiny-grid.png");
+  width: 100%;
+  overflow-y: auto;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workspace .canvas {
+  flex: 1;
+  position: relative;
+  background-color: #f5f5f5;
+  background-image: url("https://www.transparenttextures.com/patterns/tiny-grid.png");
+  width: 100%;
+  overflow-y: auto;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#run-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 7px;
+  background-color: #4e5dc1;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#run-button img {
+  width: 20px;
+  height: auto;
+  filter: brightness(0) invert(1) opacity(0.9);
+  transition: transform 0.2s ease;
+}
+
+#run-button:hover {
+  background-color: #39448e;
+}
+
+#run-button:hover img {
+  transform: scale(1.1);
+}
+
+#run-button:active img {
+  transform: scale(1);
+  transition: transform 0.1s ease;
+}
+
+/* Console CSS */
+div.console {
+  flex: none;
+  width: 100%;
+  height: 220px; /* Increased height to show full terminal */
+  background-color: #1d1f21;
+  overflow: visible; /* Allow dropdowns to overflow */
+  border-top: 2px solid #d0d0d0;
+  box-sizing: border-box;
+}
+
+.console-header {
+  position: relative;
+  overflow: visible;
+  font-family: "Fira Code", monospace;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding: 0 8px 0 0;
+  min-height: 36px;
+}
+
+.console-header > span {
+  flex: 1;
+  text-align: center;
+  letter-spacing: 2px;
+  color: #888;
+  font-family: "Fira Code", monospace;
+  font-size: 12px;
+  white-space: nowrap;
+  background: none;
+  padding: 0;
+}
+
+.console-header #btn-console {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  background: transparent;
+  border: 1px solid #6a7df9;
+  color: #6a7df9;
+  border-radius: 5px;
+  padding: 2px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.console-header #btn-console:hover {
+  border: 1px solid #6a7df9;
+  background-color: #6a7df9;
+  color: #6a7df9;
+  border-radius: 5px;
+}
+
+.console-header #btn-console img {
+  width: 10px;
+  height: 10px;
+  filter: brightness(0) invert(1);
+}
+
+.terminal-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.console-header #btn-console-minimize {
+  position: relative !important;
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #6a7df9;
+  border-radius: 3px;
+  padding: 2px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.console-header #btn-console-minimize:hover {
+  background: #23244a;
+  color: #fff;
+}
+
+.console-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background-color: #1d1f21;
+}
+
+.terminal {
+  background-color: #1d1f21;
+  color: #fff;
+  height: calc(100% - 50px); /* Adjusted to account for header/footer */
+  padding: 0px 5px 0px 5px;
+  box-sizing: border-box;
+}
+
+.xterm-viewport::-webkit-scrollbar,
+.canvas::-webkit-scrollbar {
+  width: 4px;
+  height: 5px; /* Adjust the height for horizontal scrollbar */
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb,
+.canvas::-webkit-scrollbar-thumb {
+  background-color: #6a7df9;
+  border-radius: 3px;
+  background-clip: padding-box;
+}
+
+#terminal-dropdown-menu {
+  z-index: 9999 !important;
+  position: absolute;
+  pointer-events: auto;
+  left: 0 !important;
+  top: 36px !important;
+  min-width: 180px;
+  background: #23272e;
+  color: #c5c8c6;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px #0004;
+  padding: 4px 0;
+  font-family: "Fira Code", monospace;
+  font-size: 1em;
+  display: none;
+}
+
+#terminal-dropdown-menu .dropdown-item:hover {
+  background: #2a2e36;
+  color: #ffe066;
+}
+
+#terminal-dropdown-menu .dropdown-divider {
+  height: 1px;
+  background: #333;
+  margin: 4px 0;
+}
+
+.terminal-tab-btn {
+  background: transparent;
+  color: #6a7df9;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 10px;
+  font-size: 12px;
+  margin-right: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, color 0.2s;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.terminal-tab-btn.active,
+.terminal-tab-btn:focus,
+.terminal-tab-btn[aria-selected="true"] {
+  background: #ffe066;
+  color: #222;
+  border: 1px solid #ffe066;
+}
+
+.terminal-tab-btn:hover {
+  background: #23244a;
+  color: #fff;
+}
+
+/* Dark Theme Canvas Tabs */
+[data-theme="dark"] .canvas-tabs {
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #444;
+}
+
+[data-theme="dark"] .canvas-tab {
+  background-color: #1a1a1a;
+  border-right: 1px solid #444;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .canvas-tab:hover {
+  background-color: #3d3d3d;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .canvas-tab.active {
+  background-color: #0d1117;
+  color: #00b4d8;
+  border-bottom: 2px solid #00b4d8;
+}
+
+/* Light Theme Canvas Tabs */
+[data-theme="light"] .canvas-tabs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+[data-theme="light"] .canvas-tab {
+  background-color: #ffffff;
+  border-right: 1px solid #dee2e6;
+  color: #495057;
+}
+
+[data-theme="light"] .canvas-tab:hover {
+  background-color: #e9ecef;
+  color: #212529;
+}
+
+[data-theme="light"] .canvas-tab.active {
+  background-color: #ffffff;
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+}

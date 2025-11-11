@@ -1,0 +1,13 @@
+{
+  "stepNumber": 6,
+  "title": "SNMP Sweep",
+  "description": "Identify SNMP-enabled devices on the network.",
+  "hints": [
+    "Scan for UDP port 161.",
+    "Use default community strings."
+  ],
+  "blocks": ["Set Target Range", "Enable SNMP Scan", "Review Results"],
+  "achievement": "SNMP Seeker",
+  "skill": "SNMP Discovery",
+  "points": 10
+}

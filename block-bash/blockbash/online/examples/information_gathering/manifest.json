@@ -1,0 +1,22 @@
+{
+  "title": "Information Gathering Tasks",
+  "author": "TildeSec Team",
+  "description": "Tasks for Information Gathering topic.",
+  "steps": [
+    "steps/step1.json",
+    "steps/step2.json",
+    "steps/step3.json",
+    "steps/step4.json",
+    "steps/step5.json",
+    "steps/step6.json",
+    "steps/step7.json",
+    "steps/step8.json",
+    "steps/step9.json",
+    "steps/step10.json"
+  ],
+  "assets": {
+    "css": "style.css",
+    "js": "logic.js"
+  },
+  "startStep": 0
+}

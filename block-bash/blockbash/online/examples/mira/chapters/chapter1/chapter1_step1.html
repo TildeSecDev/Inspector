@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mira RPG - Chapter 1 Step 1</title>
+  <style>
+    .character {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      /* Add a border for visibility */
+      border: 1px solid #ffe066;
+      background: rgba(0,0,0,0.05);
+      transition: left 0.3s cubic-bezier(.4,1.6,.6,1), top 0.3s cubic-bezier(.4,1.6,.6,1), transform 0.2s;
+      will-change: left, top, transform;
+      z-index: 10;
+      pointer-events: none;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .sprite-sheet {
+      width: 576px; /* 96*6 */
+      height: 96px;
+      display: none;
+    }
+    .sprite-frame {
+      width: 96px;
+      height: 96px;
+      background-repeat: no-repeat;
+      background-size: 576px 96px;
+      image-rendering: pixelated;
+      user-select: none;
+      pointer-events: none;
+      display: block;
+    }
+    .character.flip .sprite-frame {
+      transform: scaleX(-1);
+    }
+    .dialogue-box {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      min-width: 420px;
+      max-width: 90vw;
+      background: rgba(30,30,40,0.95);
+      border: 2px solid #ffe066;
+      border-radius: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      z-index: 20;
+      padding: 18px 24px 18px 18px;
+      font-family: 'Kanit', 'Tomorrow', monospace;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: 0 4px 24px #000a;
+      animation: fadeIn 0.4s;
+    }
+    .dialogue-emotion {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      background: #ffe066;
+      object-fit: contain;
+      margin-right: 8px;
+      box-shadow: 0 2px 8px #0004;
+      flex-shrink: 0;
+    }
+    .dialogue-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      white-space: pre-line;
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    #controls {
+      padding: 12px;
+      background: #181c24;
+      color: #fff;
+      font-family: 'Kanit', 'Tomorrow', monospace;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+    .workshop-root {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    #scene-canvas {
+      flex: 1 1 auto;
+      width: 100%;
+      height: 80vh;
+      min-height: 0;
+      min-width: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    #controls {
+      flex: 0 0 auto;
+    }
+    html, body {
+      /* Remove or override any global styles that break out of #workshop-container */
+      width: auto !important;
+      height: auto !important;
+      margin: 0;
+      padding: 0;
+      background: none !important;
+      overflow: visible !important;
+    }
+  </style>
+  <style>
+    .workshop-root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .workshop-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/assets/workshop/backgrounds/bg_coffeeshop.png') center center / cover no-repeat;
+      z-index: 0;
+    }
+    .workshop-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    #scene-canvas {
+      position: relative;
+      width: 100%;
+      height: 80%;
+      min-height: 0;
+      min-width: 0;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+    #controls {
+      width: 100%;
+      background: #181c24;
+      color: #fff;
+      font-family: 'Kanit', 'Tomorrow', monospace;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+      flex: 0 0 auto;
+    }
+    .character {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      border: 1px solid #ffe066;
+      background: rgba(0,0,0,0.05);
+      left: 50%;
+      top: 60%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      pointer-events: none;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .sprite-frame {
+      width: 96px;
+      height: 96px;
+      background-repeat: no-repeat;
+      background-size: 576px 96px;
+      image-rendering: pixelated;
+      user-select: none;
+      pointer-events: none;
+      display: block;
+    }
+    .dialogue-box {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      min-width: 320px;
+      max-width: 90vw;
+      background: rgba(30,30,40,0.95);
+      border: 2px solid #ffe066;
+      border-radius: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      z-index: 20;
+      padding: 18px 24px 18px 18px;
+      font-family: 'Kanit', 'Tomorrow', monospace;
+      font-size: 1.1rem;
+      color: #fff;
+      box-shadow: 0 4px 24px #000a;
+      animation: fadeIn 0.4s;
+    }
+    .dialogue-emotion {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      background: #ffe066;
+      object-fit: contain;
+      margin-right: 8px;
+      box-shadow: 0 2px 8px #0004;
+      flex-shrink: 0;
+    }
+    .dialogue-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      white-space: pre-line;
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: none !important;
+      overflow: hidden !important;
+    }
+    @media (max-width: 700px) {
+      .dialogue-box { min-width: 0; font-size: 0.95rem; padding: 10px 8px 10px 8px; }
+      .character { width: 64px; height: 64px; }
+      .sprite-frame { width: 64px; height: 64px; background-size: 384px 64px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="workshop-root">
+    <div class="workshop-bg"></div>
+    <div class="workshop-content">
+      <div id="scene-canvas">
+        <!-- Mira sprite using sprite sheet -->
+        <div class="character" id="mira" style="left: 50%; top: 60%;">
+          <div class="sprite-frame" id="mira-frame"></div>
+        </div>
+        <div id="dialogue-box" class="dialogue-box">
+          <img id="dialogue-emotion" class="dialogue-emotion" src="/assets/workshop/avatars/mira/mira_smile.png" alt="Mira">
+          <div class="dialogue-text" id="dialogue-text"></div>
+        </div>
+      </div>
+      <div id="controls">
+        <button id="next-dialogue">Next</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Dialogue lines and corresponding emotion icons
+    const dialogueLines = [
+      "Mira: \"Hey, can you help me? Alice just got some weird pop-ups after using the café Wi-Fi.\"",
+      "Mira: \"She thought she was on the real 'CoffeeShopWifi', but something's off. I checked and there are two networks with the same name!\"",
+      "Mira: \"I'm worried one is a fake. Can you help me find out which one is the imposter and shut it down? Alice is counting on us!\""
+    ];
+    const emotionIcons = [
+      "/assets/workshop/avatars/mira/mira_irritated.png",
+      "/assets/workshop/avatars/mira/mira_shocked.png",
+      "/assets/workshop/avatars/mira/mira_smile.png"
+    ];
+    // Optionally, you can use mira_happy for a final line or intro
+
+    // Sprite sheet setup
+    const miraFrame = document.getElementById('mira-frame');
+    function setMiraSprite(frameIdx = 1) {
+      // frameIdx: 0-5, default 1 is standing front
+      miraFrame.style.backgroundImage = "url('/assets/workshop/avatars/mira/mira_6.png')";
+      miraFrame.style.backgroundPosition = `-${frameIdx * 96}px 0px`;
+      miraFrame.style.backgroundSize = '576px 96px';
+      miraFrame.style.width = '96px';
+      miraFrame.style.height = '96px';
+      miraFrame.style.display = 'block';
+    }
+    setMiraSprite(1); // Show standing front
+
+    // Dialogue progression logic
+    let dialogueIdx = 0;
+    const dialogueText = document.getElementById('dialogue-text');
+    const dialogueEmotion = document.getElementById('dialogue-emotion');
+    function showDialogue(idx) {
+      dialogueText.textContent = dialogueLines[idx];
+      dialogueEmotion.src = emotionIcons[idx];
+    }
+    showDialogue(dialogueIdx);
+
+    document.getElementById('next-dialogue').onclick = function() {
+      dialogueIdx++;
+      if (dialogueIdx < dialogueLines.length) {
+        showDialogue(dialogueIdx);
+      } else {
+        // Optionally, hide dialogue or show a "Continue" button
+        document.getElementById('dialogue-box').style.display = 'none';
+        // You could trigger next step logic here if needed
+      }
+    };
+  </script>
+</body>
+</html>

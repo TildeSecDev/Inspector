@@ -1,0 +1,19 @@
+{
+  "stepNumber": 33,
+  "title": "Auth Bypass Patch",
+  "description": "A bypass allowed any password to succeed.<br><br><b>Objective:</b> Patch the auth routine to remove bypass, then rebuild and flash firmware.",
+  "dialogue": [
+    "Mira: \"That jump instruction must be fixed.\"",
+    "Mira: \"Can you help me patch the firmware and test it?\""
+  ],
+  "hints": [
+    "Modify the conditional branch around auth.",
+    "Use Ghidra or radare2."
+  ],
+  "validation": {
+    "command": "Ghidra",
+    "type": "contains"
+  },
+  "achievement": "Patch Paladin",
+  "skills_gained": ["control-flow editing", "firmware building"]
+}

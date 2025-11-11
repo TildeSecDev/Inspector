@@ -1,0 +1,68 @@
+<!-- Minimal test harness for validate.js <-> logic.js interaction -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RPG Validate/Logic Integration Test</title>
+  <style>
+    body { background: #222; color: #ffe066; font-family: monospace; }
+    #output { margin: 24px; padding: 16px; background: #333; border-radius: 8px; }
+    #menu { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h2>RPG validate.js &lt;-&gt; logic.js Integration Test</h2>
+  <div id="output">Output will appear here.</div>
+  <button id="test-btn">Simulate Validation Event</button>
+  <div id="menu"></div>
+  <script type="module">
+    // Dynamically load validate.js and logic.js from the current directory
+    let validateInput;
+    let logicLoaded = false;
+    let menuRendered = false;
+    
+    // Listen for rpg-validated event
+    window.addEventListener('rpg-validated', e => {
+      document.getElementById('output').innerHTML += '<br><b>[Test]</b> rpg-validated event received: ' + JSON.stringify(e.detail);
+      // Simulate menu rendering
+      if (e.detail && e.detail.pass) {
+        document.getElementById('menu').innerHTML = '<div id="test-menu">--- MENU ---<br>' + (e.detail.menu ? e.detail.menu.join(', ') : '') + '</div>';
+        menuRendered = true;
+      }
+    });
+
+    // Load validate.js as module
+    import('./validate.js').then(mod => {
+      validateInput = mod.validateInput || mod.default;
+      document.getElementById('output').innerHTML += '<br><b>[Test]</b> validate.js loaded.';
+    }).catch(e => {
+      document.getElementById('output').innerHTML += '<br><b>[Test]</b> Failed to load validate.js: ' + e;
+    });
+
+    // Load logic.js as script (not module, to match app behavior)
+    const script = document.createElement('script');
+    script.src = './logic.js';
+    script.onload = () => {
+      logicLoaded = true;
+      document.getElementById('output').innerHTML += '<br><b>[Test]</b> logic.js loaded.';
+    };
+    script.onerror = () => {
+      document.getElementById('output').innerHTML += '<br><b>[Test]</b> Failed to load logic.js.';
+    };
+    document.body.appendChild(script);
+
+    // Simulate validation event
+    document.getElementById('test-btn').onclick = async () => {
+      document.getElementById('output').innerHTML += '<br><b>[Test]</b> Simulating validateInput("ls")...';
+      if (!validateInput) {
+        document.getElementById('output').innerHTML += '<br><b>[Test]</b> validateInput not loaded!';
+        return;
+      }
+      const result = await validateInput('ls');
+      document.getElementById('output').innerHTML += '<br><b>[Test]</b> validateInput("ls") result: ' + JSON.stringify(result);
+      // Dispatch rpg-validated event as app would
+      window.dispatchEvent(new CustomEvent('rpg-validated', { detail: result }));
+    };
+  </script>
+</body>
+</html>

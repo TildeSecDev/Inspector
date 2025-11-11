@@ -1,0 +1,8 @@
+{
+  "step": 0,
+  "dialogue": "Mira: \"Agent, we’ve received intel. There’s a hacker sitting in this very café. He’s generating suspicious traffic. Our data shows his IP address is <span class='demo-glossary' data-gloss='ip'>10.0.0.42</span>. We need to expose him.\"",
+  "miraFrame": 1,
+  "terminal": "",
+  "showTable": false,
+  "showMusic": false
+}

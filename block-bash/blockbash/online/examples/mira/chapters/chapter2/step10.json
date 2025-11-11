@@ -1,0 +1,19 @@
+{
+  "stepNumber": 10,
+  "title": "SSID Footprint Map",
+  "description": "New phantom SSIDs keep popping up around the café.<br><br><b>Objective:</b> Map every Wi-Fi SSID in range and flag duplicates or suspicious clones.",
+  "dialogue": [
+    "Mira: \"There are new SSIDs showing up all the time. I want to map every Wi-Fi SSID in range and flag any suspicious ones.\"",
+    "Mira: \"Can you help me scan and log all SSIDs, and spot any clones?\""
+  ],
+  "hints": [
+    "Run a continuous SSID/BSSID scan and log results.",
+    "Use airodump-ng or netdiscover."
+  ],
+  "validation": {
+    "command": "airodump-ng",
+    "type": "contains"
+  },
+  "achievement": "SSID Cartographer",
+  "skills_gained": ["SSID enumeration", "duplicate detection"]
+}

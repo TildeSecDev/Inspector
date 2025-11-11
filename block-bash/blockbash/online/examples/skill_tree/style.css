@@ -1,0 +1,115 @@
+body, html {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #232946;
+  font-family: 'Kanit', 'Tomorrow', monospace;
+  overflow: hidden;
+}
+
+.skill-tree-container {
+  width: 100vw;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: auto;
+  background: #232946;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  box-sizing: border-box;
+}
+
+.skill-topic {
+  margin-bottom: 32px;
+  width: 90vw;
+  max-width: 1200px;
+}
+
+.skill-topic-title {
+  color: #ffe066;
+  font-family: 'Tomorrow', sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.skill-row {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.skill-node {
+  background: #2da5dc;
+  color: #fff;
+  border-radius: 12px;
+  padding: 18px 28px;
+  font-family: 'Kanit', monospace;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px #0003;
+  cursor: pointer;
+  position: relative;
+  min-width: 160px;
+  margin-bottom: 8px;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  border: 3px solid transparent;
+}
+
+.skill-node.achieved {
+  background: #63b22b;
+  color: #fff;
+  border-color: #ffe066;
+}
+
+.skill-node.locked {
+  background: #444b5a;
+  color: #aaa;
+  border-color: #232946;
+  opacity: 0.6;
+}
+
+.skill-node:hover .skill-tooltip {
+  display: block;
+}
+
+.skill-tooltip {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 110%;
+  transform: translateX(-50%);
+  background: #232946;
+  color: #ffe066;
+  border: 2px solid #ffe066;
+  border-radius: 8px;
+  padding: 16px 22px;
+  min-width: 260px;
+  z-index: 10;
+  font-size: 1rem;
+  box-shadow: 0 4px 16px #0006;
+  white-space: pre-line;
+}
+
+@media (max-width: 700px) {
+  .skill-topic {
+    width: 99vw;
+    max-width: 99vw;
+  }
+  .skill-row {
+    gap: 12px;
+  }
+  .skill-node {
+    min-width: 120px;
+    font-size: 0.95rem;
+    padding: 12px 10px;
+  }
+  .skill-tooltip {
+    min-width: 160px;
+    font-size: 0.95rem;
+    padding: 10px 8px;
+  }
+}

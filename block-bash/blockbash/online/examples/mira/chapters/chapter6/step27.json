@@ -1,0 +1,19 @@
+{
+  "stepNumber": 27,
+  "title": "Basic Auth Audit",
+  "description": "HTTP basic auth was brute-forced by Hydra.<br><br><b>Objective:</b> Test basic-auth with Hydra, then enable account lockout or MFA.",
+  "dialogue": [
+    "Mira: \"That login needs multi-factor or lockouts.\"",
+    "Mira: \"Can you help me test and secure the basic auth?\""
+  ],
+  "hints": [
+    "Point Hydra at the basic-auth realm.",
+    "Use fail2ban for lockouts."
+  ],
+  "validation": {
+    "command": "Hydra",
+    "type": "contains"
+  },
+  "achievement": "Auth Annihilator",
+  "skills_gained": ["MFA implementation", "lockout configuration"]
+}

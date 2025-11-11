@@ -1,0 +1,9 @@
+{
+  "stepNumber": 1,
+  "title": "Select a Topic",
+  "description": "Choose a topic to view its lessons, skills, achievements, and points.",
+  "hints": [
+    "Click a topic to view its tasks.",
+    "You can see which skills and achievements are available for each topic."
+  ]
+}

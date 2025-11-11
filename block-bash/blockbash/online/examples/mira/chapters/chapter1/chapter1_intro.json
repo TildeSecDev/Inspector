@@ -1,0 +1,9 @@
+{
+  "type": "chapter",
+  "chapter": 1,
+  "title": "Chapter 1 Title",
+  "description": "Short description for Chapter 1.",
+  "dialogue": [
+    "Mira: \"Welcome to Chapter 1!\""
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "title": "Task Topics",
+  "author": "TildeSec Team",
+  "description": "Select a topic to view its tasks, skills, achievements, and points.",
+  "steps": ["index.json"],
+  "assets": {
+    "css": "style.css",
+    "js": "logic.js"
+  },
+  "startStep": 0
+}

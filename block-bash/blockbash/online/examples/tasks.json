@@ -1,0 +1,926 @@
+{
+  "DragBlockTasks": {
+    "Wireless Attacks": [
+      {
+        "name": "Enable Monitor Mode",
+        "scenario": "Mira needs to sniff Wi-Fi frames to find anomalies.",
+        "hint": "Switch your wireless interface into monitor mode first.",
+        "blocks": ["Select Interface", "Set Mode: Monitor", "Apply"]
+      },
+      {
+        "name": "Start Packet Capture",
+        "scenario": "You must capture beacon and data frames.",
+        "hint": "Begin airodump-ng on channel 6.",
+        "blocks": ["Choose Channel", "Start airodump-ng", "Save Capture"]
+      },
+      {
+        "name": "Filter Beacon Frames",
+        "scenario": "Only beacon frames reveal SSID/BSSID info.",
+        "hint": "Apply a filter for frame type 0x08.",
+        "blocks": ["Load Capture", "Set Filter: Beacon", "Run"]
+      },
+      {
+        "name": "Locate Rogue AP",
+        "scenario": "A fake AP is broadcasting a duplicate SSID.",
+        "hint": "Look for same SSID with different MAC.",
+        "blocks": ["List SSIDs", "Compare BSSIDs", "Highlight Rogue"]
+      },
+      {
+        "name": "Block Deauth Frames",
+        "scenario": "Clients are forced off the safe network.",
+        "hint": "Drop deauth frames from the rogue MAC.",
+        "blocks": ["Select Rogue MAC", "Enable Block", "Confirm"]
+      },
+      {
+        "name": "Validate Handshake",
+        "scenario": "You need to confirm WPA2 integrity.",
+        "hint": "Capture and check the four-way handshake.",
+        "blocks": ["Force Reauth", "Capture Handshake", "Verify PSK"]
+      },
+      {
+        "name": "Analyze Beacon Timestamp",
+        "scenario": "Beacon intervals differ on malicious APs.",
+        "hint": "Compare beacon timestamps between BSSIDs.",
+        "blocks": ["Extract Beacon Times", "Compare Intervals", "Flag Difference"]
+      },
+      {
+        "name": "Extract SSID List",
+        "scenario": "Map all SSIDs in range for duplicates.",
+        "hint": "Dump SSIDs to a list file.",
+        "blocks": ["Start SSID Scan", "Export List", "Review"]
+      },
+      {
+        "name": "Compare Vendor OUIs",
+        "scenario": "Vendor tags reveal unauthorized devices.",
+        "hint": "Match OUI against known manufacturers.",
+        "blocks": ["Load OUI Database", "Match Beacon OUIs", "Report Rogue"]
+      },
+      {
+        "name": "Restore Managed Mode",
+        "scenario": "After analysis, return to normal operation.",
+        "hint": "Switch interface back to managed mode.",
+        "blocks": ["Select Interface", "Set Mode: Managed", "Apply"]
+      }
+    ],
+    "Information Gathering": [
+      {
+        "name": "Ping Sweep",
+        "scenario": "Identify live hosts on the subnet.",
+        "hints": ["Use ICMP echo requests.", "Scan the full subnet for responses."],
+        "blocks": ["Set Target Subnet", "Enable ICMP", "Start Scan"],
+        "achievement": "Network Cartographer",
+        "skill": "Host Discovery",
+        "points": 10
+      },
+      {
+        "name": "ARP Scan",
+        "scenario": "Map MAC addresses of devices on the local network.",
+        "hints": ["Use ARP requests to discover devices.", "Scan the local broadcast domain."],
+        "blocks": ["Select Interface", "Enable ARP Scan", "Save Results"],
+        "achievement": "MAC Mapper",
+        "skill": "MAC Enumeration",
+        "points": 10
+      },
+      {
+        "name": "Port Scan",
+        "scenario": "Discover open ports on a target host.",
+        "hints": ["Scan common TCP ports.", "Use SYN or connect scan."],
+        "blocks": ["Set Target Host", "Select Port Range", "Start Scan"],
+        "achievement": "Port Sleuth",
+        "skill": "Port Scanning",
+        "points": 10
+      },
+      {
+        "name": "Service Version Detection",
+        "scenario": "Identify running services and their versions.",
+        "hints": ["Use version detection flags.", "Probe open ports for banners."],
+        "blocks": ["Set Target Host", "Enable Version Detection", "Start Scan"],
+        "achievement": "Service Profiler",
+        "skill": "Service Enumeration",
+        "points": 10
+      },
+      {
+        "name": "DNS Enumeration",
+        "scenario": "Enumerate DNS records for a domain.",
+        "hints": ["Query for A, MX, TXT, and CNAME records.", "Use zone transfer if possible."],
+        "blocks": ["Set Domain", "Select Record Types", "Start Enumeration"],
+        "achievement": "DNS Detective",
+        "skill": "DNS Analysis",
+        "points": 10
+      },
+      {
+        "name": "SNMP Sweep",
+        "scenario": "Identify SNMP-enabled devices on the network.",
+        "hints": ["Scan for UDP port 161.", "Use default community strings."],
+        "blocks": ["Set Target Range", "Enable SNMP Scan", "Review Results"],
+        "achievement": "SNMP Seeker",
+        "skill": "SNMP Discovery",
+        "points": 10
+      },
+      {
+        "name": "NetBIOS Enumeration",
+        "scenario": "List NetBIOS names and shares on the network.",
+        "hints": ["Scan for NetBIOS name service.", "Enumerate available shares."],
+        "blocks": ["Set Target Range", "Enable NetBIOS Scan", "List Shares"],
+        "achievement": "Share Explorer",
+        "skill": "NetBIOS Analysis",
+        "points": 10
+      },
+      {
+        "name": "OS Fingerprinting",
+        "scenario": "Determine the operating system of a remote host.",
+        "hints": ["Use TCP/IP stack fingerprinting.", "Analyze response signatures."],
+        "blocks": ["Set Target Host", "Enable OS Detection", "Start Scan"],
+        "achievement": "OS Identifier",
+        "skill": "OS Detection",
+        "points": 10
+      },
+      {
+        "name": "Traceroute Mapping",
+        "scenario": "Map the route packets take to a remote host.",
+        "hints": ["Use traceroute to identify network hops.", "Analyze each hop's response time."],
+        "blocks": ["Set Target Host", "Start Traceroute", "Review Path"],
+        "achievement": "Route Mapper",
+        "skill": "Network Path Analysis",
+        "points": 10
+      },
+      {
+        "name": "Whois Lookup",
+        "scenario": "Gather registration information for a domain.",
+        "hints": ["Query the appropriate whois server.", "Analyze domain ownership and expiry."],
+        "blocks": ["Set Domain", "Start Whois Lookup", "Review Results"],
+        "achievement": "Registrar Researcher",
+        "skill": "Domain Intelligence",
+        "points": 10
+      }
+    ],
+    "Vulnerability Analysis": [
+      {
+        "name": "Web Vulnerability Scan",
+        "scenario": "Scan a web server for known vulnerabilities.",
+        "hints": ["Use automated scanners.", "Check for outdated software."],
+        "blocks": ["Set Target URL", "Select Scanner", "Start Scan"],
+        "achievement": "Web Hunter",
+        "skill": "Web Vulnerability Scanning",
+        "points": 10
+      },
+      {
+        "name": "SSL/TLS Configuration Audit",
+        "scenario": "Check SSL/TLS settings for weaknesses.",
+        "hints": ["Scan for weak ciphers.", "Check certificate validity."],
+        "blocks": ["Set Target Host", "Enable SSL Scan", "Analyze Results"],
+        "achievement": "SSL Auditor",
+        "skill": "SSL Analysis",
+        "points": 10
+      },
+      {
+        "name": "SQL Injection Test",
+        "scenario": "Test web forms for SQL injection vulnerabilities.",
+        "hints": ["Inject common payloads.", "Look for database errors."],
+        "blocks": ["Set Target URL", "Insert Payload", "Check Response"],
+        "achievement": "Injection Investigator",
+        "skill": "SQLi Testing",
+        "points": 10
+      },
+      {
+        "name": "Directory Traversal Check",
+        "scenario": "Test for directory traversal vulnerabilities.",
+        "hints": ["Try ../ sequences in parameters.", "Check for file disclosure."],
+        "blocks": ["Set Target URL", "Insert Traversal Payload", "Analyze Output"],
+        "achievement": "Traversal Tracker",
+        "skill": "Path Traversal Testing",
+        "points": 10
+      },
+      {
+        "name": "Cross-Site Scripting (XSS) Test",
+        "scenario": "Identify XSS vulnerabilities in web applications.",
+        "hints": ["Inject script tags.", "Check for reflected or stored XSS."],
+        "blocks": ["Set Target URL", "Insert XSS Payload", "Check Execution"],
+        "achievement": "XSS Explorer",
+        "skill": "XSS Testing",
+        "points": 10
+      },
+      {
+        "name": "Open Redirect Test",
+        "scenario": "Check for open redirect vulnerabilities.",
+        "hints": ["Manipulate redirect parameters.", "Verify redirection to external sites."],
+        "blocks": ["Set Target URL", "Change Redirect Parameter", "Test Redirect"],
+        "achievement": "Redirect Raider",
+        "skill": "Open Redirect Testing",
+        "points": 10
+      },
+      {
+        "name": "CSRF Token Check",
+        "scenario": "Verify presence and validity of CSRF tokens.",
+        "hints": ["Check forms for CSRF tokens.", "Test token validation on submission."],
+        "blocks": ["Set Target URL", "Inspect Form", "Submit Without Token"],
+        "achievement": "CSRF Checker",
+        "skill": "CSRF Testing",
+        "points": 10
+      },
+      {
+        "name": "Default Credential Scan",
+        "scenario": "Identify devices using default credentials.",
+        "hints": ["Test common username/password pairs.", "Check for admin/admin logins."],
+        "blocks": ["Set Target Host", "Load Credential List", "Attempt Login"],
+        "achievement": "Credential Checker",
+        "skill": "Credential Testing",
+        "points": 10
+      },
+      {
+        "name": "Header Security Audit",
+        "scenario": "Check HTTP headers for security best practices.",
+        "hints": ["Look for missing security headers.", "Check for X-Frame-Options, CSP, HSTS."],
+        "blocks": ["Set Target URL", "Fetch Headers", "Analyze Security"],
+        "achievement": "Header Hero",
+        "skill": "Header Analysis",
+        "points": 10
+      },
+      {
+        "name": "Weak Cipher Test",
+        "scenario": "Identify weak cryptographic ciphers in use.",
+        "hints": ["Scan for deprecated ciphers.", "Check for SSLv2/3 support."],
+        "blocks": ["Set Target Host", "Enable Cipher Scan", "Review Results"],
+        "achievement": "Cipher Sleuth",
+        "skill": "Cipher Analysis",
+        "points": 10
+      }
+    ],
+    "Web Applications": [
+      {
+        "name": "Hidden Field Removal",
+        "scenario": "Malicious hidden inputs steal data.",
+        "hint": "Inspect DOM for input[type=hidden].",
+        "blocks": ["Load Page", "Select Hidden Fields", "Remove Elements"]
+      },
+      {
+        "name": "Client Validation Patch",
+        "scenario": "Users bypass JS checks and submit bad data.",
+        "hint": "Test without JavaScript enabled.",
+        "blocks": ["Disable JS", "Submit Form", "Add Server Validation"]
+      },
+      {
+        "name": "Secure Redirect",
+        "scenario": "Open redirects used in phishing emails.",
+        "hint": "Whitelist allowed domains in code.",
+        "blocks": ["Load Redirect Handler", "Add Whitelist", "Test Redirect"]
+      },
+      {
+        "name": "Directory Listing Off",
+        "scenario": "Backups are publicly browsable.",
+        "hint": "Turn off autoindex in server config.",
+        "blocks": ["Open Config", "Set autoindex Off", "Reload Server"]
+      },
+      {
+        "name": "Form Rate-Limit",
+        "scenario": "Brute-force login attempts succeed.",
+        "hint": "Add rate-limiting middleware.",
+        "blocks": ["Load Middleware", "Set Limits", "Deploy"]
+      },
+      {
+        "name": "Content Security Policy",
+        "scenario": "Inline scripts enable XSS.",
+        "hint": "Define CSP header in responses.",
+        "blocks": ["Edit Header Config", "Add CSP Rules", "Test Policy"]
+      },
+      {
+        "name": "Secure Cookies",
+        "scenario": "Session cookies not marked HttpOnly.",
+        "hint": "Set Secure and HttpOnly flags.",
+        "blocks": ["Locate Cookie Setup", "Add Flags", "Restart App"]
+      },
+      {
+        "name": "Input Sanitization",
+        "scenario": "User input stored raw in DB.",
+        "hint": "Apply HTML encoding before save.",
+        "blocks": ["Load Save Handler", "Add Sanitizer", "Test Input"]
+      },
+      {
+        "name": "Error Handling",
+        "scenario": "Detailed errors leak stack traces.",
+        "hint": "Switch to generic error pages.",
+        "blocks": ["Load Error Config", "Set Generic Pages", "Trigger Error"]
+      },
+      {
+        "name": "Session Timeout",
+        "scenario": "Users remain logged in indefinitely.",
+        "hint": "Configure session expiration.",
+        "blocks": ["Open Session Config", "Set Timeout", "Test Logout"]
+      }
+    ],
+    "Exploitation Tools": [
+      {
+        "name": "HTTP Login Harden",
+        "scenario": "Metasploit’s HTTP login module succeeds by default.",
+        "hint": "Disable or secure that endpoint.",
+        "blocks": ["Load Module", "Attempt Login", "Harden Endpoint"]
+      },
+      {
+        "name": "ARP Spoof Test",
+        "scenario": "Ettercap can MITM after spoofing ARP.",
+        "hint": "Run spoof then enable DAI on switch.",
+        "blocks": ["Start Ettercap", "Poison ARP", "Enable DAI"]
+      },
+      {
+        "name": "Path Traversal Fix",
+        "scenario": "../ exploits read /etc/passwd.",
+        "hint": "Sanitize file path inputs.",
+        "blocks": ["Load Code", "Add Sanitizer", "Deploy Patch"]
+      },
+      {
+        "name": "Exploit Patch",
+        "scenario": "Public CVE affects portal engine.",
+        "hint": "Apply vendor patch immediately.",
+        "blocks": ["Search CVE", "Download Patch", "Apply & Test"]
+      },
+      {
+        "name": "Payload Filter",
+        "scenario": "Reverse shell payload bypasses firewall.",
+        "hint": "Block outbound on uncommon ports.",
+        "blocks": ["Generate Payload", "Send & Capture", "Add Firewall Rule"]
+      },
+      {
+        "name": "Module Audit",
+        "scenario": "Metasploit modules outdated.",
+        "hint": "Update msf modules before use.",
+        "blocks": ["Check Version", "Run msfupdate", "Verify"]
+      },
+      {
+        "name": "Credential Leak Check",
+        "scenario": "Module logs contain creds in cleartext.",
+        "hint": "Inspect msf log files.",
+        "blocks": ["Open Log", "Search Cleartext", "Mask Output"]
+      },
+      {
+        "name": "Exploit Simulation",
+        "scenario": "Test exploit in safe lab first.",
+        "hint": "Use a containerized environment.",
+        "blocks": ["Start Docker Lab", "Deploy Target", "Run Exploit"]
+      },
+      {
+        "name": "Toolchain Verification",
+        "scenario": "Ensure tools are the correct versions.",
+        "hint": "Check each tool’s --version output.",
+        "blocks": ["List Tools", "Run --version", "Record Versions"]
+      },
+      {
+        "name": "Egress Filter Audit",
+        "scenario": "Exploits use outbound TCP 4444.",
+        "hint": "Verify firewall blocks that port.",
+        "blocks": ["List Rules", "Test Connection", "Block Port"]
+      }
+    ],
+    "Password Attacks": [
+      {
+        "name": "Password Brute-Force",
+        "scenario": "Attempt to brute-force a login form.",
+        "hints": ["Use a wordlist.", "Automate login attempts."],
+        "blocks": ["Set Target URL", "Load Wordlist", "Start Attack"],
+        "achievement": "Brute-Force Breaker",
+        "skill": "Password Cracking",
+        "points": 10
+      },
+      {
+        "name": "Dictionary Attack",
+        "scenario": "Test passwords using a dictionary file.",
+        "hints": ["Use common password lists.", "Automate login attempts."],
+        "blocks": ["Set Target Service", "Load Dictionary", "Start Attack"],
+        "achievement": "Dictionary Diver",
+        "skill": "Password Cracking",
+        "points": 10
+      },
+      {
+        "name": "Password Spray",
+        "scenario": "Test a single password across many accounts.",
+        "hints": ["Avoid account lockout.", "Use slow timing."],
+        "blocks": ["Set User List", "Set Password", "Start Spray"],
+        "achievement": "Spray Specialist",
+        "skill": "Account Testing",
+        "points": 10
+      },
+      {
+        "name": "Credential Stuffing",
+        "scenario": "Test leaked credentials on multiple services.",
+        "hints": ["Use known username/password pairs.", "Automate login attempts."],
+        "blocks": ["Load Credential List", "Set Target Service", "Start Attack"],
+        "achievement": "Stuffing Smasher",
+        "skill": "Credential Testing",
+        "points": 10
+      },
+      {
+        "name": "Hash Cracking",
+        "scenario": "Crack password hashes using a tool.",
+        "hints": ["Use hashcat or John the Ripper.", "Select appropriate hash mode."],
+        "blocks": ["Load Hash File", "Select Tool", "Start Cracking"],
+        "achievement": "Hash Hacker",
+        "skill": "Hash Cracking",
+        "points": 10
+      },
+      {
+        "name": "Rainbow Table Attack",
+        "scenario": "Use rainbow tables to crack hashes.",
+        "hints": ["Precompute hash tables.", "Match hashes to plaintext."],
+        "blocks": ["Load Hash File", "Load Rainbow Table", "Start Attack"],
+        "achievement": "Rainbow Raider",
+        "skill": "Hash Cracking",
+        "points": 10
+      },
+      {
+        "name": "Password Policy Audit",
+        "scenario": "Check password policy enforcement.",
+        "hints": ["Test minimum length and complexity.", "Try weak passwords."],
+        "blocks": ["Set Target Service", "Test Weak Passwords", "Review Policy"],
+        "achievement": "Policy Enforcer",
+        "skill": "Policy Analysis",
+        "points": 10
+      },
+      {
+        "name": "Multi-Factor Authentication Test",
+        "scenario": "Test if MFA is required for login.",
+        "hints": ["Attempt login without second factor.", "Check for MFA prompt."],
+        "blocks": ["Set Target Account", "Attempt Login", "Check MFA"],
+        "achievement": "MFA Master",
+        "skill": "Authentication Testing",
+        "points": 10
+      },
+      {
+        "name": "Password Reset Workflow Review",
+        "scenario": "Test password reset process for weaknesses.",
+        "hints": ["Request password reset.", "Check for token leakage."],
+        "blocks": ["Set Target Account", "Request Reset", "Analyze Workflow"],
+        "achievement": "Reset Reviewer",
+        "skill": "Workflow Analysis",
+        "points": 10
+      },
+      {
+        "name": "Default Password Detection",
+        "scenario": "Identify use of default passwords.",
+        "hints": ["Test common defaults.", "Check device documentation."],
+        "blocks": ["Set Target Device", "Test Default Passwords", "Review Results"],
+        "achievement": "Default Detector",
+        "skill": "Credential Testing",
+        "points": 10
+      }
+    ],
+    "Reverse Engineering": [
+      {
+        "name": "Firmware Extraction",
+        "scenario": "Extract firmware image from a device.",
+        "hints": ["Use binwalk or similar tools.", "Look for embedded file systems."],
+        "blocks": ["Load Firmware", "Run Extraction", "Analyze Output"],
+        "achievement": "Firmware Forager",
+        "skill": "Firmware Analysis",
+        "points": 10
+      },
+      {
+        "name": "String Analysis",
+        "scenario": "Search for readable strings in a binary.",
+        "hints": ["Use strings utility.", "Look for credentials or URLs."],
+        "blocks": ["Load Binary", "Run Strings", "Review Output"],
+        "achievement": "String Seeker",
+        "skill": "Static Analysis",
+        "points": 10
+      },
+      {
+        "name": "Function Identification",
+        "scenario": "Identify functions in a disassembled binary.",
+        "hints": ["Use Ghidra or IDA Pro.", "Look for main and suspicious functions."],
+        "blocks": ["Load Binary", "Disassemble", "List Functions"],
+        "achievement": "Function Finder",
+        "skill": "Disassembly",
+        "points": 10
+      },
+      {
+        "name": "Control Flow Analysis",
+        "scenario": "Analyze control flow for vulnerabilities.",
+        "hints": ["Trace function calls.", "Look for insecure branches."],
+        "blocks": ["Load Disassembly", "Trace Calls", "Identify Issues"],
+        "achievement": "Flow Analyst",
+        "skill": "Control Flow Analysis",
+        "points": 10
+      },
+      {
+        "name": "Patch Binary",
+        "scenario": "Patch a binary to fix a vulnerability.",
+        "hints": ["Modify instructions.", "Rebuild and test the binary."],
+        "blocks": ["Load Binary", "Edit Instructions", "Save Patch"],
+        "achievement": "Patch Pro",
+        "skill": "Binary Patching",
+        "points": 10
+      },
+      {
+        "name": "Token Discovery",
+        "scenario": "Find embedded tokens in firmware.",
+        "hints": ["Search for API keys or secrets.", "Check for hardcoded values."],
+        "blocks": ["Load Firmware", "Search for Tokens", "List Findings"],
+        "achievement": "Token Tracker",
+        "skill": "Secret Discovery",
+        "points": 10
+      },
+      {
+        "name": "Credential Removal",
+        "scenario": "Remove hardcoded credentials from a binary.",
+        "hints": ["Locate credential strings.", "Patch or remove them."],
+        "blocks": ["Find Credentials", "Patch Binary", "Test Result"],
+        "achievement": "Credential Cleaner",
+        "skill": "Credential Management",
+        "points": 10
+      },
+      {
+        "name": "Debug Symbol Analysis",
+        "scenario": "Analyze debug symbols for sensitive info.",
+        "hints": ["Check for symbol tables.", "Look for function and variable names."],
+        "blocks": ["Load Binary", "List Symbols", "Review Info"],
+        "achievement": "Symbol Sleuth",
+        "skill": "Symbol Analysis",
+        "points": 10
+      },
+      {
+        "name": "Rebuild Firmware",
+        "scenario": "Rebuild firmware after patching.",
+        "hints": ["Use vendor toolchain.", "Sign and flash the image."],
+        "blocks": ["Build Firmware", "Sign Image", "Flash Device"],
+        "achievement": "Firmware Builder",
+        "skill": "Firmware Engineering",
+        "points": 10
+      },
+      {
+        "name": "Dynamic Analysis",
+        "scenario": "Run binary in a sandbox for dynamic analysis.",
+        "hints": ["Use QEMU or similar tools.", "Monitor runtime behavior."],
+        "blocks": ["Load Binary", "Start Sandbox", "Monitor Execution"],
+        "achievement": "Dynamic Analyst",
+        "skill": "Dynamic Analysis",
+        "points": 10
+      }
+    ],
+    "Social Engineering": [
+      {
+        "name": "Phishing Email Creation",
+        "scenario": "Craft a phishing email for a simulated test.",
+        "hints": ["Use realistic language.", "Include a call to action."],
+        "blocks": ["Draft Email", "Add Link", "Send Test"],
+        "achievement": "Phishing Planner",
+        "skill": "Phishing Simulation",
+        "points": 10
+      },
+      {
+        "name": "Spear Phishing Targeting",
+        "scenario": "Identify targets for a spear phishing campaign.",
+        "hints": ["Research targets on social media.", "Personalize messages."],
+        "blocks": ["List Targets", "Gather Info", "Draft Message"],
+        "achievement": "Target Researcher",
+        "skill": "Target Profiling",
+        "points": 10
+      },
+      {
+        "name": "Vishing Script Preparation",
+        "scenario": "Prepare a script for a vishing call.",
+        "hints": ["Use pretexting.", "Practice delivery."],
+        "blocks": ["Draft Script", "Set Pretext", "Practice"],
+        "achievement": "Vishing Voice",
+        "skill": "Vishing",
+        "points": 10
+      },
+      {
+        "name": "Physical Social Engineering Plan",
+        "scenario": "Plan a physical social engineering engagement.",
+        "hints": ["Identify entry points.", "Prepare badges or uniforms."],
+        "blocks": ["Map Entry Points", "Prepare Materials", "Set Objectives"],
+        "achievement": "Physical Planner",
+        "skill": "Physical SE",
+        "points": 10
+      },
+      {
+        "name": "USB Drop Simulation",
+        "scenario": "Simulate a USB drop attack.",
+        "hints": ["Prepare USBs with payload.", "Distribute in target area."],
+        "blocks": ["Prepare USB", "Label", "Drop"],
+        "achievement": "USB Dropper",
+        "skill": "Physical SE",
+        "points": 10
+      },
+      {
+        "name": "Pretext Development",
+        "scenario": "Develop a convincing pretext for social engineering.",
+        "hints": ["Research target organization.", "Align pretext with target's role."],
+        "blocks": ["Research", "Draft Pretext", "Review"],
+        "achievement": "Pretext Pro",
+        "skill": "Pretexting",
+        "points": 10
+      },
+      {
+        "name": "Impersonation Call",
+        "scenario": "Impersonate a helpdesk worker in a call.",
+        "hints": ["Use technical jargon.", "Request credentials or access."],
+        "blocks": ["Draft Script", "Make Call", "Record Outcome"],
+        "achievement": "Impersonator",
+        "skill": "Impersonation",
+        "points": 10
+      },
+      {
+        "name": "Social Media Recon",
+        "scenario": "Gather information from social media for SE.",
+        "hints": ["Search for public profiles.", "Look for job titles and contacts."],
+        "blocks": ["List Platforms", "Gather Info", "Document Findings"],
+        "achievement": "Recon Researcher",
+        "skill": "Reconnaissance",
+        "points": 10
+      },
+      {
+        "name": "Malicious Link Tracking",
+        "scenario": "Track clicks on a malicious link.",
+        "hints": ["Use a URL shortener.", "Monitor click statistics."],
+        "blocks": ["Create Link", "Send", "Monitor Clicks"],
+        "achievement": "Link Tracker",
+        "skill": "Phishing Simulation",
+        "points": 10
+      },
+      {
+        "name": "Awareness Training Delivery",
+        "scenario": "Deliver social engineering awareness training.",
+        "hints": ["Prepare slides and examples.", "Engage audience with scenarios."],
+        "blocks": ["Prepare Slides", "Deliver Training", "Collect Feedback"],
+        "achievement": "Trainer",
+        "skill": "Awareness Training",
+        "points": 10
+      }
+    ],
+    "Sniffing & Spoofing": [
+      {
+        "name": "Packet Sniffing",
+        "scenario": "Capture network traffic for analysis.",
+        "hints": ["Use tcpdump or Wireshark.", "Filter for specific protocols."],
+        "blocks": ["Set Interface", "Set Filter", "Start Capture"],
+        "achievement": "Packet Sniffer",
+        "skill": "Traffic Analysis",
+        "points": 10
+      },
+      {
+        "name": "ARP Spoofing",
+        "scenario": "Perform ARP spoofing to intercept traffic.",
+        "hints": ["Send forged ARP replies.", "Redirect traffic through attacker."],
+        "blocks": ["Set Target", "Send ARP Replies", "Monitor Traffic"],
+        "achievement": "ARP Attacker",
+        "skill": "ARP Manipulation",
+        "points": 10
+      },
+      {
+        "name": "DNS Spoofing",
+        "scenario": "Spoof DNS responses to redirect traffic.",
+        "hints": ["Intercept DNS requests.", "Send forged responses."],
+        "blocks": ["Set Target Domain", "Forge Response", "Monitor Redirection"],
+        "achievement": "DNS Deceiver",
+        "skill": "DNS Manipulation",
+        "points": 10
+      },
+      {
+        "name": "DHCP Spoofing",
+        "scenario": "Set up a rogue DHCP server.",
+        "hints": ["Respond to DHCP requests.", "Assign malicious gateway."],
+        "blocks": ["Start Rogue DHCP", "Set Gateway", "Monitor Leases"],
+        "achievement": "DHCP Deceiver",
+        "skill": "DHCP Manipulation",
+        "points": 10
+      },
+      {
+        "name": "MAC Spoofing",
+        "scenario": "Change MAC address to bypass filters.",
+        "hints": ["Set new MAC address.", "Verify change with ifconfig."],
+        "blocks": ["Set Interface", "Change MAC", "Verify"],
+        "achievement": "MAC Masquerader",
+        "skill": "MAC Manipulation",
+        "points": 10
+      },
+      {
+        "name": "SSL Strip Attack",
+        "scenario": "Downgrade HTTPS to HTTP in transit.",
+        "hints": ["Intercept and modify traffic.", "Remove HTTPS redirects."],
+        "blocks": ["Start SSL Strip", "Intercept Traffic", "Monitor Downgrade"],
+        "achievement": "SSL Stripper",
+        "skill": "SSL Manipulation",
+        "points": 10
+      },
+      {
+        "name": "Man-in-the-Middle Proxy",
+        "scenario": "Intercept and modify HTTP traffic.",
+        "hints": ["Set up proxy server.", "Modify requests and responses."],
+        "blocks": ["Start Proxy", "Intercept Traffic", "Modify Data"],
+        "achievement": "MITM Proxy",
+        "skill": "Proxy Manipulation",
+        "points": 10
+      },
+      {
+        "name": "Session Hijacking",
+        "scenario": "Capture and reuse session cookies.",
+        "hints": ["Sniff HTTP traffic.", "Extract session tokens."],
+        "blocks": ["Capture Traffic", "Extract Cookies", "Replay Session"],
+        "achievement": "Session Hijacker",
+        "skill": "Session Manipulation",
+        "points": 10
+      },
+      {
+        "name": "ICMP Redirect Attack",
+        "scenario": "Send ICMP redirect messages to reroute traffic.",
+        "hints": ["Forge ICMP redirect packets.", "Monitor routing changes."],
+        "blocks": ["Set Target", "Send ICMP Redirect", "Verify Route"],
+        "achievement": "ICMP Redirector",
+        "skill": "ICMP Manipulation",
+        "points": 10
+      },
+      {
+        "name": "Network Mapping via Sniffing",
+        "scenario": "Map network topology by analyzing captured traffic.",
+        "hints": ["Identify hosts and services.", "Visualize network structure."],
+        "blocks": ["Capture Traffic", "Analyze Hosts", "Map Topology"],
+        "achievement": "Network Mapper",
+        "skill": "Network Mapping",
+        "points": 10
+      }
+    ],
+    "Post Exploitation": [
+      {
+        "name": "Privilege Escalation",
+        "scenario": "Escalate privileges on a compromised system.",
+        "hints": ["Check for SUID binaries.", "Look for kernel exploits."],
+        "blocks": ["List SUID Files", "Run Exploit", "Check Privileges"],
+        "achievement": "Privilege Escalator",
+        "skill": "Privilege Escalation",
+        "points": 10
+      },
+      {
+        "name": "Persistence Mechanism",
+        "scenario": "Establish persistence after exploitation.",
+        "hints": ["Create startup scripts.", "Modify crontab."],
+        "blocks": ["Create Script", "Edit Crontab", "Test Persistence"],
+        "achievement": "Persistence Planner",
+        "skill": "Persistence",
+        "points": 10
+      },
+      {
+        "name": "Credential Harvesting",
+        "scenario": "Harvest credentials from a compromised system.",
+        "hints": ["Search for password files.", "Dump hashes from memory."],
+        "blocks": ["Search Files", "Dump Hashes", "Save Results"],
+        "achievement": "Credential Collector",
+        "skill": "Credential Harvesting",
+        "points": 10
+      },
+      {
+        "name": "Lateral Movement",
+        "scenario": "Move laterally to other systems in the network.",
+        "hints": ["Use harvested credentials.", "Connect to other hosts."],
+        "blocks": ["List Hosts", "Use Credentials", "Connect"],
+        "achievement": "Lateral Mover",
+        "skill": "Lateral Movement",
+        "points": 10
+      },
+      {
+        "name": "Data Exfiltration",
+        "scenario": "Exfiltrate sensitive data from the target.",
+        "hints": ["Compress and encrypt data.", "Transfer via covert channel."],
+        "blocks": ["Compress Data", "Encrypt", "Transfer"],
+        "achievement": "Data Exfiltrator",
+        "skill": "Data Exfiltration",
+        "points": 10
+      },
+      {
+        "name": "Log Cleaning",
+        "scenario": "Remove traces of activity from logs.",
+        "hints": ["Identify relevant log files.", "Delete or modify entries."],
+        "blocks": ["Find Logs", "Edit/Delete Entries", "Verify Clean"],
+        "achievement": "Log Cleaner",
+        "skill": "Anti-Forensics",
+        "points": 10
+      },
+      {
+        "name": "Backdoor Installation",
+        "scenario": "Install a backdoor for future access.",
+        "hints": ["Create hidden user accounts.", "Install remote access tools."],
+        "blocks": ["Create User", "Install Tool", "Test Access"],
+        "achievement": "Backdoor Builder",
+        "skill": "Backdoor Installation",
+        "points": 10
+      },
+      {
+        "name": "File Permission Modification",
+        "scenario": "Modify file permissions to maintain access.",
+        "hints": ["Change ownership and permissions.", "Hide files from users."],
+        "blocks": ["Find Files", "Change Permissions", "Verify"],
+        "achievement": "Permission Manipulator",
+        "skill": "File Permission Management",
+        "points": 10
+      },
+      {
+        "name": "Rootkit Deployment",
+        "scenario": "Deploy a rootkit to hide presence.",
+        "hints": ["Install kernel modules.", "Test for detection evasion."],
+        "blocks": ["Install Rootkit", "Test Stealth", "Monitor System"],
+        "achievement": "Rootkit Ruler",
+        "skill": "Rootkit Deployment",
+        "points": 10
+      },
+      {
+        "name": "Cleanup Operations",
+        "scenario": "Remove all tools and evidence after exploitation.",
+        "hints": ["Delete binaries and scripts.", "Wipe logs and history."],
+        "blocks": ["Delete Tools", "Wipe Logs", "Verify Clean"],
+        "achievement": "Cleanup Commander",
+        "skill": "Anti-Forensics",
+        "points": 10
+      }
+    ],
+    "Forensics": [
+      {
+        "name": "Disk Image Acquisition",
+        "scenario": "Acquire a forensic image of a disk.",
+        "hints": ["Use write blockers.", "Verify image integrity."],
+        "blocks": ["Connect Disk", "Create Image", "Verify Hash"],
+        "achievement": "Disk Imager",
+        "skill": "Disk Imaging",
+        "points": 10
+      },
+      {
+        "name": "Memory Dump Analysis",
+        "scenario": "Analyze a memory dump for artifacts.",
+        "hints": ["Use volatility or similar tools.", "Look for processes and network connections."],
+        "blocks": ["Load Memory Dump", "Analyze Processes", "Extract Artifacts"],
+        "achievement": "Memory Analyst",
+        "skill": "Memory Forensics",
+        "points": 10
+      },
+      {
+        "name": "File Carving",
+        "scenario": "Recover deleted files from disk images.",
+        "hints": ["Use carving tools.", "Look for file signatures."],
+        "blocks": ["Load Disk Image", "Run Carver", "Review Recovered Files"],
+        "achievement": "File Carver",
+        "skill": "File Recovery",
+        "points": 10
+      },
+      {
+        "name": "Timeline Analysis",
+        "scenario": "Build a timeline of system events.",
+        "hints": ["Extract timestamps from logs.", "Correlate events across sources."],
+        "blocks": ["Extract Timestamps", "Build Timeline", "Analyze Events"],
+        "achievement": "Timeline Builder",
+        "skill": "Timeline Analysis",
+        "points": 10
+      },
+      {
+        "name": "Registry Analysis",
+        "scenario": "Analyze Windows registry for evidence.",
+        "hints": ["Look for recent activity.", "Check for persistence mechanisms."],
+        "blocks": ["Load Registry Hive", "Search Keys", "Extract Evidence"],
+        "achievement": "Registry Researcher",
+        "skill": "Registry Analysis",
+        "points": 10
+      },
+      {
+        "name": "Log File Analysis",
+        "scenario": "Analyze log files for suspicious activity.",
+        "hints": ["Look for failed logins.", "Check for unusual events."],
+        "blocks": ["Load Log Files", "Search for Events", "Report Findings"],
+        "achievement": "Log Analyst",
+        "skill": "Log Analysis",
+        "points": 10
+      },
+      {
+        "name": "Artifact Extraction",
+        "scenario": "Extract forensic artifacts from a system.",
+        "hints": ["Identify browser history, cache, and cookies.", "Extract and analyze artifacts."],
+        "blocks": ["Identify Artifacts", "Extract Data", "Analyze"],
+        "achievement": "Artifact Extractor",
+        "skill": "Artifact Analysis",
+        "points": 10
+      },
+      {
+        "name": "Network Forensics",
+        "scenario": "Analyze network captures for evidence.",
+        "hints": ["Look for suspicious connections.", "Extract files from traffic."],
+        "blocks": ["Load Capture", "Analyze Traffic", "Extract Files"],
+        "achievement": "Network Forensicist",
+        "skill": "Network Forensics",
+        "points": 10
+      },
+      {
+        "name": "Malware Analysis",
+        "scenario": "Analyze a suspicious binary for malware.",
+        "hints": ["Check for known signatures.", "Run in sandbox if possible."],
+        "blocks": ["Load Binary", "Scan for Malware", "Analyze Behavior"],
+        "achievement": "Malware Analyst",
+        "skill": "Malware Analysis",
+        "points": 10
+      },
+      {
+        "name": "Report Generation",
+        "scenario": "Generate a forensic report of findings.",
+        "hints": ["Summarize evidence.", "Include timelines and artifacts."],
+        "blocks": ["Summarize Findings", "Format Report", "Export"],
+        "achievement": "Report Writer",
+        "skill": "Reporting",
+        "points": 10
+      }
+    ]
+  }
+}

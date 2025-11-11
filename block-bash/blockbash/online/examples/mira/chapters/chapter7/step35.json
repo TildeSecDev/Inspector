@@ -1,0 +1,19 @@
+{
+  "stepNumber": 35,
+  "title": "Rebuild & Secure Flash",
+  "description": "Our patched firmware must be deployed securely.<br><br><b>Objective:</b> Rebuild the patched firmware with code signing and securely flash it to devices.",
+  "dialogue": [
+    "Mira: \"Let's finalize and sign the firmware before flashing.\"",
+    "Mira: \"Can you help me rebuild and securely flash it to devices?\""
+  ],
+  "hints": [
+    "Use vendor toolchain and sign images.",
+    "Use Make, ubi-utils, and openssl."
+  ],
+  "validation": {
+    "command": "Make",
+    "type": "contains"
+  },
+  "achievement": "Flash Facilitator",
+  "skills_gained": ["code signing", "secure flashing"]
+}

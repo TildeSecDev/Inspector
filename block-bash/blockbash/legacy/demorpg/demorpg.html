@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspector RPG Workshop UI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Press Start 2P', monospace;
+      background-color: #0a0a0a;
+      color: #00ff99;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      padding: 20px;
+    }
+    .title {
+      font-size: 24px;
+      background: #1a1a1a;
+      padding: 12px 24px;
+      border: 2px solid #00ff99;
+      margin-bottom: 20px;
+    }
+    .menu-box, .dialog-box, .task-box {
+      background: #121212;
+      border: 2px solid #00ff99;
+      padding: 20px;
+      margin: 10px;
+      width: 80%;
+      max-width: 700px;
+    }
+    button {
+      background: #0f0f0f;
+      border: 2px solid #00ff99;
+      color: #00ff99;
+      padding: 10px;
+      margin: 5px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .task-step {
+      margin: 10px 0;
+    }
+    select {
+      background: #0f0f0f;
+      border: 1px solid #00ff99;
+      color: #00ff99;
+      font-family: inherit;
+      padding: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">TildeSec's BLOCK BASH RPG</div>
+
+    <div class="menu-box">
+      <strong>Main Menu</strong><br />
+      <button onclick="showMode('story')">Start Story Mode</button>
+      <button onclick="showMode('task')">Start Task Mode</button>
+    </div>
+
+    <div class="menu-box" id="storyMode" style="display: none">
+      <strong>Skill Tree - Starting from Scratch</strong><br />
+      <button onclick="showStoryTask('Mira')">Lesson 1: Help Mira</button>
+      <p>🔒 Lesson 2: Locked</p>
+    </div>
+
+    <div class="dialog-box" id="storyTask" style="display: none">
+      <strong>Story: Mira</strong>
+      <p>Mira can't connect her laptop to the internet. She tried logging in but was redirected to a PayPal login page.</p>
+      <p>Task: Prove the network is spoofed and explain how to fix it.</p>
+    </div>
+
+    <div class="menu-box" id="taskMode" style="display: none">
+      <strong>Choose a Task Category</strong><br />
+      <select id="taskList" onchange="showLesson()">
+        <option value="">-- Select --</option>
+        <option value="ping">Information Gathering</option>
+        <option value="web">Web Applications</option>
+        <option value="password">Passwords</option>
+      </select>
+    </div>
+
+    <div class="task-box" id="lessonBox" style="display: none">
+      <strong>Task: Ping a Host</strong>
+      <div class="task-step">Step 1: Drag the Ping Block to the grid.</div>
+      <div class="task-step">Step 2: Enter IP address like 8.8.8.8</div>
+      <div class="task-step">System will validate your input automatically.</div>
+    </div>
+  </div>
+
+  <script>
+    function showMode(mode) {
+      document.getElementById('storyMode').style.display = 'none';
+      document.getElementById('taskMode').style.display = 'none';
+      document.getElementById('storyTask').style.display = 'none';
+      document.getElementById('lessonBox').style.display = 'none';
+      if (mode === 'story') {
+        document.getElementById('storyMode').style.display = 'block';
+      } else {
+        document.getElementById('taskMode').style.display = 'block';
+      }
+    }
+
+    function showStoryTask(task) {
+      document.getElementById('storyTask').style.display = 'block';
+    }
+
+    function showLesson() {
+      const value = document.getElementById('taskList').value;
+      if (value) {
+        document.getElementById('lessonBox').style.display = 'block';
+      } else {
+        document.getElementById('lessonBox').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
+

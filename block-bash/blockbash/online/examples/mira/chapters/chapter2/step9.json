@@ -1,0 +1,19 @@
+{
+  "stepNumber": 9,
+  "title": "DNS Poison Audit",
+  "description": "Billing pages redirect to phishing domains on some PCs.<br><br><b>Objective:</b> Capture DNS requests/replies to detect and correct any poisoned entries.",
+  "dialogue": [
+    "Mira: \"Some of my friends are being redirected to fake billing pages. It smells like DNS poisoning!\"",
+    "Mira: \"Can you help me capture DNS traffic and spot any poisoned entries?\""
+  ],
+  "hints": [
+    "Filter for DNS packets to suspicious domains.",
+    "Use Wireshark or dnstop."
+  ],
+  "validation": {
+    "command": "Wireshark",
+    "type": "contains"
+  },
+  "achievement": "DNS Analyst",
+  "skills_gained": ["DNS forensics", "domain filtering"]
+}

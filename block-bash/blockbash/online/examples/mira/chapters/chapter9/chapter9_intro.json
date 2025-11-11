@@ -1,0 +1,9 @@
+{
+  "type": "chapter",
+  "chapter": 9,
+  "title": "Sniffing & Spoofing",
+  "description": "Mira faces attacks that intercept and manipulate network traffic.",
+  "dialogue": [
+    "Mira: \"Let's catch and stop attackers who try to sniff or spoof our network!\""
+  ]
+}

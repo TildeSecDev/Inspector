@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mission: Trace the Hacker</title>
+  <link rel="stylesheet" href="/ws/workshop_asset?lesson_id=mira&file=style.css">
+  <link rel="stylesheet" href="/ws/workshop_asset?lesson_id=mira&file=chapters/demo/demo.css">
+  <style>
+    html, body, .workshop-root, .workshop-content {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+      background: none;
+    }
+    .workshop-root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .workshop-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/assets/workshop/backgrounds/bg_outsidecoffeeshop.png') center center / cover no-repeat;
+      z-index: 0;
+      transition: background-image 0.5s;
+    }
+    .workshop-bg.inside {
+      background-image: url('/assets/workshop/backgrounds/bg_coffeeshop.png');
+    }
+    .workshop-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      box-sizing: border-box;
+      background: none;
+    }
+    #demo-scene {
+      position: relative;
+      min-height: 320px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .demo-mira-sprite {
+      width: 96px;
+      height: 96px;
+      background: url('/assets/workshop/avatars/mira/mira_6.png') -96px 0 no-repeat;
+      background-size: 576px 96px;
+      border-radius: 12px;
+      border: 2px solid #ffe066;
+      margin-right: 18px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .rpg-dialogue-banner {
+      background: rgba(30,30,40,0.95);
+      border: 2px solid #ffe066;
+      border-radius: 16px;
+      color: #fff;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 24px #000a;
+      padding: 18px 24px 18px 18px;
+      margin: 0 auto 24px auto;
+      max-width: 540px;
+      min-width: 320px;
+      display: flex;
+      align-items: flex-start;
+      z-index: 2;
+      animation: fadeIn 0.4s;
+    }
+    .demo-dialogue-emotion {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      background: #ffe066;
+      object-fit: contain;
+      margin-right: 18px;
+      box-shadow: 0 2px 8px #0004;
+      flex-shrink: 0;
+      display: block;
+    }
+    .demo-dialogue-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      white-space: pre-line;
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+    #demo-next-btn {
+      margin-top: 18px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      background: #ffe066;
+      color: #232946;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    #demo-next-btn:hover { background: #fff3b0; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
+<body>
+  <div class="workshop-root">
+    <div class="workshop-bg" id="workshop-bg"></div>
+    <div class="workshop-content">
+      <div id="demo-scene"></div>
+      <button class="demo-btn" id="demo-next-btn" type="button">Next</button>
+      <div id="demo-popup" class="demo-popup"></div>
+    </div>
+  </div>
+  <script>
+    // Demo visual novel logic
+    const steps = [
+      {
+        dialogue: `Mira: "Agent, we’ve received intel. There’s a hacker sitting in this very café. He’s generating suspicious traffic. Our data shows his IP address is <span class='demo-glossary' data-gloss='ip'>10.0.0.42</span>. We need to expose him."`,
+        miraFrame: 1,
+        background: '/assets/workshop/backgrounds/bg_outsidecoffeeshop.png'
+      },
+      {
+        dialogue: `Mira: "Is the target alive? Drag the <span class='demo-glossary' data-gloss='ping'>🟦 ping</span> block into the workspace and press RUN to test the IP."`,
+        miraFrame: 1,
+        background: '/assets/workshop/backgrounds/bg_coffeeshop.png'
+      },
+      {
+        dialogue: `Mira: "Good. He’s online. Now drag <span class='demo-glossary' data-gloss='nmap'>🟩 nmap</span> into the workspace. Use the command to scan for open ports and his <span class='demo-glossary' data-gloss='hostname'>hostname</span>. We need to find out how we can connect to his machine and what he’s running."`,
+        miraFrame: 1,
+        background: '/assets/workshop/backgrounds/bg_coffeeshop.png'
+      }
+      // ...add more steps as needed...
+    ];
+    const emotionIcons = [
+      "/assets/workshop/avatars/mira/mira_irritated.png",
+      "/assets/workshop/avatars/mira/mira_shocked.png",
+      "/assets/workshop/avatars/mira/mira_smile.png"
+    ];
+
+    let stepIdx = 0;
+    const scene = document.getElementById('demo-scene');
+    const nextBtn = document.getElementById('demo-next-btn');
+    const bgDiv = document.getElementById('workshop-bg');
+
+    function renderStep(idx) {
+      const s = steps[idx];
+      // Set background
+      bgDiv.style.backgroundImage = `url('${s.background}')`;
+      // Render dialogue and Mira sprite
+      scene.innerHTML = `
+        <div class="rpg-dialogue-banner">
+          <img class="demo-dialogue-emotion" src="${emotionIcons[idx] || emotionIcons[0]}" alt="Mira">
+          <div class="demo-dialogue-text">${s.dialogue}</div>
+        </div>
+      `;
+      // Next button label
+      if (idx >= steps.length - 1) {
+        nextBtn.textContent = "Finish";
+      } else {
+        nextBtn.textContent = "Next";
+      }
+    }
+
+    renderStep(stepIdx);
+
+    nextBtn.onclick = function() {
+      if (stepIdx < steps.length - 1) {
+        stepIdx++;
+        renderStep(stepIdx);
+      } else {
+        // Optionally, hide everything or show a completion message
+        scene.innerHTML = `<div class="rpg-dialogue-banner"><div class="demo-dialogue-text">Mission complete!</div></div>`;
+        nextBtn.style.display = "none";
+      }
+    };
+  </script>
+</body>
+</html>

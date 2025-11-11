@@ -1,0 +1,19 @@
+{
+  "stepNumber": 54,
+  "title": "ARP Cache Timeline",
+  "description": "You need to prove exactly when the rogue AP first appeared on the network.<br><br><b>Objective:</b> Extract and timestamp ARP cache entries (e.g., via `arp -a` and parsing) to correlate device connections and isolate the rogue MAC.",
+  "dialogue": [
+    "Mira: \"ARP cache timestamps will show me the moment the malicious MAC joined.\"",
+    "Mira: \"Can you help me extract and correlate ARP cache entries?\""
+  ],
+  "hints": [
+    "Extract timestamped entries from the ARP cache or use system audit logs.",
+    "Use arp, grep, and awk."
+  ],
+  "validation": {
+    "command": "arp",
+    "type": "contains"
+  },
+  "achievement": "ARP Archivist",
+  "skills_gained": ["cache analysis", "timestamp inference"]
+}

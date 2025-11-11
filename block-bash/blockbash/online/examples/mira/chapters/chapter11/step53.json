@@ -1,0 +1,19 @@
+{
+  "stepNumber": 53,
+  "title": "Browser Cache Inspection",
+  "description": "Some users report that credentials reappear even after logout—cached pages may be leaking data.<br><br><b>Objective:</b> Inspect and purge browser cache artifacts (e.g., via BrowserHistoryView or sqlite3) to remove any stored credentials.",
+  "dialogue": [
+    "Mira: \"The browser cache might still hold stolen credentials—let's clear and inspect it.\"",
+    "Mira: \"Can you help me purge any stored credentials from the cache?\""
+  ],
+  "hints": [
+    "Use a cache-viewer or sqlite3 to extract saved form data from the cache database.",
+    "Use BrowserHistoryView or sqlite3."
+  ],
+  "validation": {
+    "command": "BrowserHistoryView",
+    "type": "contains"
+  },
+  "achievement": "Cache Sleuth",
+  "skills_gained": ["artifact parsing", "cache cleanup"]
+}

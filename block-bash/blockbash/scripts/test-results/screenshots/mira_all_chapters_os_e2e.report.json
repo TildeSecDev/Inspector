@@ -1,0 +1,381 @@
+{
+  "summary": "Mira all chapters xterm exercise across OSes",
+  "timestamp": "2025-09-09T17:31:45.517Z",
+  "results": [
+    {
+      "os": "kali",
+      "attempted": 7,
+      "progressed": 7,
+      "recognized": 1,
+      "httpValidated": 5,
+      "stepLogs": [
+        {
+          "step": 1,
+          "file": "step0.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step0.json",
+          "cmd": "echo mira-step-1",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": false,
+            "hint": "Unknown step or missing input."
+          }
+        },
+        {
+          "step": 2,
+          "file": "step1.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step1.json",
+          "cmd": "airodump-ng",
+          "validated": false,
+          "detail": null,
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 1,
+            "hint": "Now submit the flag you found (e.g., SSID_FLAG{...})"
+          }
+        },
+        {
+          "step": 3,
+          "file": "step2.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step2.json",
+          "cmd": "iw dev wlan0 set type managed",
+          "validated": false,
+          "detail": null,
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 2,
+            "hint": "Now submit the flag you found (e.g., DEAUTH_FLAG{...})"
+          }
+        },
+        {
+          "step": 4,
+          "file": "step3.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step3.json",
+          "cmd": "aircrack-ng",
+          "validated": false,
+          "detail": null,
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 3,
+            "hint": "Now submit the flag you found (e.g., HANDSHAKE_FLAG{...})"
+          }
+        },
+        {
+          "step": 5,
+          "file": "step4.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step4.json",
+          "cmd": "airodump-ng --manufacturer",
+          "validated": false,
+          "detail": null,
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 4,
+            "hint": "Now submit the flag you found (e.g., BEACON_FLAG{...})"
+          }
+        },
+        {
+          "step": 6,
+          "file": "step5.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step5.json",
+          "cmd": "macchanger --help",
+          "validated": false,
+          "detail": null,
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 5,
+            "hint": "Now submit the flag you found (e.g., MAC_FLAG{...})"
+          }
+        },
+        {
+          "step": 7,
+          "file": "step6.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step6.json",
+          "cmd": "echo mira-step-6",
+          "validated": false,
+          "detail": null,
+          "http": {
+            "pass": false,
+            "hint": "Try 'nmap -sn' for a ping sweep or 'arp-scan'."
+          }
+        }
+      ]
+    },
+    {
+      "os": "windows",
+      "attempted": 7,
+      "progressed": 7,
+      "recognized": 7,
+      "httpValidated": 5,
+      "stepLogs": [
+        {
+          "step": 1,
+          "file": "step0.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step0.json",
+          "cmd": "echo mira-step-1",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": false,
+            "hint": "Unknown step or missing input."
+          }
+        },
+        {
+          "step": 2,
+          "file": "step1.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step1.json",
+          "cmd": "airodump-ng",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 1,
+            "hint": "Now submit the flag you found (e.g., SSID_FLAG{...})"
+          }
+        },
+        {
+          "step": 3,
+          "file": "step2.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step2.json",
+          "cmd": "iw dev wlan0 set type managed",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 2,
+            "hint": "Now submit the flag you found (e.g., DEAUTH_FLAG{...})"
+          }
+        },
+        {
+          "step": 4,
+          "file": "step3.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step3.json",
+          "cmd": "aircrack-ng",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 3,
+            "hint": "Now submit the flag you found (e.g., HANDSHAKE_FLAG{...})"
+          }
+        },
+        {
+          "step": 5,
+          "file": "step4.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step4.json",
+          "cmd": "airodump-ng --manufacturer",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 4,
+            "hint": "Now submit the flag you found (e.g., BEACON_FLAG{...})"
+          }
+        },
+        {
+          "step": 6,
+          "file": "step5.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step5.json",
+          "cmd": "macchanger --help",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 5,
+            "hint": "Now submit the flag you found (e.g., MAC_FLAG{...})"
+          }
+        },
+        {
+          "step": 7,
+          "file": "step6.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step6.json",
+          "cmd": "echo mira-step-6",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": false,
+            "hint": "Try 'nmap -sn' for a ping sweep or 'arp-scan'."
+          }
+        }
+      ]
+    },
+    {
+      "os": "osx",
+      "attempted": 7,
+      "progressed": 7,
+      "recognized": 7,
+      "httpValidated": 5,
+      "stepLogs": [
+        {
+          "step": 1,
+          "file": "step0.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step0.json",
+          "cmd": "echo mira-step-1",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": false,
+            "hint": "Unknown step or missing input."
+          }
+        },
+        {
+          "step": 2,
+          "file": "step1.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step1.json",
+          "cmd": "airodump-ng",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 1,
+            "hint": "Now submit the flag you found (e.g., SSID_FLAG{...})"
+          }
+        },
+        {
+          "step": 3,
+          "file": "step2.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step2.json",
+          "cmd": "iw dev wlan0 set type managed",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 2,
+            "hint": "Now submit the flag you found (e.g., DEAUTH_FLAG{...})"
+          }
+        },
+        {
+          "step": 4,
+          "file": "step3.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step3.json",
+          "cmd": "aircrack-ng",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 3,
+            "hint": "Now submit the flag you found (e.g., HANDSHAKE_FLAG{...})"
+          }
+        },
+        {
+          "step": 5,
+          "file": "step4.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step4.json",
+          "cmd": "airodump-ng --manufacturer",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 4,
+            "hint": "Now submit the flag you found (e.g., BEACON_FLAG{...})"
+          }
+        },
+        {
+          "step": 6,
+          "file": "step5.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step5.json",
+          "cmd": "macchanger --help",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": true,
+            "flagRequired": true,
+            "stepNumber": 5,
+            "hint": "Now submit the flag you found (e.g., MAC_FLAG{...})"
+          }
+        },
+        {
+          "step": 7,
+          "file": "step6.json",
+          "ok": true,
+          "url": "http://localhost:3000/ws/workshop_asset?lesson_id=mira&file=step6.json",
+          "cmd": "echo mira-step-6",
+          "validated": true,
+          "detail": {
+            "hint": "Try typing 'ls' in the terminal.",
+            "pass": false
+          },
+          "http": {
+            "pass": false,
+            "hint": "Try 'nmap -sn' for a ping sweep or 'arp-scan'."
+          }
+        }
+      ]
+    }
+  ]
+}

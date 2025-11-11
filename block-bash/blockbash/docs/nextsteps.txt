@@ -1,0 +1,76 @@
+NEXT STEPS FOR RPG WORKSHOP & USER PROGRESS INTEGRATION
+=======================================================
+
+1. RPG Workshop Example
+-----------------------
+- Create a new folder: /examples/rpg
+- Add a .cerrf file (zip archive) named rpg.cerrf with:
+    - manifest.json (metadata, steps, validation rules)
+    - step1.json, step2.json, ... (step files)
+    - assets/ (optional: images, rpg.js, rpg.css)
+
+2. MongoDB Integration
+----------------------
+- Install dependencies:
+    npm install mongoose
+
+- Create models/UserProgress.js:
+    const mongoose = require('mongoose');
+    const UserProgressSchema = new mongoose.Schema({
+      name: String,
+      password: String,
+      email: String,
+      ip: String,
+      createdAt: { type: Date, default: Date.now },
+      storyCompletions: [String],
+      taskCompletions: [String],
+      lastCommands: [String],
+      achievements: [String],
+      files: [String],
+      sudo: { type: Boolean, default: false }
+    });
+    module.exports = mongoose.model('UserProgress', UserProgressSchema);
+
+- In app.js, connect to MongoDB and require the model:
+    const mongoose = require('mongoose');
+    mongoose.connect('mongodb://localhost:27017/blockbash', { useNewUrlParser: true, useUnifiedTopology: true });
+    const UserProgress = require('./models/UserProgress');
+
+3. Workshop Endpoints
+---------------------
+- Add GET /ws/workshop?lesson_id=rpg to load RPG workshop from /examples/rpg.cerrf
+- Add POST /ws/validate to validate user output against step validation rules in the .cerrf
+- Add GET/POST /ws/progress to get/update user progress, achievements, last commands, etc.
+- Use MongoDB for all user progress storage.
+
+4. Auto-load RPG Workshop on /editor
+------------------------------------
+- In /editor route, after session validation:
+    - Find or create user in MongoDB by IP.
+    - Inject userId into the served HTML for frontend use.
+    - On frontend, fetch /ws/workshop?lesson_id=rpg on page load and render RPG UI.
+
+5. User Progress Tracking
+-------------------------
+- Store in MongoDB:
+    - name, password, email, ip, createdAt
+    - storyCompletions, taskCompletions
+    - last 5 commands since last login
+    - achievements unlocked
+    - files created by user (filenames)
+    - sudo status
+
+6. Frontend Integration
+-----------------------
+- On /editor load, fetch RPG workshop and render in UI.
+- When user runs a command, POST to /run, then POST result to /ws/validate.
+- On step completion, POST to /ws/progress with time, commands, achievements, etc.
+
+7. Testing & Validation
+-----------------------
+- Test RPG loading, validation, and progress tracking end-to-end.
+- Ensure MongoDB is running and accessible.
+- Confirm user progress persists across sessions.
+
+--------------------------------------
+This file summarizes the steps needed to implement the RPG workshop system, MongoDB user progress, and endpoint integration as described.

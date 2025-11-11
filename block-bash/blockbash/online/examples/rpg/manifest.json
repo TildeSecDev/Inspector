@@ -1,0 +1,14 @@
+{
+  "title": "DemoRPG: Cave Bash",
+  "author": "TildeSec Team",
+  "description": "A Cave Story-inspired RPG demo. Explore, talk, and solve your first bash quest.",
+  "steps": [
+    "steps/step1.json"
+  ],
+  "assets": {
+    "background": "/assets/workshop/backgrounds/bg_cavestory.png",
+    "css": "style.css",
+    "js": "logic.js"
+  },
+  "startStep": 0
+}

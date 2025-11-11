@@ -1,0 +1,19 @@
+{
+  "stepNumber": 25,
+  "title": "Custom Payload Defense",
+  "description": "A crafted reverse shell succeeded on the portal.<br><br><b>Objective:</b> Deliver a msfvenom reverse shell, then enforce egress filtering to block it.",
+  "dialogue": [
+    "Mira: \"If msfvenom worked, we need stricter egress rules.\"",
+    "Mira: \"Can you help me test and block custom payloads?\""
+  ],
+  "hints": [
+    "Generate a custom payload with msfvenom.",
+    "Use iptables for egress filtering."
+  ],
+  "validation": {
+    "command": "msfvenom",
+    "type": "contains"
+  },
+  "achievement": "Payload Pioneer",
+  "skills_gained": ["payload crafting", "network firewalling"]
+}

@@ -1,0 +1,137 @@
+# Change Log - Modifications Made Today
+
+1. Updated generate_database_sql.js:
+   - Converted the Python script into a Node.js script.
+   - Script now creates a SQLite database (database.sqlite) in the /databases folder.
+   - Defined tables: users, userprogresses, and workshops.
+
+2. Modified start_mongo.sh:
+   - Updated script to check for SQLite database file.
+   - If database.sqlite is absent, it runs the Node.js script (generate_database_sql.js) to create it.
+   - No longer starting a full mongod for database storage.
+
+3. Updated app.js:
+   - Integrated SQLite by connecting to database.sqlite using sqlite3.
+   - Modified /auth/register endpoint to use SQLite for user registration (inserts new user into users table using sqliteDb.run()).
+   - Modified /auth/login endpoint to use SQLite for authentication.
+   - Updated /admin/users endpoint to query users from SQLite instead of using Mongoose/MongoDB.
+   - Left legacy MongoDB code for other collections (e.g. UserProgress) intact where needed.
+   - Minor adjustments to JSON responses to avoid empty JSON errors.
+
+4. Minor adjustments to frontend files:
+   - Adjusted welcome.html and newindex.html to ensure proper redirection after login/registration.
+   - Updated admin.html to display user data from SQLite via the revised /admin/users endpoint.
+
+5. Additional changes:
+   - Ensured all modifications now reference correct filepaths.
+   - Updated changes.txt with a comprehensive log of all changes applied today.
+
+- - - - - - -  - - - - - -  - - - - - - - - - - - - -- - - - - - - - - - - - 
+## RPG Workshop & .cerrf Integration
+
+- Implemented RPG workshop loading from .cerrf files (zip archives) in /examples/rpg.cerrf and /examples/rpg uncompressed.
+- .cerrf files now include:
+  - manifest.json (metadata, steps, assets)
+  - stepN.json (step-by-step instructions, hints, validation)
+  - assets/ (images, banners, avatars, logo, etc.)
+  - style.css and logic.js for custom RPG UI and logic
+  - validate.js for per-step command validation
+
+## Workshop Section Functionality
+
+- On /editor, the workshop section auto-loads the RPG .cerrf via `/ws/workshop?lesson_id=rpg`.
+- The server extracts and serves indexHtml, manifest, and assets (CSS, JS, images) from the .cerrf.
+- The workshop UI is rendered inside the info-panel's #workshop-container.
+- RPG dialogue, hints, menu, logo, laptop, and character avatars are all dynamically rendered and styled.
+- Menu options and navigation (including a Back button) are handled in logic.js.
+
+## Terminal & Validation
+
+- xterm.js terminal now only prints the actual command output (not validation JSON).
+- When a command is run, the backend `/run` endpoint:
+  - Executes the command in the user's workspace directory.
+  - Streams output to the frontend.
+  - On completion, loads and evaluates validate.js from the .cerrf.
+  - Calls the validate function with `{ command, commandOutput }`.
+  - Appends a JSON object with `{ output, validation }` to the stream.
+- The frontend parses this JSON, emits a `rpg-validated` event, and the RPG logic updates the UI accordingly (menu, hints, etc).
+
+## RPG UI/UX Improvements
+
+- RPG dialogue and hints are displayed in banners with transparent backgrounds and proper scaling.
+- Menu buttons are rendered in a transparent container, each with its own banner background.
+- The Back button remains visible after menu selection.
+- Logo, laptop, and character images are loaded and displayed as part of the RPG panel.
+- Responsive and visually consistent layout for all RPG UI elements.
+
+## Backend/Database
+
+- SQLite integration for user registration, login, and admin user listing.
+- MongoDB is still used for user progress tracking.
+- Database initialization scripts and checks updated.
+
+## Miscellaneous
+
+- Improved error handling for asset loading from .cerrf files.
+- Updated CSS for RPG and workspace to ensure proper scaling and appearance.
+- Updated frontend scripts to handle block drag-and-drop, terminal input, and workshop loading robustly.
+- Documented all changes and next steps in nextsteps.txt and next steps 2.txt.
+
+--------------------------------------
+## How the Workshop Section Works
+
+- The workshop section loads a .cerrf file (zip archive) containing all necessary files for a workshop.
+- The server exposes endpoints to:
+  - List available workshops
+  - Serve workshop HTML, manifest, and assets
+  - Validate user commands via validate.js in the .cerrf
+- The frontend fetches and renders the workshop UI, and listens for validation events to update the RPG state.
+
+## How .cerrf Files Work
+
+- .cerrf files are zip archives with:
+  - manifest.json: metadata, step list, asset references
+  - stepN.json: step-by-step instructions, hints, validation rules
+  - assets/: images, banners, avatars, etc.
+  - style.css, logic.js: custom UI and logic
+  - validate.js: validation logic for commands
+- The server extracts and serves files from the .cerrf as needed.
+
+## Server Validation Handling
+
+- When a command is run, the server:
+  - Executes the command in the user's workspace
+  - Loads validate.js from the .cerrf
+  - Evaluates the validate function with the command and output
+  - Returns the validation result as JSON (not shown in the terminal, only used by the RPG logic)
+- The frontend RPG logic listens for validation events and updates the UI (menu, hints, progression) accordingly.
+
+--------------------------------------
+# Change Log - Modifications Made Today
+
+[2024-06-09]
+
+6. Fixed RPG asset path issues:
+   - Ensured all references to bg_cavestory.png use the correct path: /assets/workshop/backgrounds/bg_cavestory.png in all HTML, CSS, and JS files.
+   - Updated logic.js to use /ws/workshop_asset?lesson_id=rpg&file=assets/workshop/... only for assets that should be loaded from the .cerrf, and /assets/workshop/... for assets served from the public folder.
+   - Added console.log statements to all asset <img> tags to log successful and failed loads for easier debugging.
+   - Verified that style.css and all RPG backgrounds reference /assets/workshop/backgrounds/bg_cavestory.png.
+   - Searched for and removed any remaining references to /assets/workshop/bg_cavestory.png (incorrect path).
+
+7. General asset path audit:
+   - All RPG and workshop HTML, CSS, and JS now consistently use /assets/workshop/... for public assets.
+   - Confirmed that all required assets exist in public/assets/workshop and its subfolders.
+[2025-06-06]
+
++ Themes are now consistent between the settings modal and the onboarding flow.
++ Theme definitions clarified and documented.
++ Added a notifications button that surfaces event and friend request alerts.
++ Friend search and add functionality verified working.
+
+- The original theme is still applied on initial load; chosen or Classic should be the default when visiting /editor.
+- Terminal sessions require pressing Ctrl+C before a new command can run.
+- Workshop `.cerrf` files are not updated from terminal input yet.
+- Leaderboard popup only opens when clicking the button background, not the icon.
+- Selecting "Show Onboarding" should close the About popup and present steps in clearer boxes with Back/Finish buttons.
+- Opening more than six terminals collapses them into an inaccessible dropdown.
+- The dropdown next to the '+' button in the terminal view is not visible or usable.

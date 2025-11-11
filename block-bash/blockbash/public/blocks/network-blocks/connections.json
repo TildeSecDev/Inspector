@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Automatic Copper",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "auto-copper",
+    "data-category": "connections",
+    "nestable": false,
+    "icon": "fa fa-minus",
+    "deviceType": "connection",
+    "connectionType": "auto-copper",
+    "innerHTML": "<div class=\"network-block-title\">Automatic Copper</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Automatic copper cable (detects straight-through or crossover)</p><input type=\"text\" class=\"cable-name\" placeholder=\"Cable Label\"><select class=\"cable-type\"><option value=\"cat5e\">Cat 5e</option><option value=\"cat6\">Cat 6</option><option value=\"cat6a\">Cat 6a</option></select><input type=\"text\" class=\"length\" placeholder=\"Cable Length\"></div>"
+  },
+  {
+    "name": "Copper Straight-Through",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "copper-straight",
+    "data-category": "connections",
+    "nestable": false,
+    "icon": "fa fa-minus",
+    "deviceType": "connection",
+    "connectionType": "straight-through",
+    "innerHTML": "<div class=\"network-block-title\">Copper Straight-Through</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Straight-through copper cable (device to switch/hub)</p><input type=\"text\" class=\"cable-name\" placeholder=\"Cable Label\"><select class=\"cable-type\"><option value=\"cat5e\">Cat 5e</option><option value=\"cat6\">Cat 6</option><option value=\"cat6a\">Cat 6a</option></select><input type=\"text\" class=\"length\" placeholder=\"Cable Length\"></div>"
+  },
+  {
+    "name": "Copper Crossover",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "copper-crossover",
+    "data-category": "connections",
+    "nestable": false,
+    "icon": "fa fa-exchange",
+    "deviceType": "connection",
+    "connectionType": "crossover",
+    "innerHTML": "<div class=\"network-block-title\">Copper Crossover</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Crossover copper cable (device to device)</p><input type=\"text\" class=\"cable-name\" placeholder=\"Cable Label\"><select class=\"cable-type\"><option value=\"cat5e\">Cat 5e</option><option value=\"cat6\">Cat 6</option><option value=\"cat6a\">Cat 6a</option></select><input type=\"text\" class=\"length\" placeholder=\"Cable Length\"></div>"
+  },
+  {
+    "name": "Fiber Optic",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "fiber-optic",
+    "data-category": "connections",
+    "nestable": false,
+    "icon": "fa fa-flash",
+    "deviceType": "connection",
+    "connectionType": "fiber",
+    "innerHTML": "<div class=\"network-block-title\">Fiber Optic</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Fiber optic cable for high-speed connections</p><input type=\"text\" class=\"cable-name\" placeholder=\"Cable Label\"><select class=\"fiber-type\"><option value=\"single-mode\">Single-mode</option><option value=\"multi-mode\">Multi-mode</option></select><select class=\"connector-type\"><option value=\"sc\">SC</option><option value=\"lc\">LC</option><option value=\"st\">ST</option></select><input type=\"text\" class=\"length\" placeholder=\"Cable Length\"></div>"
+  },
+  {
+    "name": "Console/Rollover",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "console-rollover",
+    "data-category": "connections",
+    "nestable": false,
+    "icon": "fa fa-terminal",
+    "deviceType": "connection",
+    "connectionType": "console",
+    "innerHTML": "<div class=\"network-block-title\">Console/Rollover</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Console cable for device management</p><input type=\"text\" class=\"cable-name\" placeholder=\"Cable Label\"><select class=\"connector-type\"><option value=\"rj45-db9\">RJ45 to DB9</option><option value=\"rj45-usb\">RJ45 to USB</option><option value=\"rollover\">Rollover Cable</option></select></div>"
+  },
+  {
+    "name": "Serial DCE/DTE",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "serial-dce-dte",
+    "data-category": "connections",
+    "nestable": false,
+    "icon": "fa fa-arrows-h",
+    "deviceType": "connection",
+    "connectionType": "serial",
+    "innerHTML": "<div class=\"network-block-title\">Serial DCE/DTE</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Serial connection with DCE/DTE configuration</p><input type=\"text\" class=\"cable-name\" placeholder=\"Cable Label\"><select class=\"dce-end\"><option value=\"left\">Left Device DCE</option><option value=\"right\">Right Device DCE</option></select><input type=\"text\" class=\"clock-rate\" placeholder=\"Clock Rate (if DCE)\" value=\"64000\"></div>"
+  },
+  {
+    "name": "Telephone (RJ-11)",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "telephone-rj11",
+    "data-category": "connections",
+    "nestable": false,
+    "icon": "fa fa-phone",
+    "deviceType": "connection",
+    "connectionType": "telephone",
+    "innerHTML": "<div class=\"network-block-title\">Telephone (RJ-11)</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Telephone cable with RJ-11 connectors</p><input type=\"text\" class=\"cable-name\" placeholder=\"Cable Label\"><input type=\"text\" class=\"phone-line\" placeholder=\"Phone Line Number\"></div>"
+  }
+]

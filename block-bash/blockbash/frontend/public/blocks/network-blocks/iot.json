@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Arduino",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "arduino",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-microchip",
+    "deviceType": "iot-controller",
+    "ports": ["ethernet", "usb"],
+    "innerHTML": "<div class=\"network-block-title\">Arduino</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Arduino microcontroller for IoT applications</p><input type=\"text\" class=\"device-name\" placeholder=\"Arduino Name\"><select class=\"arduino-model\"><option value=\"uno\">Arduino Uno</option><option value=\"nano\">Arduino Nano</option><option value=\"mega\">Arduino Mega</option><option value=\"esp32\">ESP32</option></select><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address (if networked)\"><textarea class=\"sketch-code\" placeholder=\"Arduino Sketch Code\"></textarea></div>"
+  },
+  {
+    "name": "Raspberry Pi",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "raspberry-pi",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-pie-chart",
+    "deviceType": "iot-computer",
+    "ports": ["ethernet", "wireless", "usb"],
+    "innerHTML": "<div class=\"network-block-title\">Raspberry Pi</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">Raspberry Pi single-board computer</p><input type=\"text\" class=\"device-name\" placeholder=\"Pi Name\"><select class=\"pi-model\"><option value=\"pi4\">Raspberry Pi 4</option><option value=\"pi3\">Raspberry Pi 3</option><option value=\"zero\">Pi Zero W</option><option value=\"pico\">Pi Pico W</option></select><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address\"><select class=\"os\"><option value=\"raspbian\">Raspberry Pi OS</option><option value=\"ubuntu\">Ubuntu</option><option value=\"iot-core\">Windows IoT Core</option></select><textarea class=\"python-code\" placeholder=\"Python Application Code\"></textarea></div>"
+  },
+  {
+    "name": "Temperature Sensor",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "temp-sensor-iot",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-thermometer-half",
+    "deviceType": "iot-sensor",
+    "ports": ["wireless"],
+    "innerHTML": "<div class=\"network-block-title\">Temperature Sensor</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">IoT temperature sensor with wireless connectivity</p><input type=\"text\" class=\"sensor-name\" placeholder=\"Sensor Name\"><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address\"><input type=\"text\" class=\"temperature-range\" placeholder=\"Temperature Range (°C)\"><input type=\"number\" class=\"update-interval\" placeholder=\"Update Interval (seconds)\" value=\"60\"><select class=\"sensor-type\"><option value=\"dht22\">DHT22</option><option value=\"ds18b20\">DS18B20</option><option value=\"bme280\">BME280</option></select></div>"
+  },
+  {
+    "name": "Humidity Sensor",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "humidity-sensor-iot",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-tint",
+    "deviceType": "iot-sensor",
+    "ports": ["wireless"],
+    "innerHTML": "<div class=\"network-block-title\">Humidity Sensor</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">IoT humidity sensor with wireless connectivity</p><input type=\"text\" class=\"sensor-name\" placeholder=\"Sensor Name\"><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address\"><input type=\"text\" class=\"humidity-range\" placeholder=\"Humidity Range (%)\"><input type=\"number\" class=\"update-interval\" placeholder=\"Update Interval (seconds)\" value=\"60\"><select class=\"sensor-type\"><option value=\"dht22\">DHT22</option><option value=\"sht30\">SHT30</option><option value=\"bme280\">BME280</option></select></div>"
+  },
+  {
+    "name": "Light Sensor",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "light-sensor-iot",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-sun-o",
+    "deviceType": "iot-sensor",
+    "ports": ["wireless"],
+    "innerHTML": "<div class=\"network-block-title\">Light Sensor</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">IoT light/luminosity sensor</p><input type=\"text\" class=\"sensor-name\" placeholder=\"Sensor Name\"><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address\"><input type=\"text\" class=\"light-range\" placeholder=\"Light Range (lux)\"><input type=\"number\" class=\"update-interval\" placeholder=\"Update Interval (seconds)\" value=\"60\"><select class=\"sensor-type\"><option value=\"bh1750\">BH1750</option><option value=\"tsl2561\">TSL2561</option><option value=\"veml7700\">VEML7700</option></select></div>"
+  },
+  {
+    "name": "Motion Sensor",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "motion-sensor-iot",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-eye",
+    "deviceType": "iot-sensor",
+    "ports": ["wireless"],
+    "innerHTML": "<div class=\"network-block-title\">Motion Sensor</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">IoT motion detection sensor</p><input type=\"text\" class=\"sensor-name\" placeholder=\"Sensor Name\"><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address\"><input type=\"number\" class=\"detection-range\" placeholder=\"Detection Range (meters)\" value=\"5\"><select class=\"sensor-type\"><option value=\"pir\">PIR (Passive Infrared)</option><option value=\"ultrasonic\">Ultrasonic</option><option value=\"microwave\">Microwave</option></select><input type=\"number\" class=\"sensitivity\" placeholder=\"Sensitivity (1-10)\" min=\"1\" max=\"10\" value=\"5\"></div>"
+  },
+  {
+    "name": "Smart Bulb Actuator",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "smart-bulb-actuator",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-lightbulb-o",
+    "deviceType": "iot-actuator",
+    "ports": ["wireless"],
+    "innerHTML": "<div class=\"network-block-title\">Smart Bulb Actuator</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">IoT smart lightbulb actuator</p><input type=\"text\" class=\"device-name\" placeholder=\"Smart Bulb Name\"><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address\"><input type=\"range\" class=\"brightness\" min=\"0\" max=\"100\" value=\"100\" oninput=\"this.nextElementSibling.value=this.value\"><output>100</output>% Brightness<select class=\"color-mode\"><option value=\"white\">White Light</option><option value=\"rgb\">RGB Color</option><option value=\"tunable\">Tunable White</option></select><input type=\"color\" class=\"rgb-color\" value=\"#ffffff\"></div>"
+  },
+  {
+    "name": "Smart Plug Actuator",
+    "class": "network-block",
+    "draggable": true,
+    "blockType": "smart-plug-actuator",
+    "data-category": "iot",
+    "nestable": false,
+    "icon": "fa fa-plug",
+    "deviceType": "iot-actuator",
+    "ports": ["wireless"],
+    "innerHTML": "<div class=\"network-block-title\">Smart Plug Actuator</div><div class=\"network-block-details\" style=\"display:none;\"><p class=\"explanation\">IoT smart plug/outlet actuator</p><input type=\"text\" class=\"device-name\" placeholder=\"Smart Plug Name\"><input type=\"text\" class=\"ip-address\" placeholder=\"IP Address\"><select class=\"power-state\"><option value=\"on\">On</option><option value=\"off\">Off</option><option value=\"schedule\">Scheduled</option></select><input type=\"number\" class=\"power-consumption\" placeholder=\"Power Consumption (W)\" value=\"0\" readonly><input type=\"text\" class=\"schedule\" placeholder=\"Schedule (if applicable)\"></div>"
+  }
+]

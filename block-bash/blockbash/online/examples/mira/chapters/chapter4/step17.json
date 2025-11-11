@@ -1,0 +1,19 @@
+{
+  "stepNumber": 17,
+  "title": "Client-Side Validation Fix",
+  "description": "Validation bypass lets users submit harmful payloads.<br><br><b>Objective:</b> Bypass client-side checks to identify missing server-side validation and implement it.",
+  "dialogue": [
+    "Mira: \"I think the site only checks input with JavaScript. That's not enough!\"",
+    "Mira: \"Can you help me test and add server-side validation?\""
+  ],
+  "hints": [
+    "Disable JS to see what unvalidated data is sent.",
+    "Use browser console or Tamper Data."
+  ],
+  "validation": {
+    "command": "browser console",
+    "type": "contains"
+  },
+  "achievement": "Client-Side Conqueror",
+  "skills_gained": ["validation best practices", "defensive coding"]
+}

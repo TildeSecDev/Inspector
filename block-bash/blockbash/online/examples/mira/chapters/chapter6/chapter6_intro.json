@@ -1,0 +1,9 @@
+{
+  "type": "chapter",
+  "chapter": 6,
+  "title": "Password Attacks",
+  "description": "Password security is critical. Mira must defend against brute-force and cracking attempts.",
+  "dialogue": [
+    "Mira: \"Time to make sure our passwords are strong and safe!\""
+  ]
+}

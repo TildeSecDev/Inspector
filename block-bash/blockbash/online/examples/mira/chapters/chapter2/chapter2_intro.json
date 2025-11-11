@@ -1,0 +1,9 @@
+{
+  "type": "chapter",
+  "chapter": 2,
+  "title": "Information Gathering",
+  "description": "Learn essential reconnaissance techniques to map networks and identify potential vulnerabilities.",
+  "dialogue": [
+    "Mira: \"Now that we've secured the wireless network, let's gather more information about what's happening on the network.\""
+  ]
+}

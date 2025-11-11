@@ -1,0 +1,19 @@
+{
+  "stepNumber": 30,
+  "title": "Rainbow Table Defense",
+  "description": "Rainbow tables eased hash recovery.<br><br><b>Objective:</b> Generate a rainbow table attack, then implement per-user salts in password hashes.",
+  "dialogue": [
+    "Mira: \"Salting will render those tables useless.\"",
+    "Mira: \"Can you help me implement per-user salts?\""
+  ],
+  "hints": [
+    "Generate a small rainbow table locally.",
+    "Use rtgen and rcrack."
+  ],
+  "validation": {
+    "command": "rtgen",
+    "type": "contains"
+  },
+  "achievement": "Rainbow Wrangler",
+  "skills_gained": ["salted hashing", "table mitigation"]
+}

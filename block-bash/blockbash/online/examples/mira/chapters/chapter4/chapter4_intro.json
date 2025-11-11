@@ -1,0 +1,9 @@
+{
+  "type": "chapter",
+  "chapter": 4,
+  "title": "Web Applications",
+  "description": "The café's web applications need attention. Mira must secure forms, redirects, and admin panels.",
+  "dialogue": [
+    "Mira: \"Web security is just as important. Let's lock down those forms and panels!\""
+  ]
+}

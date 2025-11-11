@@ -1,0 +1,81 @@
+name: CI
+on:
+  push:
+    branches: [ main, unstable ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: Repo tidy check
+        run: npm run repo:tidy
+
+  test-and-ui:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests (no coverage on Node 18)
+        if: matrix.node == 18
+        env:
+          SKIP_DOCKER: 1
+          NODE_ENV: test
+        run: npm run test:integration
+
+      - name: Run integration tests with coverage (Node 20)
+        if: matrix.node == 20
+        env:
+          SKIP_DOCKER: 1
+          NODE_ENV: test
+        run: npm run test:integration:cov
+
+      - name: Upload coverage (Node 20)
+        if: matrix.node == 20 && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: coverage/
+
+      - name: Upload test artifacts (all nodes)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-node-${{ matrix.node }}
+          path: |
+            server.log
+            test-results/
+      - name: Cleanup transient logs
+        if: always()
+        run: rm -f server.log || true
+      - name: UI smoke tests (Playwright editor)
+        if: matrix.node == 20 # run once on latest node to save time
+        env:
+          ALLOW_PORT_REUSE: 1
+        run: npx playwright test tests/e2e/editor.spec.js -c tests/e2e/playwright.config.js || (echo 'Playwright smoke failed' && exit 1)
+
+      # Placeholder: Selenium tests deprecated – retained off by default.
+      # To re-enable, add a job or step invoking npm run test:selenium* scripts.

@@ -1,0 +1,19 @@
+{
+  "stepNumber": 8,
+  "title": "DHCP Rogue Detector",
+  "description": "One friend got an IP from a malicious DHCP server.<br><br><b>Objective:</b> Sniff DHCP traffic to identify and disable any unauthorized DHCP servers.",
+  "dialogue": [
+    "Mira: \"Someone's assigning bad IPs—time to find that rogue DHCP!\"",
+    "Mira: \"Can you sniff DHCP traffic and help me disable any unauthorized DHCP servers?\""
+  ],
+  "hints": [
+    "Capture only DHCP broadcast packets.",
+    "Use tcpdump -i wlan0 port 67 or port 68."
+  ],
+  "validation": {
+    "command": "tcpdump",
+    "type": "contains"
+  },
+  "achievement": "DHCP Detective",
+  "skills_gained": ["DHCP packet capture", "tcpdump filtering"]
+}

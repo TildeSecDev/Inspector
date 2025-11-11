@@ -1,0 +1,59 @@
+{
+  "info": {
+    "name": "BlockBash Sandbox API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Preferred OS",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/user/preferred_os",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["user", "preferred_os"]
+        }
+      }
+    },
+    {
+      "name": "Set Preferred OS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"os\": \"kali\"}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/user/preferred_os",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["user", "preferred_os"]
+        }
+      }
+    },
+    {
+      "name": "Get Active Containers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/admin/active_containers",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["admin", "active_containers"]
+        }
+      }
+    }
+  ]
+}

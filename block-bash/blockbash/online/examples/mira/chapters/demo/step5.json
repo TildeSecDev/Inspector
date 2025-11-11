@@ -1,0 +1,8 @@
+{
+  "step": 5,
+  "dialogue": "Mira: \"Bingo. He just opened the link. That music? It’s coming from that table. Click it to confirm his identity.\"",
+  "miraFrame": 3,
+  "terminal": "",
+  "showTable": true,
+  "showMusic": true
+}

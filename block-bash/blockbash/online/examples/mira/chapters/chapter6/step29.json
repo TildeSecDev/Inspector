@@ -1,0 +1,19 @@
+{
+  "stepNumber": 29,
+  "title": "Hash Cracking Workflow",
+  "description": "MD5 hashes were trivial to crack offline.<br><br><b>Objective:</b> Crack an MD5 hash, then migrate storage to bcrypt or SHA-256 salted.",
+  "dialogue": [
+    "Mira: \"We need stronger hashing algorithms for storage.\"",
+    "Mira: \"Can you help me migrate to a more secure hash?\""
+  ],
+  "hints": [
+    "Use John the Ripper on the hash file.",
+    "Use bcrypt for secure hashing."
+  ],
+  "validation": {
+    "command": "John the Ripper",
+    "type": "contains"
+  },
+  "achievement": "Hash Hacker",
+  "skills_gained": ["secure hashing", "salted storage"]
+}

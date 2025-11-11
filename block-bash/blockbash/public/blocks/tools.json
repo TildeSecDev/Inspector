@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Nmap",
+    "class": "block",
+    "draggable": true,
+    "blockType": "nmap",
+    "data-category": "tools",
+    "nestable": false,
+    "icon": "fa fa-search",
+    "innerHTML": "<div class=\"block-title\">Nmap</div><div class=\"block-details nmap-details\" style=\"display:none;\"><p class=\"explanation\">Nmap (Network Mapper) is a tool used to discover hosts and services on a network by sending packets and analyzing responses.</p><input type=\"text\" class=\"nmap-args\" placeholder=\"Arguments (e.g. -sV 10.0.0.42)\"></div>"
+  }
+]

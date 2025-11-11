@@ -1,0 +1,23 @@
+{
+  "welcome.title": "Inicio de sesión de Inspector",
+  "bg.brand": "INSPECTOR",
+  "binder.login.cover": "INICIAR",
+  "binder.register.cover": "REGISTRAR",
+
+  "login.title": "Iniciar sesión",
+  "login.email.placeholder": "Correo o Usuario",
+  "login.password.placeholder": "Contraseña",
+  "login.submit": "Entrar",
+
+  "register.title": "Registrarse",
+  "register.name.placeholder": "Nombre",
+  "register.email.placeholder": "Correo",
+  "register.password.placeholder": "Contraseña",
+  "register.org.placeholder": "Selecciona organización",
+  "register.org.school": "Escuela",
+  "register.org.company": "Empresa",
+  "register.org.other": "Otro",
+  "register.submit": "Registrar",
+
+  "toast.caseAccepted": "Caso aceptado"
+}

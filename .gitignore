@@ -1,0 +1,15 @@
+node_modules
+
+# Build artifacts and distribution files
+dist/
+*.dmg
+*.zip
+*.app
+
+# Large files
+*.framework
+
+# Electron build output
+electron-app/dist/
+build/
+

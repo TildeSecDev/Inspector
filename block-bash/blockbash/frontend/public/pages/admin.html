@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="title">Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@400;600;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#1d2254; --panel:#2a3172; --panel-alt:#313a85; --accent:#ffc857; --danger:#ff5f56; --ok:#3fb950; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:'Kanit',sans-serif; background:linear-gradient(135deg,#4e5dc1 0%, #243066 80%); color:#fff; min-height:100vh; }
+    header { padding:1rem 1.5rem; display:flex; flex-wrap:wrap; gap:1rem; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); backdrop-filter:blur(6px); border-bottom:1px solid rgba(255,255,255,0.1); }
+    h1 { font-family:'Tomorrow',sans-serif; margin:0; letter-spacing:1px; font-size:1.8rem; }
+    #language-select { background:#272f70; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:.4rem .6rem; border-radius:4px; }
+    main { padding:1rem 1.25rem 3rem; display:grid; gap:1.25rem; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); }
+    .card { background:rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:1rem .9rem 1.1rem; position:relative; display:flex; flex-direction:column; backdrop-filter:blur(4px); }
+    .card h2 { margin:.2rem 0 .75rem; font-size:1.1rem; font-family:'Tomorrow',sans-serif; font-weight:600; letter-spacing:.5px; display:flex; gap:.5rem; align-items:center; }
+    table { width:100%; border-collapse:collapse; font-size:.75rem; font-family:'Tomorrow',sans-serif; }
+    th,td { padding:.4rem .5rem; text-align:left; }
+    thead th { background:#272f70; position:sticky; top:0; z-index:1; }
+    tbody tr:nth-child(even) { background:rgba(255,255,255,0.05); }
+    tbody tr:hover { background:rgba(255,255,255,0.08); }
+    .scroll { max-height:240px; overflow:auto; border:1px solid rgba(255,255,255,0.1); border-radius:6px; }
+    .metric-strip { display:flex; gap:1rem; flex-wrap:wrap; margin-top:.25rem; }
+    .metric { background:#272f70; border:1px solid rgba(255,255,255,0.15); padding:.6rem .8rem; border-radius:8px; flex:1 1 120px; display:flex; flex-direction:column; gap:.2rem; font-family:'Tomorrow',sans-serif; }
+    .metric span.value { font-size:1.15rem; font-weight:600; }
+    .idle-warn { color:var(--danger); font-weight:600; }
+    .badge { display:inline-block; background:#272f70; padding:.25rem .5rem; margin:.2rem .3rem .2rem 0; border-radius:4px; font-size:.65rem; letter-spacing:.5px; border:1px solid rgba(255,255,255,0.2); }
+    .flex-col { display:flex; flex-direction:column; gap:.6rem; }
+    .small { font-size:.65rem; opacity:.75; }
+    .fade { opacity:.6; }
+    .cmd { font-family:monospace; font-size:.7rem; background:#161b3d; padding:.25rem .4rem; border-radius:4px; display:block; margin-bottom:.25rem; overflow-wrap:anywhere; }
+    footer { text-align:center; padding:1rem 0 2rem; font-size:.65rem; opacity:.55; }
+    @media (min-width:1400px){ main { grid-template-columns:repeat(auto-fit,minmax(420px,1fr)); } }
+  </style>
+  <script defer src="/js/i18n.js"></script>
+</head>
+<body data-page="admin">
+  <header>
+    <h1 data-i18n="title">Admin Panel</h1>
+    <div style="display:flex; gap:.75rem; align-items:center; flex-wrap:wrap;">
+      <select id="language-select">
+        <option value="english">EN</option>
+        <option value="spanish">ES</option>
+        <option value="german">DE</option>
+        <option value="french">FR</option>
+        <option value="arabic">AR</option>
+      </select>
+    </div>
+  </header>
+  <main>
+    <section class="card" id="panel-sessions">
+      <h2 data-i18n="admin.sessions.title">Active Sessions</h2>
+      <div class="metric-strip">
+        <div class="metric"><span class="value" id="metric-active">0</span><span data-i18n="admin.metrics.activeUsers" class="small">Active Users</span></div>
+        <div class="metric"><span class="value" id="metric-activities">0</span><span data-i18n="admin.metrics.distinctActivities" class="small">Distinct Activities</span></div>
+      </div>
+      <div class="scroll" style="margin-top:.7rem;">
+        <table>
+          <thead><tr><th data-i18n="admin.sessions.user">User</th><th data-i18n="admin.sessions.activity">Activity</th><th data-i18n="admin.sessions.connected">Connected</th><th data-i18n="admin.sessions.idle">Idle</th></tr></thead>
+          <tbody id="sessions-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="panel-commands">
+      <h2 data-i18n="admin.commands.title">Recent Commands</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th data-i18n="admin.commands.user">User</th><th data-i18n="admin.commands.last5">Last 5</th></tr></thead>
+          <tbody id="commands-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="panel-progress">
+      <h2 data-i18n="admin.progress.title">User Progress</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th data-i18n="admin.progress.user">User</th><th data-i18n="admin.progress.lesson">Lesson</th><th data-i18n="admin.progress.progress">Progress</th><th data-i18n="admin.progress.lastLogin">Last Login</th></tr></thead>
+          <tbody id="progress-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="panel-achievements">
+      <h2 data-i18n="admin.achievements.title">Achievements</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th data-i18n="admin.achievements.user">User</th><th data-i18n="admin.achievements.list">List</th></tr></thead>
+          <tbody id="achievements-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="panel-ipam">
+      <h2 data-i18n="ipam.title">IPAM Database</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th data-i18n="ipam.headers.clientIp">Client IP</th><th data-i18n="ipam.headers.firstName">First Name</th><th data-i18n="ipam.headers.displayName">Display Name</th><th data-i18n="ipam.headers.expires">Expires</th><th data-i18n="ipam.headers.restricted">Restricted</th></tr></thead>
+          <tbody id="ipam-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="panel-users">
+      <h2 data-i18n="users.title">Users Database</h2>
+      <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.5rem; align-items:flex-end;">
+        <div style="flex:1 1 160px;">
+          <label class="small" data-i18n="admin.filters.org">Organisation Filter</label>
+          <select id="org-filter" style="width:100%;background:#272f70;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:.35rem .4rem;border-radius:4px;">
+            <option value="" data-i18n="admin.filters.allOrgs">All Organisations</option>
+          </select>
+        </div>
+        <div style="flex:1 1 160px;">
+          <label class="small" data-i18n="admin.role.user">Role</label>
+          <select id="role-select" style="width:100%;background:#272f70;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:.35rem .4rem;border-radius:4px;">
+            <option value="user" data-i18n="admin.role.user">User</option>
+            <option value="orgadmin" data-i18n="admin.role.orgadmin">Org Admin</option>
+            <option value="admin" data-i18n="admin.role.admin">Admin</option>
+          </select>
+        </div>
+        <div style="flex:1 1 160px;">
+          <label class="small" data-i18n="admin.role.target">Target User</label>
+          <input id="role-target" type="text" placeholder="username or email" style="width:100%;background:#272f70;color:#fff;border:1px solid rgba(255,255,255,0.25);padding:.4rem;border-radius:4px;" />
+        </div>
+        <button id="apply-role" style="align-self:flex-end;background:#313c8c;border:1px solid rgba(255,255,255,0.25);color:#fff;padding:.55rem .9rem;border-radius:6px;font-family:'Tomorrow',sans-serif;cursor:pointer;font-size:.7rem;letter-spacing:.5px;" data-i18n="admin.role.apply">Apply Role</button>
+        <div id="role-msg" class="small" style="min-width:140px;max-width:260px;"></div>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th data-i18n="users.headers.name">Name</th><th data-i18n="users.headers.email">Email</th><th data-i18n="users.headers.org">Organisation</th><th data-i18n="users.headers.userType">User Type</th><th data-i18n="users.headers.id">_id</th></tr></thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="card" id="panel-organisations">
+      <h2 data-i18n="admin.orgs.title">Organisations</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th data-i18n="admin.orgs.name">Name</th><th data-i18n="admin.orgs.users">Users</th><th data-i18n="admin.orgs.admins">Org Admins</th></tr></thead>
+          <tbody id="orgs-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <footer>&copy; <span id="year"></span> BlockBash</footer>
+  <script defer>
+    const fmtMs = ms => {
+      if(ms < 2000) return ms + 'ms';
+      const s = Math.floor(ms/1000); if(s < 60) return s + 's';
+      const m = Math.floor(s/60); if(m < 60) return m + 'm';
+      const h = Math.floor(m/60); if(h < 24) return h + 'h';
+      const d = Math.floor(h/24); return d + 'd';
+    };
+    function fetchJSON(url){ return fetch(url).then(r=>r.json()).catch(e=>{ console.warn('Fetch failed', url, e); return []; }); }
+    async function refreshSessions(){
+      const data = await fetchJSON('/admin/active_sessions');
+      const tbody = document.getElementById('sessions-body');
+      tbody.innerHTML = '';
+      const activities = new Set();
+      const now = Date.now();
+      data.forEach(s => { activities.add(s.currentActivity || ''); });
+      document.getElementById('metric-active').textContent = data.length;
+      document.getElementById('metric-activities').textContent = [...activities].filter(a=>a).length;
+      data.forEach(s => {
+        const tr = document.createElement('tr');
+        const idleMs = now - s.lastSeen;
+        tr.innerHTML = `<td>${s.username}</td><td>${s.currentActivity||''}</td><td>${fmtMs(now - s.since)}</td><td class="${idleMs>300000?'idle-warn':''}">${fmtMs(idleMs)}</td>`;
+        tbody.appendChild(tr);
+      });
+  if(!tbody.children.length){ tbody.innerHTML = '<tr><td colspan="4">&nbsp;</td></tr>'; }
+    }
+    async function refreshCommands(){
+      const data = await fetchJSON('/admin/recent_commands');
+      const tbody = document.getElementById('commands-body');
+      tbody.innerHTML='';
+      Object.entries(data).forEach(([user, list])=>{
+        const tr = document.createElement('tr');
+        const cmds = (list||[]).slice().reverse().map(c=>`<span class='cmd' title='${new Date(c.ts).toLocaleString()}'>${c.cmd}</span>`).join('');
+        tr.innerHTML = `<td>${user}</td><td>${cmds||''}</td>`;
+        tbody.appendChild(tr);
+      });
+  if(!tbody.children.length){ tbody.innerHTML = '<tr><td colspan="2">&nbsp;</td></tr>'; }
+    }
+    async function refreshProgress(){
+      const data = await fetchJSON('/admin/user_progress');
+      const tbody = document.getElementById('progress-body');
+      tbody.innerHTML='';
+      data.forEach(r => {
+        let progress = r.progress; try { if(typeof progress === 'string') progress = JSON.parse(progress); } catch {}
+        const pct = progress && progress.total ? Math.round(((progress.completed||0)/progress.total)*100) + '%' : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.name||r.email||''}</td><td>${r.lesson||''}</td><td>${pct}</td><td>${r.login?new Date(r.login).toLocaleString():''}</td>`;
+        tbody.appendChild(tr);
+      });
+  if(!tbody.children.length){ tbody.innerHTML = '<tr><td colspan="4">&nbsp;</td></tr>'; }
+    }
+    async function refreshAchievements(){
+      const data = await fetchJSON('/admin/achievements');
+      const tbody = document.getElementById('achievements-body');
+      tbody.innerHTML='';
+      data.forEach(r => {
+        let list = []; try { if(typeof r.achievements === 'string') list = JSON.parse(r.achievements||'[]'); else list = r.achievements||[]; } catch {}
+        const badges = list.map(a=>`<span class='badge'>${a.title||a}</span>`).join('');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.name||''}</td><td>${badges}</td>`;
+        tbody.appendChild(tr);
+      });
+  if(!tbody.children.length){ tbody.innerHTML = '<tr><td colspan="2">&nbsp;</td></tr>'; }
+    }
+    async function refreshIpam(){
+      const data = await fetchJSON('/admin/ipam');
+      const body = document.getElementById('ipam-table-body');
+      body.innerHTML='';
+      Object.entries(data||{}).forEach(([ip, details])=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${ip}</td><td>${details.name||''}</td><td>${details.display||''}</td><td>${details.expires===-1?(window.__i18nMap&&window.__i18nMap['ipam.expires.never']||'Never'):new Date(details.expires).toLocaleString()}</td><td>${details.restricted}</td>`;
+        body.appendChild(tr);
+      });
+    }
+    async function refreshUsers(){
+      const orgSel = document.getElementById('org-filter');
+      const orgVal = orgSel && orgSel.value ? `?organisation=${encodeURIComponent(orgSel.value)}` : '';
+      const users = await fetchJSON('/admin/users'+orgVal);
+      const body = document.getElementById('users-table-body');
+      body.innerHTML='';
+      users.forEach(user=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${user.name||''}</td><td>${user.email||''}</td><td>${user.organisation||''}</td><td>${user.userType||''}</td><td>${user._id||''}</td>`;
+        body.appendChild(tr);
+      });
+  if(!body.children.length){ body.innerHTML = '<tr><td colspan="5">&nbsp;</td></tr>'; }
+    }
+    async function refreshOrgs(){
+      const data = await fetchJSON('/admin/organisations');
+      const body = document.getElementById('orgs-body');
+      const filter = document.getElementById('org-filter');
+      body.innerHTML='';
+      const existing = new Set(['']);
+      data.forEach(o=>{ existing.add(o.organisation); const tr=document.createElement('tr'); tr.innerHTML=`<td>${o.organisation}</td><td>${o.userCount}</td><td>${o.orgAdmins}</td>`; body.appendChild(tr); });
+      // Rebuild org filter options (preserve selection)
+      if(filter){
+        const current = filter.value;
+        filter.innerHTML = `<option value="" data-i18n="admin.filters.allOrgs">All Organisations</option>` + [...existing].filter(v=>v).sort().map(v=>`<option value="${v}">${v}</option>`).join('');
+        if(existing.has(current)) filter.value = current; else filter.value='';
+      }
+  if(!body.children.length){ body.innerHTML = '<tr><td colspan="3">&nbsp;</td></tr>'; }
+    }
+    async function applyRole(){
+      const target = document.getElementById('role-target').value.trim();
+      const role = document.getElementById('role-select').value;
+      const msgEl = document.getElementById('role-msg');
+      if(!target){ msgEl.textContent='No target'; return; }
+      msgEl.textContent='...';
+      try {
+        const r = await fetch('/admin/users/role', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ target, role }) });
+        const j = await r.json();
+        if(r.ok && j.ok){ msgEl.style.color='#3fb950'; msgEl.textContent='Updated'; refreshUsers(); }
+        else { msgEl.style.color='#ff5f56'; msgEl.textContent=j.error||'Error'; }
+      } catch(e){ msgEl.style.color='#ff5f56'; msgEl.textContent='Network'; }
+      setTimeout(()=>{ msgEl.textContent=''; }, 4000);
+    }
+    document.getElementById('apply-role').addEventListener('click', applyRole);
+    document.getElementById('org-filter').addEventListener('change', ()=>{ refreshUsers(); });
+    function cycle(){ refreshSessions(); refreshCommands(); refreshProgress(); refreshAchievements(); refreshIpam(); refreshUsers(); }
+    document.getElementById('year').textContent = new Date().getFullYear();
+  cycle(); refreshOrgs();
+    setInterval(refreshSessions, 5000);
+    setInterval(refreshCommands, 5000);
+    setInterval(refreshProgress, 15000);
+    setInterval(refreshAchievements, 20000);
+    setInterval(refreshIpam, 10000);
+  setInterval(refreshUsers, 15000);
+  setInterval(refreshOrgs, 20000);
+  </script>
+  <script defer src="/js/i18n.js"></script>
+</body>
+</html>

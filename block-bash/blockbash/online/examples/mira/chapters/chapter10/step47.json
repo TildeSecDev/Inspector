@@ -1,0 +1,19 @@
+{
+  "stepNumber": 47,
+  "title": "Hash Dump Safeguard",
+  "description": "Password hashes were staged for cracking.<br><br><b>Objective:</b> Delete unauthorized hash dumps and enforce strict file permissions.",
+  "dialogue": [
+    "Mira: \"We need to enforce hash encryption and access control.\"",
+    "Mira: \"Can you help me delete unauthorized dumps and lock down permissions?\""
+  ],
+  "hints": [
+    "Look for /etc/shadow dumps.",
+    "Use chmod and chown."
+  ],
+  "validation": {
+    "command": "chmod",
+    "type": "contains"
+  },
+  "achievement": "Hash Harvester",
+  "skills_gained": ["file permission management", "access auditing"]
+}

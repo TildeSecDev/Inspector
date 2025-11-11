@@ -1,0 +1,108 @@
+/* Achievements Dropdown */
+#achievements-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    min-width: 320px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    z-index: 1000;
+    padding: 16px 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+#achievements-dropdown.show {
+    display: block;
+}
+
+#achievements-dropdown .achievement-item {
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 10px 0;
+    opacity: 1;
+    background: #f8f9fa;
+    border-radius: 6px;
+    color: #222;
+    font-size: 1.08em;
+    font-weight: 500;
+}
+
+#achievements-dropdown .achievement-item.locked {
+    opacity: 0.5;
+    filter: grayscale(1);
+    background: #e0e0e0;
+    color: #888;
+}
+
+#achievements-dropdown .achievement-item:hover {
+    background: #e6f7ff;
+}
+
+#achievements-dropdown .achievement-item img {
+    background: #fff;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+#achievements-dropdown .achievement-item div {
+    background: none;
+    color: inherit;
+    font-size: 1em;
+    line-height: 1.3;
+}
+
+/* Achievements Pop-up */
+.achievement-popup {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: #222;
+    color: #fff;
+    padding: 24px 36px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s, transform 0.4s;
+    transform: translateY(40px);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 340px;
+}
+
+.achievement-popup.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.achievement-popup img {
+    margin-bottom: 12px;
+    background: #fff;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+.achievement-popup button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5em;
+    cursor: pointer;
+    align-self: flex-end;
+}

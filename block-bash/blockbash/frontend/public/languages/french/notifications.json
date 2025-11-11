@@ -1,0 +1,10 @@
+{
+  "notifications.loading": "Chargement...",
+  "notifications.none": "Aucune notification",
+  "notifications.failed": "Échec du chargement des notifications",
+  "notifications.friend.clickInstruction": "cliquer pour accepter ou refuser",
+  "notifications.delete": "Supprimer",
+  "notifications.accept": "Accepter",
+  "notifications.deny": "Refuser",
+  "notifications.close": "Fermer"
+}

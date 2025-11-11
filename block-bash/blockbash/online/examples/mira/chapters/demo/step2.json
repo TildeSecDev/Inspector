@@ -1,0 +1,13 @@
+{
+  "step": 2,
+  "dialogue": "Mira: \"Good. He’s online. Now drag <span class='demo-glossary' data-gloss='nmap'>🟩 nmap</span> into the workspace. Use the command to scan for open ports and his <span class='demo-glossary' data-gloss='hostname'>hostname</span>. We need to find out how we can connect to his machine and what he’s running.\"",
+  "miraFrame": 1,
+  "terminal": "man nmap",
+  "showTable": false,
+  "showMusic": false,
+  "hint": "Hint: Try <code>nmap -sV 10.0.0.42</code>",
+  "glossary": {
+    "nmap": "Nmap (Network Mapper) is a tool used to discover hosts and services on a network by sending packets and analyzing responses.",
+    "hostname": "The network name assigned to a device – in this case, ‘Mr E’."
+  }
+}

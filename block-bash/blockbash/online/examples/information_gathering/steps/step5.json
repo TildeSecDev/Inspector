@@ -1,0 +1,13 @@
+{
+  "stepNumber": 5,
+  "title": "DNS Enumeration",
+  "description": "Enumerate DNS records for a domain.",
+  "hints": [
+    "Query for A, MX, TXT, and CNAME records.",
+    "Use zone transfer if possible."
+  ],
+  "blocks": ["Set Domain", "Select Record Types", "Start Enumeration"],
+  "achievement": "DNS Detective",
+  "skill": "DNS Analysis",
+  "points": 10
+}

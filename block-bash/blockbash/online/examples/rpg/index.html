@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cave Bash RPG</title>
+  <link rel="stylesheet" href="/ws/workshop_asset?lesson_id=rpg&file=style.css">
+  <style>
+    /* Example of correct CSS syntax */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+    #left-sidebar {
+      width: 220px;
+      background: #f0f0f0;
+      padding: 16px;
+      box-sizing: border-box;
+      border-right: 1px solid #ccc;
+      min-height: 100vh;
+    }
+    #main-content {
+      flex: 1;
+      padding: 24px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    #right-sidebar {
+      width: 320px;
+      background: #f8f8f8;
+      padding: 16px;
+      box-sizing: border-box;
+      border-left: 1px solid #ccc;
+      min-height: 100vh;
+    }
+    .workshop-root {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .workshop-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/assets/workshop/backgrounds/bg_cavestory.png') center center / cover no-repeat;
+      z-index: 0;
+    }
+    .workshop-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: none !important;
+      overflow: hidden !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="workshop-root">
+    <div class="workshop-bg"></div>
+    <div class="workshop-content">
+      <div class="rpg-panel">
+        <!-- Debug overlay widget (bottom-right) -->
+        <style>
+          /* Debug overlay styles */
+          .rpg-debug-overlay {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #222; /* matches log background */
+            color: #ffe066;   /* matches log text */
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            transition: width 200ms ease, height 200ms ease, border-radius 200ms ease, background 200ms ease;
+            overflow: hidden;
+          }
+          .rpg-debug-overlay .rpg-debug-toggle {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            pointer-events: auto;
+          }
+          .rpg-debug-overlay .rpg-debug-panel {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            box-sizing: border-box;
+          }
+          .rpg-debug-overlay.open {
+            width: 340px;
+            height: 260px;
+            border-radius: 16px;
+            background: #1b1b1b;
+          }
+          .rpg-debug-overlay.open .rpg-debug-toggle { display: none; }
+          .rpg-debug-overlay.open .rpg-debug-panel { display: flex; }
+          .rpg-debug-banner {
+            background: #ffecb3; /* existing banner scheme */
+            color: #333;
+            border: 1px solid #fbc02d;
+            border-radius: 8px;
+            font-size: 12px;
+            padding: 6px 8px;
+            opacity: 1;
+          }
+          .rpg-debug-log {
+            background: #222;
+            color: #ffe066;
+            font-size: 12px;
+            border-radius: 8px;
+            padding: 6px 8px;
+            height: 100%;
+            overflow: auto;
+          }
+        </style>
+        <div id="rpg-debug-overlay" class="rpg-debug-overlay collapsed" aria-live="polite">
+          <button class="rpg-debug-toggle" type="button">./debug</button>
+          <div class="rpg-debug-panel">
+            <div id="rpg-debug-banner" class="rpg-debug-banner">[DEBUG] RPG Panel Loaded - Waiting for logic.js and validate.js...</div>
+            <div id="rpg-debug-log" class="rpg-debug-log"></div>
+          </div>
+        </div>
+        <!-- .rpg-topbar (logo/title) will be dynamically inserted here by JS after validation -->
+        <div class="rpg-bg"></div>
+        <!-- Laptop image centered above the menu, overlaying the cave background -->
+        <img src="/assets/workshop/laptop.png" alt="Laptop" id="rpg-laptop-bg" class="rpg-laptop"
+             onload="console.log('Loaded laptop.png from /assets/workshop/laptop.png')"
+             onerror="console.log('Failed to load laptop.png from /assets/workshop/laptop.png')">
+        <img src="/assets/workshop/avatars/mira/mira.png" alt="Mira" id="mira-sprite" style="display:none"
+             onload="console.log('Loaded mira.png from /assets/workshop/avatars/mira/mira.png')"
+             onerror="console.log('Failed to load mira.png from /assets/workshop/avatars/mira/mira.png')">
+        <div class="rpg-dialogue" id="rpg-dialogue">
+          <div class="rpg-dialogue-banner">
+            <p id="rpg-text">
+              You wake up in a dimly lit cave. A terminal glows nearby.<br><br><b>Objective:</b> Type <code>ls</code> in the terminal to look around.
+            </p>
+          </div>
+          <div class="rpg-hint-banner" id="rpg-hints" style="display:none;">
+            <span>Hint: Try <code>ls</code> in the terminal below.</span>
+          </div>
+          <script>
+            // DEBUG: Mark when logic.js is loaded
+            window.addEventListener('logicjs-loaded', function() {
+              const el = document.getElementById('rpg-debug-banner'); if (el) el.textContent = '[DEBUG] logic.js loaded and executed.';
+              console.log('[DEBUG] logic.js loaded and executed.');
+            });
+            // DEBUG: Mark when validate.js is loaded
+            window.addEventListener('validatejs-loaded', function() {
+              const el = document.getElementById('rpg-debug-banner'); if (el) el.textContent = '[DEBUG] validate.js loaded and executed.';
+              console.log('[DEBUG] validate.js loaded and executed.');
+            });
+            // DEBUG: Mark when RPG menu render event is received
+            window.addEventListener('rpg-menu-rendered', function() {
+              const el = document.getElementById('rpg-debug-banner'); if (el) el.textContent = '[DEBUG] RPG menu rendered!';
+              console.log('[DEBUG] RPG menu rendered!');
+            });
+            // DEBUG: Mark errors
+            window.addEventListener('rpg-error', function(e) {
+              const el = document.getElementById('rpg-debug-banner'); if (el) el.textContent = '[ERROR] ' + e.detail;
+              console.error('[ERROR]', e.detail);
+            });
+            // Toggle handler for the debug overlay widget
+            document.addEventListener('DOMContentLoaded', function() {
+              const overlay = document.getElementById('rpg-debug-overlay');
+              const toggle = overlay && overlay.querySelector('.rpg-debug-toggle');
+              if (toggle && overlay) {
+                toggle.addEventListener('click', () => {
+                  overlay.classList.toggle('open');
+                  overlay.classList.toggle('collapsed');
+                });
+              }
+            });
+          </script>
+          <script src="logic.js"
+            onload="console.log('[DEBUG] logic.js script tag loaded');window.dispatchEvent(new Event('logicjs-loaded'))"
+            onerror="console.error('[ERROR] Failed to load logic.js');window.dispatchEvent(new CustomEvent('rpg-error',{detail:'Failed to load logic.js'}))"></script>
+          <script src="validate.js"
+            onload="console.log('[DEBUG] validate.js script tag loaded');window.dispatchEvent(new Event('validatejs-loaded'))"
+            onerror="console.error('[ERROR] Failed to load validate.js');window.dispatchEvent(new CustomEvent('rpg-error',{detail:'Failed to load validate.js'}))"></script>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Example of correct JS syntax:
+    document.addEventListener('DOMContentLoaded', function() {
+      // Your JS code here
+    });
+
+    // Ensure lesson_id cookie is set for RPG validation
+    document.cookie = "lesson_id=rpg; path=/";
+
+    // Sprite map handling for mira_6.png
+    function setMiraSprite(index) {
+      // index: 0-5 for each sprite in the horizontal sprite map
+      const mira = document.getElementById('mira-sprite');
+      mira.style.display = 'block';
+      mira.style.width = '96px'; // assuming each sprite is 96px wide
+      mira.style.height = '128px'; // assuming heightite is 96px wide
+      mira.style.objectFit = 'none'; // assuming height
+      mira.style.objectPosition = `-${index * 96}px 0`;
+    }
+    // Example: setMiraSprite(0) to show the first sprite
+  </script>
+</body>
+</html>

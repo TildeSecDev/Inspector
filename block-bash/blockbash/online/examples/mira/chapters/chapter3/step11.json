@@ -1,0 +1,21 @@
+{
+  "stepNumber": 11,
+  "title": "Automated Portal Scan",
+  "description": "The captive portal is like the café's front door—it's supposed to keep out the bad guys, but what if it has secret backdoors or weak locks? Time to unleash our vulnerability-hunting super scanner and patch up any holes before the digital burglars strike!<br><br><b>Objective:</b> Transform into a vulnerability superhero! Fire up Nessus to scan the portal server, uncover hidden weaknesses, and apply patches like a cybersecurity doctor.",
+  "dialogue": [
+    "Mira: \"Okay, the Wi-Fi's clean, but I smell trouble—the captive portal might have some sneaky vulnerabilities hiding in the code!\"",
+    "Mira: \"Let's scan it with our fancy tools and patch 'em up before they cause chaos. You're the vuln-hunting hero—ready to save the day?\"",
+    "Mira: \"Imagine finding a secret trapdoor in the portal—exciting, right? Let's hunt!\""
+  ],
+  "hints": [
+    "Credentialed scans are like having a VIP pass—they get you deeper access for better results!",
+    "Launch Nessus and let it crawl through the portal like a digital bloodhound sniffing for weaknesses.",
+    "Don't forget to review the scan results and prioritize the critical fixes—patch 'em quick!"
+  ],
+  "validation": {
+    "command": "Nessus",
+    "type": "contains"
+  },
+  "achievement": "Vuln Hunter",
+  "skills_gained": ["authenticated scanning", "remediation planning"]
+}

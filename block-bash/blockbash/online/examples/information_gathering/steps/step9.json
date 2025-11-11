@@ -1,0 +1,13 @@
+{
+  "stepNumber": 9,
+  "title": "Traceroute Mapping",
+  "description": "Map the route packets take to a remote host.",
+  "hints": [
+    "Use traceroute to identify network hops.",
+    "Analyze each hop's response time."
+  ],
+  "blocks": ["Set Target Host", "Start Traceroute", "Review Path"],
+  "achievement": "Route Mapper",
+  "skill": "Network Path Analysis",
+  "points": 10
+}
