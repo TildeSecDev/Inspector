@@ -97,6 +97,18 @@ export function runMigrations(db: Database.Database): void {
         CREATE INDEX IF NOT EXISTS idx_reports_run_id ON reports(run_id);
       `,
     },
+    {
+      name: '002_add_updated_at_columns',
+      sql: `
+        ALTER TABLE scenarios ADD COLUMN updated_at TEXT;
+        ALTER TABLE runs ADD COLUMN updated_at TEXT;
+        ALTER TABLE reports ADD COLUMN updated_at TEXT;
+
+        UPDATE scenarios SET updated_at = created_at WHERE updated_at IS NULL;
+        UPDATE runs SET updated_at = COALESCE(finished_at, started_at) WHERE updated_at IS NULL;
+        UPDATE reports SET updated_at = created_at WHERE updated_at IS NULL;
+      `,
+    },
   ];
 
   const appliedMigrations = db

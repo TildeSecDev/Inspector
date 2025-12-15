@@ -155,6 +155,8 @@ export const ScenarioSchema = z.object({
   attackEvents: z.array(AttackEventSchema).default([]),
   duration: z.number().default(60000), // simulation duration in ms
   options: z.record(z.unknown()).optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 export type Scenario = z.infer<typeof ScenarioSchema>;
@@ -229,6 +231,7 @@ export const RunResultSchema = z.object({
       impactScore: z.number(),
     })
     .optional(),
+  updatedAt: z.string().optional(),
 });
 
 export type RunResult = z.infer<typeof RunResultSchema>;
@@ -264,6 +267,7 @@ export const ReportSchema = z.object({
   path: z.string(),
   createdAt: z.string(),
   metadata: z.record(z.unknown()).optional(),
+  updatedAt: z.string().optional(),
 });
 
 export type Report = z.infer<typeof ReportSchema>;

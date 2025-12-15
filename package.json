@@ -8,10 +8,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=apps/desktop",
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
+    "dev": "npm run dev -w @inspectortwin/desktop",
+    "dev:renderer": "npm run dev -w @inspectortwin/renderer",
+    "dev:desktop": "npm run dev -w @inspectortwin/desktop",
+    "build": "npm run build -ws --if-present",
+    "test": "npm run test -ws --if-present",
+    "test:smoke": "playwright test",
+    "lint": "npm run lint -ws --if-present",
+    "seed": "npm run build -ws --if-present && node scripts/seed.mjs",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/dist packages/*/dist"
   },
   "devDependencies": {

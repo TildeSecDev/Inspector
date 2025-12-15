@@ -176,7 +176,7 @@ export class TopologyRepository {
 export class ScenarioRepository {
   constructor(private db: Database.Database) {}
 
-  create(data: Omit<Scenario, 'id'> & { projectId: string }): Scenario & { projectId: string } {
+  create(data: Omit<Scenario, 'id' | 'createdAt' | 'updatedAt'> & { projectId: string }): Scenario & { projectId: string } {
     const now = new Date().toISOString();
     const scenario: Scenario = {
       id: randomUUID(),
@@ -188,15 +188,17 @@ export class ScenarioRepository {
       attackEvents: data.attackEvents,
       duration: data.duration,
       options: data.options,
+    createdAt: now,
+    updatedAt: now,
     };
 
     ScenarioSchema.parse(scenario);
 
     this.db
       .prepare(
-        'INSERT INTO scenarios (id, project_id, topology_id, name, scenario_json, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO scenarios (id, project_id, topology_id, name, scenario_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
       )
-      .run(scenario.id, data.projectId, scenario.topologyId, scenario.name, JSON.stringify(scenario), now);
+      .run(scenario.id, data.projectId, scenario.topologyId, scenario.name, JSON.stringify(scenario), now, now);
 
     return { ...scenario, projectId: data.projectId };
   }
@@ -206,7 +208,10 @@ export class ScenarioRepository {
     if (!row) return undefined;
 
     const scenario = JSON.parse(row.scenario_json);
-    return { ...ScenarioSchema.parse(scenario), projectId: row.project_id };
+    return {
+      ...ScenarioSchema.parse({ ...scenario, createdAt: scenario.createdAt || row.created_at, updatedAt: scenario.updatedAt || row.updated_at }),
+      projectId: row.project_id,
+    };
   }
 
   findByProjectId(projectId: string): (Scenario & { projectId: string })[] {
@@ -216,7 +221,10 @@ export class ScenarioRepository {
 
     return rows.map((row) => {
       const scenario = JSON.parse(row.scenario_json);
-      return { ...ScenarioSchema.parse(scenario), projectId: row.project_id };
+      return {
+        ...ScenarioSchema.parse({ ...scenario, createdAt: scenario.createdAt || row.created_at, updatedAt: scenario.updatedAt || row.updated_at }),
+        projectId: row.project_id,
+      };
     });
   }
 
@@ -232,13 +240,14 @@ export class RunRepository {
     const run: RunResult = {
       id: randomUUID(),
       ...data,
+      updatedAt: new Date().toISOString(),
     };
 
     RunResultSchema.parse(run);
 
     this.db
       .prepare(
-        'INSERT INTO runs (id, scenario_id, started_at, finished_at, results_json, status) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO runs (id, scenario_id, started_at, finished_at, results_json, status, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
       )
       .run(
         run.id,
@@ -246,7 +255,8 @@ export class RunRepository {
         run.startedAt,
         run.finishedAt || null,
         JSON.stringify(run),
-        run.status
+        run.status,
+        run.updatedAt
       );
 
     return run;
@@ -271,12 +281,12 @@ export class RunRepository {
     const existing = this.findById(id);
     if (!existing) throw new Error(`Run ${id} not found`);
 
-    const updated = { ...existing, ...data };
+    const updated = { ...existing, ...data, updatedAt: new Date().toISOString() };
     RunResultSchema.parse(updated);
 
     this.db
-      .prepare('UPDATE runs SET finished_at = ?, results_json = ?, status = ? WHERE id = ?')
-      .run(updated.finishedAt || null, JSON.stringify(updated), updated.status, id);
+      .prepare('UPDATE runs SET finished_at = ?, results_json = ?, status = ?, updated_at = ? WHERE id = ?')
+      .run(updated.finishedAt || null, JSON.stringify(updated), updated.status, updated.updatedAt, id);
 
     return updated;
   }
@@ -365,18 +375,20 @@ export class ReportRepository {
       id: randomUUID(),
       ...data,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     ReportSchema.parse(report);
 
     this.db
-      .prepare('INSERT INTO reports (id, run_id, format, path, created_at, metadata_json) VALUES (?, ?, ?, ?, ?, ?)')
+      .prepare('INSERT INTO reports (id, run_id, format, path, created_at, updated_at, metadata_json) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run(
         report.id,
         report.runId,
         report.format,
         report.path,
         report.createdAt,
+        report.updatedAt,
         report.metadata ? JSON.stringify(report.metadata) : null
       );
 
@@ -393,6 +405,7 @@ export class ReportRepository {
       format: row.format,
       path: row.path,
       createdAt: row.created_at,
+      updatedAt: row.updated_at,
       metadata: row.metadata_json ? JSON.parse(row.metadata_json) : undefined,
     });
   }
@@ -409,6 +422,7 @@ export class ReportRepository {
         format: row.format,
         path: row.path,
         createdAt: row.created_at,
+        updatedAt: row.updated_at,
         metadata: row.metadata_json ? JSON.parse(row.metadata_json) : undefined,
       })
     );

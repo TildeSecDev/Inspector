@@ -8,7 +8,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./src/sample-data.js": "./src/sample-data.ts"
   },
   "scripts": {
     "build": "tsc",

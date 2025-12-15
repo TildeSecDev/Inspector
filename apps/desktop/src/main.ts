@@ -16,6 +16,13 @@ const store = new Store();
 let mainWindow: BrowserWindow | null = null;
 let projectStore: ProjectStore | null = null;
 
+const ensureAuthorized = () => {
+  const allowed = store.get('roeAccepted') === true;
+  if (!allowed) {
+    throw new Error('Authorized local testing has not been acknowledged. Please accept the Rules of Engagement.');
+  }
+};
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,
@@ -155,6 +162,7 @@ ipcMain.handle('scenario:delete', async (_, id) => {
 
 // Simulation operations
 ipcMain.handle('simulation:run', async (_, graph, scenario, options) => {
+  ensureAuthorized();
   const engine = new SimulationEngine();
   const result = await engine.simulate(graph, scenario, options);
   
@@ -188,6 +196,7 @@ ipcMain.handle('findings:getByRunId', async (_, runId) => {
 
 // Report operations
 ipcMain.handle('report:generate', async (_, reportData, options) => {
+  ensureAuthorized();
   const generator = new ReportGenerator();
   const outputPath = join(app.getPath('documents'), 'InspectorTwin', options.outputPath);
   
@@ -216,6 +225,7 @@ ipcMain.handle('report:getByRunId', async (_, runId) => {
 let labRuntime: LabRuntime | null = null;
 
 ipcMain.handle('lab:start', async (_, config) => {
+  ensureAuthorized();
   // Validate config for safety
   const validation = LabRuntime.validateConfig(config);
   if (!validation.valid) {
@@ -231,6 +241,7 @@ ipcMain.handle('lab:start', async (_, config) => {
 });
 
 ipcMain.handle('lab:stop', async () => {
+  ensureAuthorized();
   if (labRuntime) {
     await labRuntime.stopLab();
     labRuntime = null;
@@ -239,6 +250,7 @@ ipcMain.handle('lab:stop', async () => {
 });
 
 ipcMain.handle('lab:getStatus', async () => {
+  ensureAuthorized();
   if (!labRuntime) {
     return { running: false, services: [] };
   }

@@ -136,13 +136,35 @@ export class LabRuntime {
   static validateConfig(config: LabConfig): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
+    const isAllowedHost = (value: string) => {
+      // Allow localhost/127.0.0.1 or RFC1918 192.168.x.x
+      if (value === 'localhost' || value === '127.0.0.1') return true;
+      const m = value.match(/^192\.168\.(\d{1,3})\.(\d{1,3})$/);
+      if (!m) return false;
+      const [a, b] = [Number(m[1]), Number(m[2])];
+      return a >= 0 && a <= 255 && b >= 0 && b <= 255;
+    };
+
     for (const service of config.services) {
       // Ensure only localhost bindings
       if (service.ports) {
         for (const hostPort of Object.values(service.ports)) {
-          // Port should be a number or should not contain external IPs
-          if (hostPort.includes('.') && !hostPort.startsWith('127.')) {
-            errors.push(`Service ${service.name}: External IP binding not allowed. Use localhost only.`);
+          // If user provided hostPort like "127.0.0.1:8000" or "192.168.x.x:8000", validate host; otherwise treat as port number
+          const parts = hostPort.split(':');
+          if (parts.length === 2) {
+            const [host, port] = parts;
+            if (!isAllowedHost(host)) {
+              errors.push(`Service ${service.name}: External IP binding not allowed (${host}). Use localhost/127.0.0.1/192.168.x.x only.`);
+            }
+            if (Number.isNaN(Number(port))) {
+              errors.push(`Service ${service.name}: Host port must be numeric (${hostPort}).`);
+            }
+          } else if (parts.length === 1) {
+            if (Number.isNaN(Number(parts[0]))) {
+              errors.push(`Service ${service.name}: Host port must be numeric (${hostPort}).`);
+            }
+          } else {
+            errors.push(`Service ${service.name}: Invalid port mapping format (${hostPort}).`);
           }
         }
       }

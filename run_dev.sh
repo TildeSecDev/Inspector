@@ -30,16 +30,11 @@ else
     echo "✅ Dependencies already installed"
 fi
 
-# Build packages
-echo "🔨 Building packages..."
-npm run build --workspaces --if-present
-
-# Start the application
-echo "🎯 Starting Inspector Twin..."
+# Start the application (renderer + electron)
+echo "🎯 Starting Inspector Twin (Vite + Electron)..."
 echo ""
 echo "The application will open in a new window."
 echo "Press Ctrl+C to stop the development server."
 echo ""
 
-cd apps/desktop
 npm run dev
