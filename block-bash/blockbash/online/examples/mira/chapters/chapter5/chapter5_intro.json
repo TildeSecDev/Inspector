@@ -1,9 +1,0 @@
-{
-  "type": "chapter",
-  "chapter": 5,
-  "title": "Exploitation Tools",
-  "description": "Mira tests the network with real-world exploitation tools to find and fix weaknesses.",
-  "dialogue": [
-    "Mira: \"Let's use some advanced tools to test our defenses!\""
-  ]
-}

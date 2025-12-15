@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["ES2020"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/project-store" },
+    { "path": "../../packages/core-sim" },
+    { "path": "../../packages/report-kit" },
+    { "path": "../../packages/lab-runtime" }
+  ]
+}

@@ -1,9 +1,0 @@
-{
-  "type": "chapter",
-  "chapter": 3,
-  "title": "Vulnerability Analysis",
-  "description": "Mira suspects there are more vulnerabilities in the system. It's time to scan and patch!",
-  "dialogue": [
-    "Mira: \"Let's hunt for vulnerabilities and patch them before attackers do!\""
-  ]
-}

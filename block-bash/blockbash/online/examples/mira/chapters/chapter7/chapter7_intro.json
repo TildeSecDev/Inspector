@@ -1,9 +1,0 @@
-{
-  "type": "chapter",
-  "chapter": 7,
-  "title": "Reverse Engineering",
-  "description": "Mira investigates firmware and binaries for hidden threats.",
-  "dialogue": [
-    "Mira: \"Let's dig into the code and see what secrets are hidden inside!\""
-  ]
-}

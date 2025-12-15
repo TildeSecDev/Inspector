@@ -1,7 +1,0 @@
-bcrypt==5.1.1
-Flask==1.1.2  
-http-errors==1.6.3  
-jinja2==2.11.3  
-jszip==3.10.1 
-mongoose==8.14.1  
-sqlite3==5.1.7  # sqlite3 is already built into Python, so no need to add it 

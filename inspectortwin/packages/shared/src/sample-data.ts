@@ -1,0 +1,335 @@
+// Sample project data for Inspector Twin
+// This file can be imported to seed the database with example projects
+
+export const sampleProjects = [
+  {
+    name: 'SME Office + Cloud App',
+    description: 'Small-medium enterprise office network with cloud application infrastructure',
+    topologies: [
+      {
+        name: 'Main Network',
+        graph: {
+          nodes: [
+            {
+              id: 'node-isp',
+              type: 'modem',
+              label: 'ISP Connection',
+              position: { x: 400, y: 50 },
+              tags: ['external'],
+              riskCriticality: 'high',
+              interfaces: [{ id: 'isp-wan', name: 'WAN', enabled: true }],
+            },
+            {
+              id: 'node-router',
+              type: 'router',
+              label: 'Office Router',
+              position: { x: 400, y: 150 },
+              tags: ['network', 'critical'],
+              riskCriticality: 'critical',
+              interfaces: [],
+            },
+            {
+              id: 'node-firewall',
+              type: 'firewall',
+              label: 'Firewall',
+              position: { x: 400, y: 250 },
+              tags: ['security', 'critical'],
+              riskCriticality: 'critical',
+              interfaces: [],
+              properties: {
+                policy: `allow tcp from Internal to WebApp port 443
+allow tcp from Internal to WebApp port 80
+deny tcp from Guest to Internal
+allow dns from Any to DNS`,
+              },
+            },
+            {
+              id: 'node-switch',
+              type: 'switch',
+              label: 'Internal Switch',
+              position: { x: 200, y: 350 },
+              tags: ['network', 'internal'],
+              riskCriticality: 'medium',
+              interfaces: [],
+            },
+            {
+              id: 'node-server',
+              type: 'server',
+              label: 'App Server',
+              position: { x: 200, y: 450 },
+              tags: ['internal', 'application'],
+              riskCriticality: 'high',
+              interfaces: [],
+              properties: { tls: true, https: true },
+            },
+            {
+              id: 'node-workstation',
+              type: 'workstation',
+              label: 'Employee Workstation',
+              position: { x: 100, y: 350 },
+              tags: ['internal', 'users'],
+              riskCriticality: 'medium',
+              interfaces: [],
+            },
+            {
+              id: 'node-guest-wifi',
+              type: 'workstation',
+              label: 'Guest WiFi',
+              position: { x: 600, y: 350 },
+              tags: ['guest', 'isolated'],
+              riskCriticality: 'low',
+              interfaces: [],
+            },
+            {
+              id: 'node-cloud',
+              type: 'cloud-service',
+              label: 'Cloud Storage',
+              position: { x: 400, y: 450 },
+              tags: ['external', 'cloud'],
+              riskCriticality: 'medium',
+              interfaces: [],
+            },
+          ],
+          links: [
+            { id: 'link-1', source: 'node-isp', target: 'node-router', type: 'wan', bandwidth: 100, latency: 20, loss: 0, jitter: 5, canFail: true, failed: false },
+            { id: 'link-2', source: 'node-router', target: 'node-firewall', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-3', source: 'node-firewall', target: 'node-switch', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-4', source: 'node-switch', target: 'node-server', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-5', source: 'node-switch', target: 'node-workstation', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-6', source: 'node-firewall', target: 'node-guest-wifi', type: 'wifi', bandwidth: 100, latency: 5, loss: 0, jitter: 2, canFail: false, failed: false },
+            { id: 'link-7', source: 'node-firewall', target: 'node-cloud', type: 'vpn', bandwidth: 100, latency: 30, loss: 0, jitter: 10, canFail: true, failed: false },
+          ],
+        },
+      },
+    ],
+    scenarios: [
+      {
+        name: 'ISP Link Failure',
+        description: 'Simulate ISP connection failure and observe impact',
+        topologyId: 'will-be-set',
+        flows: [
+          {
+            id: 'flow-1',
+            from: 'node-workstation',
+            to: 'node-cloud',
+            protocol: 'https',
+            port: 443,
+            rate: 10,
+            label: 'User accessing cloud storage',
+          },
+        ],
+        faults: [
+          {
+            id: 'fault-1',
+            type: 'link-down',
+            targetId: 'link-1',
+            startTime: 5000,
+          },
+        ],
+        attackEvents: [],
+        duration: 30000,
+      },
+      {
+        name: 'Guest Network Isolation Test',
+        description: 'Verify guest network cannot access internal resources',
+        topologyId: 'will-be-set',
+        flows: [
+          {
+            id: 'flow-1',
+            from: 'node-guest-wifi',
+            to: 'node-server',
+            protocol: 'tcp',
+            port: 80,
+            rate: 5,
+            label: 'Guest trying to reach internal server',
+          },
+        ],
+        faults: [],
+        attackEvents: [],
+        duration: 10000,
+      },
+      {
+        name: 'Attacker on Network',
+        description: 'Simulate an attacker compromising a workstation and attempting lateral movement',
+        topologyId: 'will-be-set',
+        flows: [],
+        faults: [],
+        attackEvents: [
+          {
+            id: 'attack-1',
+            type: 'phishing-compromise',
+            sourceNodeId: 'node-workstation',
+            timestamp: 2000,
+            blocked: false,
+          },
+          {
+            id: 'attack-2',
+            type: 'lateral-movement',
+            sourceNodeId: 'node-workstation',
+            targetNodeId: 'node-server',
+            timestamp: 5000,
+            blocked: false,
+          },
+          {
+            id: 'attack-3',
+            type: 'data-exfil-attempt',
+            sourceNodeId: 'node-server',
+            targetNodeId: 'node-cloud',
+            timestamp: 8000,
+            blocked: false,
+          },
+        ],
+        duration: 15000,
+      },
+    ],
+  },
+  {
+    name: 'School Lab + Guest Wi-Fi Segmentation',
+    description: 'Educational network with student lab and guest access',
+    topologies: [
+      {
+        name: 'School Network',
+        graph: {
+          nodes: [
+            {
+              id: 'node-router',
+              type: 'router',
+              label: 'School Router',
+              position: { x: 400, y: 100 },
+              tags: ['network', 'critical'],
+              riskCriticality: 'critical',
+              interfaces: [],
+            },
+            {
+              id: 'node-firewall',
+              type: 'firewall',
+              label: 'Network Firewall',
+              position: { x: 400, y: 200 },
+              tags: ['security'],
+              riskCriticality: 'high',
+              interfaces: [],
+              properties: {
+                policy: `allow tcp from Students to LabServer port 80
+allow tcp from Faculty to AdminPanel port 443
+deny tcp from Students to AdminPanel
+deny tcp from Guest to Students
+deny tcp from Guest to Faculty`,
+              },
+            },
+            {
+              id: 'node-lab-switch',
+              type: 'switch',
+              label: 'Lab Switch',
+              position: { x: 200, y: 300 },
+              tags: ['students', 'lab'],
+              riskCriticality: 'medium',
+              interfaces: [],
+            },
+            {
+              id: 'node-lab-server',
+              type: 'server',
+              label: 'Lab Server',
+              position: { x: 200, y: 400 },
+              tags: ['students'],
+              riskCriticality: 'medium',
+              interfaces: [],
+            },
+            {
+              id: 'node-admin-panel',
+              type: 'server',
+              label: 'Admin Panel',
+              position: { x: 600, y: 400 },
+              tags: ['faculty', 'admin'],
+              role: 'admin',
+              riskCriticality: 'critical',
+              interfaces: [],
+            },
+            {
+              id: 'node-guest-wifi',
+              type: 'workstation',
+              label: 'Guest Wi-Fi',
+              position: { x: 400, y: 400 },
+              tags: ['guest'],
+              riskCriticality: 'low',
+              interfaces: [],
+            },
+          ],
+          links: [
+            { id: 'link-1', source: 'node-router', target: 'node-firewall', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-2', source: 'node-firewall', target: 'node-lab-switch', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-3', source: 'node-lab-switch', target: 'node-lab-server', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-4', source: 'node-firewall', target: 'node-admin-panel', type: 'ethernet', bandwidth: 1000, latency: 1, loss: 0, jitter: 0, canFail: false, failed: false },
+            { id: 'link-5', source: 'node-firewall', target: 'node-guest-wifi', type: 'wifi', bandwidth: 100, latency: 5, loss: 0, jitter: 2, canFail: false, failed: false },
+          ],
+        },
+      },
+    ],
+    scenarios: [
+      {
+        name: 'Student Accessing Admin Panel',
+        description: 'Test that students cannot access the admin panel',
+        topologyId: 'will-be-set',
+        flows: [
+          {
+            id: 'flow-1',
+            from: 'node-lab-switch',
+            to: 'node-admin-panel',
+            protocol: 'tcp',
+            port: 443,
+            rate: 5,
+            label: 'Student trying to reach admin panel',
+          },
+        ],
+        faults: [],
+        attackEvents: [],
+        duration: 10000,
+      },
+      {
+        name: 'Link Degradation',
+        description: 'Simulate network degradation on lab switch',
+        topologyId: 'will-be-set',
+        flows: [
+          {
+            id: 'flow-1',
+            from: 'node-lab-switch',
+            to: 'node-lab-server',
+            protocol: 'http',
+            port: 80,
+            rate: 20,
+            label: 'Student accessing lab server',
+          },
+        ],
+        faults: [
+          {
+            id: 'fault-1',
+            type: 'link-degraded',
+            targetId: 'link-2',
+            startTime: 3000,
+            params: { latency: 100, loss: 10 },
+          },
+        ],
+        attackEvents: [],
+        duration: 15000,
+      },
+      {
+        name: 'Credential Reuse Attack',
+        description: 'Simulate credential reuse from guest network',
+        topologyId: 'will-be-set',
+        flows: [],
+        faults: [],
+        attackEvents: [
+          {
+            id: 'attack-1',
+            type: 'credential-reuse',
+            sourceNodeId: 'node-guest-wifi',
+            targetNodeId: 'node-admin-panel',
+            timestamp: 3000,
+            blocked: true,
+            blockedBy: 'node-firewall',
+          },
+        ],
+        duration: 10000,
+      },
+    ],
+  },
+];

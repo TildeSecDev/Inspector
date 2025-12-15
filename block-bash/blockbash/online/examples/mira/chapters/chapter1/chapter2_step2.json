@@ -1,9 +1,0 @@
-{
-  "type": "chapter",
-  "chapter": 2,
-  "title": "Information Gathering",
-  "description": "After securing the wireless network, Mira needs to investigate the network for any remaining threats.",
-  "dialogue": [
-    "Mira: \"Now that Wi-Fi is safer, let's see what else is lurking on the network!\""
-  ]
-}

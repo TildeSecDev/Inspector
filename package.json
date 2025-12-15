@@ -6,6 +6,8 @@
   "scripts": {
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
+    "dev:electron": "NODE_ENV=development electron .",
+    "dev:vite": "cd inspectortwin/apps/renderer && npm run dev",
     "build:mac": "electron-builder --mac",
     "dist": "electron-builder --mac --dir",
     "postinstall": "echo 'Run `npm --prefix ./block-bash/blockbash install` if you want to install the original server dependencies; this standalone app does not need them.'"

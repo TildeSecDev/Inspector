@@ -1,9 +1,0 @@
-{
-  "type": "chapter",
-  "chapter": 10,
-  "title": "Post Exploitation",
-  "description": "After an attack, Mira must clean up and secure the system.",
-  "dialogue": [
-    "Mira: \"The attack is over, but the work isn't! Let's clean up and lock things down.\""
-  ]
-}

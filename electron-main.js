@@ -2,12 +2,33 @@ const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// Standalone Electron app folder (bundled UI resources). This app does not use any
-// resources from the original block-bash folder — it loads files from `electron-app`.
-const APP_DIR = path.join(__dirname, 'electron-app');
 const PRELOAD_PATH = path.join(__dirname, 'preload.js');
 
-function createWindow() {
+// Wait for server to be ready
+async function waitForServer(url, maxAttempts = 30) {
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const http = require('http');
+      await new Promise((resolve, reject) => {
+        const req = http.get(url, (res) => {
+          resolve(res.statusCode === 200 || res.statusCode === 404);
+        }).on('error', reject);
+        req.setTimeout(2000);
+      });
+      console.log(`[electron] Server ready after ${i} attempts`);
+      return true;
+    } catch (e) {
+      if (i === maxAttempts - 1) {
+        console.error(`[electron] Server not ready after ${maxAttempts} attempts`);
+        return false;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  return false;
+}
+
+async function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -19,18 +40,42 @@ function createWindow() {
     }
   });
 
-  const indexPath = path.join(APP_DIR, 'index.html');
-  win.loadFile(indexPath).catch(err => {
-    console.error('[electron] failed to load index file:', err);
-    win.loadURL('about:blank');
-  });
+  // Load dev server in development, otherwise load static file
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[electron] Waiting for dev server at http://localhost:5173');
+    const serverReady = await waitForServer('http://localhost:5173');
+    if (serverReady) {
+      console.log('[electron] Loading dev server');
+      win.loadURL('http://localhost:5173').catch(err => {
+        console.error('[electron] failed to load dev server:', err);
+        win.loadURL('about:blank');
+      });
+    } else {
+      console.error('[electron] Dev server not ready, loading static files');
+      const APP_DIR = path.join(__dirname, 'electron-app');
+      const indexPath = path.join(APP_DIR, 'index.html');
+      win.loadFile(indexPath).catch(err => {
+        console.error('[electron] failed to load index file:', err);
+        win.loadURL('about:blank');
+      });
+    }
+  } else {
+    // Production mode: load static files from electron-app
+    const APP_DIR = path.join(__dirname, 'electron-app');
+    const indexPath = path.join(APP_DIR, 'index.html');
+    console.log('[electron] Loading static files from', indexPath);
+    win.loadFile(indexPath).catch(err => {
+      console.error('[electron] failed to load index file:', err);
+      win.loadURL('about:blank');
+    });
+  }
 
   // Optional: open devtools in development
   if (process.env.NODE_ENV === 'development') win.webContents.openDevTools();
 }
 
-app.on('ready', () => {
-  console.log('[electron] App ready. Loading standalone UI from electron-app/');
+app.on('ready', async () => {
+  console.log('[electron] App ready');
   // Install a simple app menu with common actions
   try {
     const isMac = process.platform === 'darwin';
@@ -168,7 +213,7 @@ app.on('ready', () => {
     } catch (e) { return { error: String(e) }; }
   });
 
-  createWindow();
+  await createWindow();
 });
 
 app.on('window-all-closed', () => {
