@@ -19,13 +19,18 @@
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/dist packages/*/dist"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@types/node": "^20.10.0",
+    "electron-rebuild": "^3.2.9",
+    "playwright": "^1.40.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.0.4",
-    "playwright": "^1.40.0"
+    "vitest": "^1.0.4"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.5.0"
   }
 }

@@ -247,7 +247,7 @@ export class RunRepository {
 
     this.db
       .prepare(
-        'INSERT INTO runs (id, scenario_id, started_at, finished_at, results_json, status, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO runs (id, scenario_id, started_at, finished_at, results_json, status) VALUES (?, ?, ?, ?, ?, ?)'
       )
       .run(
         run.id,
@@ -255,8 +255,7 @@ export class RunRepository {
         run.startedAt,
         run.finishedAt || null,
         JSON.stringify(run),
-        run.status,
-        run.updatedAt
+        run.status
       );
 
     return run;
@@ -281,12 +280,12 @@ export class RunRepository {
     const existing = this.findById(id);
     if (!existing) throw new Error(`Run ${id} not found`);
 
-    const updated = { ...existing, ...data, updatedAt: new Date().toISOString() };
+    const updated = { ...existing, ...data };
     RunResultSchema.parse(updated);
 
     this.db
-      .prepare('UPDATE runs SET finished_at = ?, results_json = ?, status = ?, updated_at = ? WHERE id = ?')
-      .run(updated.finishedAt || null, JSON.stringify(updated), updated.status, updated.updatedAt, id);
+      .prepare('UPDATE runs SET finished_at = ?, results_json = ?, status = ? WHERE id = ?')
+      .run(updated.finishedAt || null, JSON.stringify(updated), updated.status, id);
 
     return updated;
   }

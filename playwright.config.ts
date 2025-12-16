@@ -22,6 +22,11 @@ export default defineConfig({
     },
   ],
 
-  webServer: undefined, // App must be started separately
+  webServer: {
+    command: 'cd apps/renderer && npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+  },
   timeout: 60000,
 });

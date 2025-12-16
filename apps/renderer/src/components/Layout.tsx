@@ -7,22 +7,34 @@ import {
   AlertTriangle, 
   FileText, 
   Settings,
-  ListChecks
+  ListChecks,
+  Info
 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
+import { mockAPI } from '../utils/mockAPI';
+
+const TAB_INFO = {
+  '/projects': 'Manage your network simulation projects. Create new projects to organize different network topologies and scenarios.',
+  '/designer': 'Design your network topology with a visual canvas. Add routers, switches, firewalls, servers and more to build your digital twin.',
+  '/scenarios': 'Create test scenarios like DDoS attacks, hardware failures, or data breaches. Define flows, faults, and attack events.',
+  '/simulation': 'Run simulations and view real-time metrics. See packet flows, policy evaluations, and event timelines.',
+  '/findings': 'Review security findings discovered during simulations. Filter by severity and view remediation recommendations.',
+  '/reports': 'Generate and export reports in JSON or PDF format. Document your simulation results and findings.',
+  '/settings': 'Configure application settings and review the Rules of Engagement for authorized testing.',
+};
 
 export function Layout() {
   const { roeAccepted, setRoeAccepted } = useAppStore();
   const [loadingRoe, setLoadingRoe] = useState(true);
   const [ackChecked, setAckChecked] = useState(false);
+  const [infoPopup, setInfoPopup] = useState<string | null>(null);
 
   useEffect(() => {
     const loadRoe = async () => {
       try {
-        const saved = window.electronAPI?.settings ? await window.electronAPI.settings.get('roeAccepted') : null;
-        const local = typeof localStorage !== 'undefined' ? localStorage.getItem('roeAccepted') : null;
-        const accepted = saved === true || local === 'true';
-        if (accepted) setRoeAccepted(true);
+        const api = window.electronAPI?.settings || mockAPI.settings;
+        const saved = await api.get('roeAccepted');
+        if (saved === true) setRoeAccepted(true);
       } catch {
         /* ignore */
       } finally {
@@ -34,12 +46,13 @@ export function Layout() {
 
   const handleAccept = async () => {
     if (!ackChecked) return;
-    setRoeAccepted(true);
-    if (window.electronAPI?.settings) {
-      await window.electronAPI.settings.set('roeAccepted', true);
-    }
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('roeAccepted', 'true');
+    try {
+      const api = window.electronAPI?.settings || mockAPI.settings;
+      await api.set('roeAccepted', true);
+      setRoeAccepted(true);
+    } catch (err) {
+      console.error('Failed to save ROE acceptance:', err);
+      setRoeAccepted(true);
     }
   };
 
@@ -48,34 +61,229 @@ export function Layout() {
       <aside className="sidebar">
         <h2>Inspector Twin</h2>
         <nav>
-          <NavLink to="/projects" className={({ isActive }) => isActive ? 'active' : ''}>
-            <FolderOpen size={16} style={{ display: 'inline', marginRight: '8px' }} />
-            Projects
-          </NavLink>
-          <NavLink to="/designer" className={({ isActive }) => isActive ? 'active' : ''}>
-            <Network size={16} style={{ display: 'inline', marginRight: '8px' }} />
-            Twin Designer
-          </NavLink>
-          <NavLink to="/scenarios" className={({ isActive }) => isActive ? 'active' : ''}>
-            <ListChecks size={16} style={{ display: 'inline', marginRight: '8px' }} />
-            Scenarios
-          </NavLink>
-          <NavLink to="/simulation" className={({ isActive }) => isActive ? 'active' : ''}>
-            <PlayCircle size={16} style={{ display: 'inline', marginRight: '8px' }} />
-            Simulation Runner
-          </NavLink>
-          <NavLink to="/findings" className={({ isActive }) => isActive ? 'active' : ''}>
-            <AlertTriangle size={16} style={{ display: 'inline', marginRight: '8px' }} />
-            Findings
-          </NavLink>
-          <NavLink to="/reports" className={({ isActive }) => isActive ? 'active' : ''}>
-            <FileText size={16} style={{ display: 'inline', marginRight: '8px' }} />
-            Reports
-          </NavLink>
-          <NavLink to="/settings" className={({ isActive }) => isActive ? 'active' : ''}>
-            <Settings size={16} style={{ display: 'inline', marginRight: '8px' }} />
-            Settings
-          </NavLink>
+          <div style={{ position: 'relative' }}>
+            <NavLink to="/projects" className={({ isActive }) => isActive ? 'active' : ''}>
+              <FolderOpen size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Projects
+            </NavLink>
+            <Info 
+              size={14} 
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
+              onMouseEnter={() => setInfoPopup('/projects')}
+              onMouseLeave={() => setInfoPopup(null)}
+            />
+            {infoPopup === '/projects' && (
+              <div style={{ 
+                position: 'absolute', 
+                left: '100%', 
+                top: 0, 
+                marginLeft: '12px', 
+                background: '#1a1a1a', 
+                border: '1px solid #333', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                width: '280px', 
+                fontSize: '13px', 
+                zIndex: 1000,
+                color: '#ccc',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}>
+                {TAB_INFO['/projects']}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ position: 'relative' }}>
+            <NavLink to="/designer" className={({ isActive }) => isActive ? 'active' : ''}>
+              <Network size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Twin Designer
+            </NavLink>
+            <Info 
+              size={14} 
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
+              onMouseEnter={() => setInfoPopup('/designer')}
+              onMouseLeave={() => setInfoPopup(null)}
+            />
+            {infoPopup === '/designer' && (
+              <div style={{ 
+                position: 'absolute', 
+                left: '100%', 
+                top: 0, 
+                marginLeft: '12px', 
+                background: '#1a1a1a', 
+                border: '1px solid #333', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                width: '280px', 
+                fontSize: '13px', 
+                zIndex: 1000,
+                color: '#ccc',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}>
+                {TAB_INFO['/designer']}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ position: 'relative' }}>
+            <NavLink to="/scenarios" className={({ isActive }) => isActive ? 'active' : ''}>
+              <ListChecks size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Scenarios
+            </NavLink>
+            <Info 
+              size={14} 
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
+              onMouseEnter={() => setInfoPopup('/scenarios')}
+              onMouseLeave={() => setInfoPopup(null)}
+            />
+            {infoPopup === '/scenarios' && (
+              <div style={{ 
+                position: 'absolute', 
+                left: '100%', 
+                top: 0, 
+                marginLeft: '12px', 
+                background: '#1a1a1a', 
+                border: '1px solid #333', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                width: '280px', 
+                fontSize: '13px', 
+                zIndex: 1000,
+                color: '#ccc',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}>
+                {TAB_INFO['/scenarios']}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ position: 'relative' }}>
+            <NavLink to="/simulation" className={({ isActive }) => isActive ? 'active' : ''}>
+              <PlayCircle size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Simulation Runner
+            </NavLink>
+            <Info 
+              size={14} 
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
+              onMouseEnter={() => setInfoPopup('/simulation')}
+              onMouseLeave={() => setInfoPopup(null)}
+            />
+            {infoPopup === '/simulation' && (
+              <div style={{ 
+                position: 'absolute', 
+                left: '100%', 
+                top: 0, 
+                marginLeft: '12px', 
+                background: '#1a1a1a', 
+                border: '1px solid #333', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                width: '280px', 
+                fontSize: '13px', 
+                zIndex: 1000,
+                color: '#ccc',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}>
+                {TAB_INFO['/simulation']}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ position: 'relative' }}>
+            <NavLink to="/findings" className={({ isActive }) => isActive ? 'active' : ''}>
+              <AlertTriangle size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Findings
+            </NavLink>
+            <Info 
+              size={14} 
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
+              onMouseEnter={() => setInfoPopup('/findings')}
+              onMouseLeave={() => setInfoPopup(null)}
+            />
+            {infoPopup === '/findings' && (
+              <div style={{ 
+                position: 'absolute', 
+                left: '100%', 
+                top: 0, 
+                marginLeft: '12px', 
+                background: '#1a1a1a', 
+                border: '1px solid #333', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                width: '280px', 
+                fontSize: '13px', 
+                zIndex: 1000,
+                color: '#ccc',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}>
+                {TAB_INFO['/findings']}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ position: 'relative' }}>
+            <NavLink to="/reports" className={({ isActive }) => isActive ? 'active' : ''}>
+              <FileText size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Reports
+            </NavLink>
+            <Info 
+              size={14} 
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
+              onMouseEnter={() => setInfoPopup('/reports')}
+              onMouseLeave={() => setInfoPopup(null)}
+            />
+            {infoPopup === '/reports' && (
+              <div style={{ 
+                position: 'absolute', 
+                left: '100%', 
+                top: 0, 
+                marginLeft: '12px', 
+                background: '#1a1a1a', 
+                border: '1px solid #333', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                width: '280px', 
+                fontSize: '13px', 
+                zIndex: 1000,
+                color: '#ccc',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}>
+                {TAB_INFO['/reports']}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ position: 'relative' }}>
+            <NavLink to="/settings" className={({ isActive }) => isActive ? 'active' : ''}>
+              <Settings size={16} style={{ display: 'inline', marginRight: '8px' }} />
+              Settings
+            </NavLink>
+            <Info 
+              size={14} 
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
+              onMouseEnter={() => setInfoPopup('/settings')}
+              onMouseLeave={() => setInfoPopup(null)}
+            />
+            {infoPopup === '/settings' && (
+              <div style={{ 
+                position: 'absolute', 
+                left: '100%', 
+                top: 0, 
+                marginLeft: '12px', 
+                background: '#1a1a1a', 
+                border: '1px solid #333', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                width: '280px', 
+                fontSize: '13px', 
+                zIndex: 1000,
+                color: '#ccc',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              }}>
+                {TAB_INFO['/settings']}
+              </div>
+            )}
+          </div>
         </nav>
         <div style={{ marginTop: '40px', padding: '16px', backgroundColor: '#1a1a1a', borderRadius: '6px', fontSize: '12px', color: '#999' }}>
           <p style={{ marginBottom: '8px', fontWeight: 'bold', color: '#ff8800' }}>

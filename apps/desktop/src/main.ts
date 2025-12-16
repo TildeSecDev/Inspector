@@ -1,14 +1,10 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { join } from 'path';
 import Store from 'electron-store';
 import { ProjectStore } from '@inspectortwin/project-store';
 import { SimulationEngine } from '@inspectortwin/core-sim';
 import { ReportGenerator } from '@inspectortwin/report-kit';
 import { LabRuntime } from '@inspectortwin/lab-runtime';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Initialize electron-store for app settings
 const store = new Store();
