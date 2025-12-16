@@ -13,6 +13,7 @@ Do not use this tool to target real systems without written permission. The appl
 ## Features
 
 ### Digital Twin Designer
+
 - Drag-and-drop topology canvas using React Flow
 - Support for multiple node types: routers, switches, firewalls, servers, workstations, IoT devices, cloud services
 - Visual link configuration with bandwidth, latency, and failure simulation
@@ -20,6 +21,7 @@ Do not use this tool to target real systems without written permission. The appl
 - Firewall policy DSL for security rules
 
 ### Simulation Engine
+
 - Packet flow animation and routing simulation
 - Firewall policy evaluation
 - Failure injection (link down, degradation, node failure)
@@ -27,6 +29,7 @@ Do not use this tool to target real systems without written permission. The appl
 - Attack event simulation (credential reuse, phishing, lateral movement, data exfiltration)
 
 ### Security Assessment
+
 - Topology misconfiguration detection
 - Single point of failure identification
 - Exposed service analysis
@@ -34,12 +37,14 @@ Do not use this tool to target real systems without written permission. The appl
 - Policy enforcement testing
 
 ### Local Lab Testing (Optional)
+
 - Docker container orchestration for safe testing
 - Localhost-only enforcement
 - Configurable test environments
 - Service monitoring and management
 
 ### Reporting
+
 - JSON and PDF report generation
 - Findings categorized by severity
 - Remediation recommendations
@@ -70,30 +75,33 @@ Do not use this tool to target real systems without written permission. The appl
 ### Quick Start
 
 1. **Clone the repository**:
+
    ```bash
    git clone <repository-url>
    cd inspectortwin
    ```
-
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
-
 3. **Run in development mode**:
-   
+
    **macOS/Linux**:
+
    ```bash
    chmod +x run_dev.sh
    ./run_dev.sh
    ```
-   
+
    **Windows**:
+
    ```cmd
    run_dev.bat
    ```
 
 The application will automatically:
+
 - Install all workspace dependencies
 - Build all packages
 - Start the Vite dev server
@@ -205,6 +213,7 @@ deny tcp from Any to AdminPanel port 22
 ### Rules of Engagement
 
 Before running any "security checks", the application displays warnings and requires acknowledgment that:
+
 - Testing is authorized
 - Tests run only against local containers or simulations
 - No external targeting is permitted
@@ -250,21 +259,27 @@ Packaged apps will be in `apps/desktop/release/`.
 ## Workspace Packages
 
 ### @inspectortwin/shared
+
 Common types and Zod schemas used across all packages.
 
 ### @inspectortwin/project-store
+
 SQLite-based storage layer with repositories for projects, topologies, scenarios, runs, findings, and reports.
 
 ### @inspectortwin/policy-dsl
+
 Parser, validator, and evaluator for firewall policy DSL.
 
 ### @inspectortwin/core-sim
+
 Simulation engine with graph validation, routing, packet flow simulation, and failure injection.
 
 ### @inspectortwin/report-kit
+
 Report generator supporting JSON and PDF formats using pdf-lib.
 
 ### @inspectortwin/lab-runtime
+
 Optional Docker container orchestration for local testing with safety enforcement.
 
 ## Sample Projects
@@ -272,9 +287,10 @@ Optional Docker container orchestration for local testing with safety enforcemen
 Inspector Twin ships with two sample projects:
 
 1. **SME Office + Cloud App**
+
    - Scenarios: ISP link failure, guest network isolation test, attacker on network
-   
 2. **School Lab + Guest Wi-Fi Segmentation**
+
    - Scenarios: Guest trying to reach admin panel, link degradation, credential reuse attack
 
 Load these from the Projects page to see examples.
@@ -292,20 +308,24 @@ npx playwright test --workspace=apps/renderer
 ## Troubleshooting
 
 ### Application won't start
+
 - Ensure Node.js 18+ is installed: `node -v`
 - Delete `node_modules` and run `npm install` again
 - Check for port conflicts (default: 5173)
 
 ### Database errors
+
 - Database file is in: `~/Library/Application Support/inspectortwin/` (macOS)
 - Delete database file to reset (will lose data)
 
 ### Docker lab won't start
+
 - Ensure Docker is installed and running
 - Check Docker daemon is accessible
 - Verify localhost-only binding in lab config
 
 ### Build failures
+
 - Run `npm run clean` then `npm install`
 - Ensure all peer dependencies are satisfied
 - Check TypeScript version compatibility
@@ -313,6 +333,7 @@ npx playwright test --workspace=apps/renderer
 ## Contributing
 
 Contributions are welcome! Please ensure:
+
 - Code follows existing style
 - Tests are included
 - Documentation is updated
@@ -320,7 +341,11 @@ Contributions are welcome! Please ensure:
 
 ## License
 
-[Specify your license]
+**Inspector Twin** is proprietary software developed by Nathan Brown-Bennett, Wadoud Zakour, and the TildeSec team for TildeSec only.
+
+**Unauthorized copying, modification, or distribution is strictly prohibited.**
+
+All rights reserved. This software is provided as-is for authorized use by TildeSec personnel only. Any use outside of TildeSec requires explicit written permission from the copyright holders.
 
 ## Disclaimer
 
