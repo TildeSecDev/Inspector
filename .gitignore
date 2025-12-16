@@ -14,3 +14,17 @@ playwright-report/
 *.tsbuildinfo
 .vite/
 out/
+
+# Tauri / Rust build artifacts
+src-tauri/target/
+target/
+Cargo.lock
+*.o
+*.a
+*.so
+.cargo/
+*.rlib
+
+# Development files
+.tauri/
+libappindicator3/
