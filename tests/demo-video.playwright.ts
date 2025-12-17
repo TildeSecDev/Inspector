@@ -63,9 +63,15 @@ test.describe('Inspector Twin - Demo Video', () => {
     await page.waitForTimeout(1500);
     
     // Scroll down to show the full interface
-    await page.evaluate(() => window.scrollBy(0, 100));
+    await page.evaluate(() => {
+      const scroll = (globalThis as any).scrollBy;
+      if (typeof scroll === 'function') scroll(0, 100);
+    });
     await page.waitForTimeout(1000);
-    await page.evaluate(() => window.scrollBy(0, -100));
+    await page.evaluate(() => {
+      const scroll = (globalThis as any).scrollBy;
+      if (typeof scroll === 'function') scroll(0, -100);
+    });
     await page.waitForTimeout(500);
     
     // Click to add a node (open node selector modal)
@@ -88,9 +94,15 @@ test.describe('Inspector Twin - Demo Video', () => {
     
     // Show scenarios (if any exist from sample data)
     // Scroll to show all scenarios
-    await page.evaluate(() => window.scrollBy(0, 100));
+    await page.evaluate(() => {
+      const scroll = (globalThis as any).scrollBy;
+      if (typeof scroll === 'function') scroll(0, 100);
+    });
     await page.waitForTimeout(1000);
-    await page.evaluate(() => window.scrollBy(0, -100));
+    await page.evaluate(() => {
+      const scroll = (globalThis as any).scrollBy;
+      if (typeof scroll === 'function') scroll(0, -100);
+    });
     await page.waitForTimeout(1000);
     
     // Navigate to Simulation Runner tab
@@ -180,9 +192,15 @@ test.describe('Inspector Twin - Demo Video', () => {
       await page.waitForTimeout(2500);
       
       // Scroll to show all scenario cards
-      await page.evaluate(() => window.scrollBy(0, 100));
+      await page.evaluate(() => {
+        const scroll = (globalThis as any).scrollBy;
+        if (typeof scroll === 'function') scroll(0, 100);
+      });
       await page.waitForTimeout(1000);
-      await page.evaluate(() => window.scrollBy(0, -100));
+      await page.evaluate(() => {
+        const scroll = (globalThis as any).scrollBy;
+        if (typeof scroll === 'function') scroll(0, -100);
+      });
       await page.waitForTimeout(1500);
       
       // Show Simulation Runner
