@@ -2,7 +2,7 @@
 
 **Digital Twin Simulation and Security Assessment Platform**
 
-Inspector Twin (formerly Inspector-BE) is a desktop Electron application that enables organizations to create digital twins of their physical and digital environments, run safe simulations, and perform authorized local security assessments.
+Inspector Twin is a modern desktop application built with Tauri that enables organizations to create digital twins of their physical and digital environments, run safe simulations, and perform authorized local security assessments.
 
 ## ⚠️ Important Notice
 
@@ -12,12 +12,27 @@ Do not use this tool to target real systems without written permission. The appl
 
 ## Features
 
+### Modern Application Architecture
+
+- **Tab-Based Interface**: Scenarios, Simulation Runner, and Findings are integrated as tabs within Twin Designer for streamlined workflow
+- **4-Page Navigation**: Projects, Twin Designer, Reports, and Settings in the sidebar
+- **Browser-Compatible**: Full functionality available in modern browsers (Chrome, Firefox, Edge) for testing
+- **Hot Reload**: Instant updates during development with Vite HMR
+- **Responsive Design**: Optimized for desktop viewing at 1920x1080
+
 ### Digital Twin Designer
 
 - Drag-and-drop topology canvas using React Flow
-- Support for multiple node types: routers, switches, firewalls, servers, workstations, IoT devices, cloud services
+- **49 device types** across 6 categories:
+  - **Network Infrastructure**: Router, Switch, Firewall, Load Balancer, VPN Gateway, Proxy Server, NAT Gateway, DNS Server
+  - **End User Devices**: Workstation, Laptop, Mobile Device, Tablet, Thin Client, Printer, IP Phone, Smart TV
+  - **Servers & Services**: Web Server, App Server, Database Server, File Server, Mail Server, API Server, Cache Server, Backup Server
+  - **IoT & Embedded**: IoT Gateway, Smart Sensor, Camera, Access Control, HVAC Controller, Industrial PLC, Smart Lock, Environmental Monitor
+  - **Cloud & Virtual**: Cloud VM, Container, Cloud Storage, Cloud DB, Cloud CDN, Cloud Function, Cloud Gateway, Cloud Firewall
+  - **Security Devices**: IDS/IPS, SIEM, Honeypot, Security Gateway, Threat Intel Feed, Log Collector, Forensic Workstation, Security Scanner
 - Visual link configuration with bandwidth, latency, and failure simulation
 - Property panels for detailed node/link configuration
+- Integrated tabs: Designer, Scenarios, Simulation Runner, and Findings
 - Firewall policy DSL for security rules
 
 ### Simulation Engine
@@ -53,79 +68,151 @@ Do not use this tool to target real systems without written permission. The appl
 
 ## Tech Stack
 
-- **Runtime**: Node.js 18+ + Electron 28
-- **UI**: React 18 + TypeScript + Vite
+- **Desktop Framework**: Tauri v2 (Rust + WebView)
+- **Runtime**: Node.js 18+
+- **UI**: React 18 + TypeScript + Vite 5
 - **State Management**: Zustand
 - **Canvas**: React Flow (topology designer)
 - **Editor**: Monaco Editor (policy DSL)
-- **Database**: SQLite via better-sqlite3
+- **Storage**: localStorage-based mockAPI (browser-compatible)
+- **Module System**: ESM
 - **Validation**: Zod
 - **Reports**: pdf-lib
 - **Container Management**: dockerode (optional)
 - **Testing**: Vitest + Playwright
 
+## 🚀 Quick Start Guide
+
+### TL;DR
+
+```bash
+git clone <repository-url> && cd Inspector
+npm install
+npm run dev:tauri
+```
+
+Visit the **Projects** page → Select **"SME Office + Cloud App"** → Explore **Twin Designer** tabs!
+
+---
+
+## 📸 Screenshots
+
+### Projects Management
+![Projects Page - Empty State](.playwright-mcp/1_projects_page_empty.png)
+*Empty projects page ready for new project creation*
+
+![Project Creation Form](.playwright-mcp/2_project_create_form.png)
+*Create new security assessment projects*
+
+![Projects with Data](.playwright-mcp/10_projects_with_data.png)
+*Projects page with sample data loaded*
+
+### Twin Designer - Topology Canvas
+![Twin Designer](.playwright-mcp/4_twin_designer_no_project.png)
+*Interactive topology designer with React Flow canvas*
+
+![Designer with Topology](.playwright-mcp/11_designer_with_topology.png)
+*Complete network topology with 8 nodes and 7 links*
+
+### Twin Designer - Integrated Tabs
+![Scenarios Tab](.playwright-mcp/5_scenarios_page.png)
+*Pre-configured security scenarios with Run Simulation buttons*
+
+![Scenarios with Data](.playwright-mcp/12_scenarios_with_data.png)
+*Scenario cards showing attack simulations*
+
+![Simulation Runner Tab](.playwright-mcp/6_simulation_runner.png)
+*Simulation execution interface*
+
+![Findings Tab](.playwright-mcp/7_findings_page.png)
+*Security findings and assessment results*
+
+### Reports & Settings
+![Reports Page](.playwright-mcp/8_reports_page.png)
+*Report generation and export interface*
+
+![Settings Page](.playwright-mcp/9_settings_page.png)
+*Application configuration and preferences*
+
+---
+
 ## Installation
 
 ### Prerequisites
 
-- Node.js 18+ and npm 9+
-- Git
-- (Optional) Docker for lab testing features
+- ✅ Node.js 18+ and npm 9+
+- ✅ Rust 1.70+ (for Tauri backend)
+- ✅ Git
+- ⚠️ (Optional) Docker for lab testing features
 
-### Quick Start
+**Check your setup**:
+```bash
+node -v    # Should be 18+
+npm -v     # Should be 9+
+rustc --version  # Should be 1.70+
+```
+
+### Detailed Installation
 
 1. **Clone the repository**:
 
    ```bash
    git clone <repository-url>
-   cd inspectortwin
+   cd Inspector
    ```
+
 2. **Install dependencies**:
 
    ```bash
    npm install
    ```
-3. **Run in development mode**:
 
-   **macOS/Linux**:
+3. **Install Tauri CLI** (if not already installed):
 
    ```bash
-   chmod +x run_dev.sh
-   ./run_dev.sh
+   cargo install tauri-cli --version "^2.0.0"
    ```
 
-   **Windows**:
+4. **Run in development mode**:
 
-   ```cmd
-   run_dev.bat
+   ```bash
+   npm run dev:tauri
    ```
 
-The application will automatically:
+   This command will:
+   - Start the Vite dev server (React frontend) on port 5173
+   - Launch the Tauri window with hot reload enabled
 
-- Install all workspace dependencies
-- Build all packages
-- Start the Vite dev server
-- Launch the Electron window
+5. **Alternative**: Run frontend only for browser testing:
+
+   ```bash
+   npm run dev:renderer
+   ```
+
+   Then open http://localhost:5173 in your browser.
 
 ## Project Structure
 
 ```
-inspectortwin/
+Inspector/
 ├── apps/
-│   ├── desktop/          # Electron main process + preload
-│   └── renderer/         # React UI (Vite)
+│   └── renderer/         # React UI (Vite + TypeScript)
 ├── packages/
-│   ├── shared/           # Shared types and Zod schemas
+│   ├── shared/           # Shared types, Zod schemas, and sample data (ESM)
 │   ├── core-sim/         # Simulation engine
-│   ├── project-store/    # SQLite storage layer
+│   ├── project-store/    # Storage layer repositories
 │   ├── policy-dsl/       # Firewall policy parser
 │   ├── report-kit/       # Report generation
 │   └── lab-runtime/      # Docker lab orchestration
-├── docs/                 # Documentation
+├── src-tauri/            # Tauri Rust backend
+│   ├── src/
+│   │   └── main.rs       # Tauri main process
+│   ├── Cargo.toml        # Rust dependencies
+│   └── tauri.conf.json   # Tauri configuration
+├── tests/                # Playwright E2E tests
+├── .playwright-mcp/      # Screenshot assets
 ├── scripts/              # Build and utility scripts
-├── run_dev.sh            # Development runner (Unix)
-├── run_dev.bat           # Development runner (Windows)
-└── package.json          # Root workspace config
+└── package.json          # Root workspace config (ESM)
 ```
 
 ## Usage
@@ -139,33 +226,34 @@ inspectortwin/
 
 ### 2. Build a Topology
 
-1. Select your project
-2. Navigate to "Twin Designer"
-3. Select node type from dropdown
-4. Click "Add Node" to place nodes on canvas
-5. Drag connections between nodes
-6. Click "Save" to persist topology
+1. Select your project from the Projects page
+2. Navigate to "Twin Designer" in the sidebar
+3. In the **Designer tab**:
+   - Select device type from the modal (49 types across 6 categories)
+   - Click "Add Node" to place nodes on canvas
+   - Drag connections between nodes
+   - Select nodes/edges to edit properties
+   - Click "Save" to persist topology
 
-### 3. Create a Scenario
+### 3. Create and Manage Scenarios
 
-1. Navigate to "Scenarios"
-2. Click "Create Scenario"
-3. Define traffic flows
-4. Add fault injections (optional)
-5. Configure attack simulations (optional)
-6. Save scenario
+1. In Twin Designer, click the **Scenarios tab**
+2. View pre-configured scenarios for sample projects
+3. Click "Run Simulation" on any scenario card
+4. Define traffic flows, fault injections, and attack simulations
+5. Scenarios are stored per-project
 
 ### 4. Run Simulation
 
-1. Navigate to "Simulation Runner"
-2. Ensure topology and scenario are selected
+1. Click the **Simulation Runner tab** in Twin Designer
+2. Select a scenario from the Scenarios tab
 3. Click "Run Simulation"
 4. View real-time event timeline
 5. Review metrics (packets, latency, policies)
 
 ### 5. Review Findings
 
-1. Navigate to "Findings"
+1. Click the **Findings tab** in Twin Designer
 2. Review findings categorized by severity:
    - Critical (red)
    - High (orange)
@@ -173,6 +261,8 @@ inspectortwin/
    - Low (blue)
    - Info (gray)
 3. Read remediation recommendations
+
+**Note**: Scenarios, Simulation Runner, and Findings are now **integrated as tabs within Twin Designer** for a streamlined workflow.
 
 ### 6. Generate Reports
 
@@ -204,11 +294,11 @@ deny tcp from Any to AdminPanel port 22
 ### Built-in Safety Mechanisms
 
 1. **Local-Only Enforcement**: Lab runtime only binds to 127.0.0.1
-2. **Context Isolation**: Electron runs with `contextIsolation: true` and `nodeIntegration: false`
+2. **Tauri Security**: Runs with secure defaults and sandboxed WebView
 3. **CSP Headers**: Content Security Policy prevents external script execution
-4. **Sandbox Mode**: Renderer process runs in sandbox
-5. **IPC Whitelisting**: Only explicitly exposed APIs available to renderer
-6. **Config Validation**: Lab configurations validated before execution
+4. **IPC Whitelisting**: Only explicitly exposed commands available
+5. **Config Validation**: Lab configurations validated before execution
+6. **Browser-Compatible Storage**: Uses localStorage for safe client-side persistence
 
 ### Rules of Engagement
 
@@ -226,14 +316,26 @@ Before running any "security checks", the application displays warnings and requ
 # Install all dependencies
 npm install
 
-# Run in development mode
-npm run dev
+# Run in development mode (Tauri + Vite)
+npm run dev:tauri
+
+# Run frontend only (browser testing)
+npm run dev:renderer
 
 # Build all packages
 npm run build
 
 # Run tests
 npm run test
+
+# Run Playwright tests
+npx playwright test
+
+# Update screenshots
+npx playwright test tests/screenshot-update.playwright.ts --update-snapshots
+
+# Record demo videos
+npx playwright test --config=playwright-demo.config.ts
 
 # Lint code
 npm run lint
@@ -246,15 +348,13 @@ npm run clean
 
 ```bash
 # Build for current platform
-npm run package --workspace=apps/desktop
+cd src-tauri && cargo tauri build
 
-# Build for specific platforms
-npm run package:mac --workspace=apps/desktop
-npm run package:win --workspace=apps/desktop
-npm run package:linux --workspace=apps/desktop
+# The packaged app will be in:
+# - macOS: src-tauri/target/release/bundle/macos/
+# - Windows: src-tauri/target/release/bundle/msi/
+# - Linux: src-tauri/target/release/bundle/appimage/
 ```
-
-Packaged apps will be in `apps/desktop/release/`.
 
 ## Workspace Packages
 
@@ -264,7 +364,7 @@ Common types and Zod schemas used across all packages.
 
 ### @inspectortwin/project-store
 
-SQLite-based storage layer with repositories for projects, topologies, scenarios, runs, findings, and reports.
+Storage layer with repositories for projects, topologies, scenarios, runs, findings, and reports.
 
 ### @inspectortwin/policy-dsl
 
@@ -284,16 +384,21 @@ Optional Docker container orchestration for local testing with safety enforcemen
 
 ## Sample Projects
 
-Inspector Twin ships with two sample projects:
+Inspector Twin ships with pre-configured sample project:
 
-1. **SME Office + Cloud App**
+### **SME Office + Cloud App**
 
-   - Scenarios: ISP link failure, guest network isolation test, attacker on network
-2. **School Lab + Guest Wi-Fi Segmentation**
+**Topology** (8 nodes, 7 links):
+- ISP Router → Firewall → Switch
+- Connected devices: Router, AppServer, Workstation, GuestWiFi, CloudStorage
+- Complete network topology with bandwidth and latency configuration
 
-   - Scenarios: Guest trying to reach admin panel, link degradation, credential reuse attack
+**Pre-configured Scenarios**:
+1. **Student Accessing Admin Panel** - Authorization bypass attempt
+2. **Link Degradation Between ISP and Main Router** - Network resilience test
+3. **Credential Reuse Attack** - Lateral movement simulation
 
-Load these from the Projects page to see examples.
+Load this project from the Projects page to explore a fully configured digital twin with topology and scenarios.
 
 ## Testing
 
@@ -301,22 +406,73 @@ Load these from the Projects page to see examples.
 # Run unit tests
 npm run test
 
-# Run UI tests with Playwright
-npx playwright test --workspace=apps/renderer
+# Run all Playwright E2E tests
+npx playwright test
+
+# Run specific test file
+npx playwright test tests/screenshot-update.playwright.ts
+
+# Update screenshots
+npx playwright test tests/screenshot-update.playwright.ts --update-snapshots
+
+# Run demo video recording
+npx playwright test --config=playwright-demo.config.ts
+
+# View test report
+npx playwright show-report
 ```
+
+### Screenshots
+
+Application screenshots are maintained in `.playwright-mcp/` directory and automatically updated via Playwright tests:
+
+- Projects page (empty and with data)
+- Project creation flow
+- Twin Designer with topology
+- Scenarios, Simulation Runner, and Findings tabs
+- Reports and Settings pages
+
+Update screenshots: `npx playwright test tests/screenshot-update.playwright.ts --update-snapshots`
+
+### Demo Videos
+
+Inspector Twin includes automated demo video generation. See [DEMO_VIDEOS.md](DEMO_VIDEOS.md) for details.
+
+**Available Videos**:
+- `inspector-twin-demo.webm` (978 KB) - Comprehensive 44-second feature showcase
+- `demo-happy-flow.webm` (827 KB) - Basic happy path workflow
+- `demo-sample-data.webm` (608 KB) - Sample project demonstration
+
+**Regenerate videos**: `npx playwright test --config=playwright-demo.config.ts`
 
 ## Troubleshooting
 
 ### Application won't start
 
 - Ensure Node.js 18+ is installed: `node -v`
+- Ensure Rust is installed: `rustc --version`
+- Install Tauri CLI: `cargo install tauri-cli --version "^2.0.0"`
 - Delete `node_modules` and run `npm install` again
 - Check for port conflicts (default: 5173)
+- Check Tauri logs in terminal for errors
 
-### Database errors
+### Module errors or import issues
 
-- Database file is in: `~/Library/Application Support/inspectortwin/` (macOS)
-- Delete database file to reset (will lose data)
+- Ensure all packages use ESM: Check `"type": "module"` in package.json
+- Rebuild shared package: `cd packages/shared && npm run build`
+- Clear cache and reinstall: `npm run clean && npm install`
+
+### JSX syntax errors
+
+- Check for unmatched opening/closing tags in React components
+- Verify all fragments `<>` have corresponding `</>`
+- Ensure all divs have matching closing tags
+
+### Storage/Data issues
+
+- Data is stored in browser localStorage (inspect via DevTools)
+- Clear localStorage to reset: `localStorage.clear()` in browser console
+- Sample data auto-loads from `packages/shared/src/sample-data.ts`
 
 ### Docker lab won't start
 
@@ -327,8 +483,10 @@ npx playwright test --workspace=apps/renderer
 ### Build failures
 
 - Run `npm run clean` then `npm install`
+- Rebuild Tauri: `cd src-tauri && cargo clean && cd .. && npm run dev:tauri`
 - Ensure all peer dependencies are satisfied
-- Check TypeScript version compatibility
+- Check TypeScript version compatibility (5.3+)
+- Verify Rust toolchain is up to date: `rustup update`
 
 ## Contributing
 
