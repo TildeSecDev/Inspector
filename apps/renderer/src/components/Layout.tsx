@@ -68,19 +68,19 @@ export function Layout() {
             />
             {infoPopup === '/projects' && (
               <div style={{ 
-                position: 'absolute', 
-                left: '100%', 
-                top: 0, 
-                marginLeft: '12px', 
+                position: 'fixed', 
+                left: '262px', 
+                top: '80px', 
                 background: '#1a1a1a', 
                 border: '1px solid #333', 
                 borderRadius: '6px', 
                 padding: '12px', 
                 width: '280px', 
                 fontSize: '13px', 
-                zIndex: 1000,
+                zIndex: 10000,
                 color: '#ccc',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                pointerEvents: 'none'
               }}>
                 {TAB_INFO['/projects']}
               </div>
@@ -100,19 +100,19 @@ export function Layout() {
             />
             {infoPopup === '/designer' && (
               <div style={{ 
-                position: 'absolute', 
-                left: '100%', 
-                top: 0, 
-                marginLeft: '12px', 
+                position: 'fixed', 
+                left: '262px', 
+                top: '134px', 
                 background: '#1a1a1a', 
                 border: '1px solid #333', 
                 borderRadius: '6px', 
                 padding: '12px', 
                 width: '280px', 
                 fontSize: '13px', 
-                zIndex: 1000,
+                zIndex: 10000,
                 color: '#ccc',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                pointerEvents: 'none'
               }}>
                 {TAB_INFO['/designer']}
               </div>
@@ -132,19 +132,19 @@ export function Layout() {
             />
             {infoPopup === '/reports' && (
               <div style={{ 
-                position: 'absolute', 
-                left: '100%', 
-                top: 0, 
-                marginLeft: '12px', 
+                position: 'fixed', 
+                left: '262px', 
+                top: '188px', 
                 background: '#1a1a1a', 
                 border: '1px solid #333', 
                 borderRadius: '6px', 
                 padding: '12px', 
                 width: '280px', 
                 fontSize: '13px', 
-                zIndex: 1000,
+                zIndex: 10000,
                 color: '#ccc',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                pointerEvents: 'none'
               }}>
                 {TAB_INFO['/reports']}
               </div>
@@ -164,19 +164,19 @@ export function Layout() {
             />
             {infoPopup === '/settings' && (
               <div style={{ 
-                position: 'absolute', 
-                left: '100%', 
-                top: 0, 
-                marginLeft: '12px', 
+                position: 'fixed', 
+                left: '262px', 
+                top: '242px', 
                 background: '#1a1a1a', 
                 border: '1px solid #333', 
                 borderRadius: '6px', 
                 padding: '12px', 
                 width: '280px', 
                 fontSize: '13px', 
-                zIndex: 1000,
+                zIndex: 10000,
                 color: '#ccc',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                pointerEvents: 'none'
               }}>
                 {TAB_INFO['/settings']}
               </div>

@@ -389,18 +389,19 @@ export function TwinDesignerPage() {
             {/* Properties Panel */}
             <div style={{
               width: '300px',
-              borderLeft: '1px solid #ddd',
-          overflow: 'auto',
-          backgroundColor: '#f9f9f9',
-          padding: '16px',
-        }}>
+              borderLeft: '1px solid #333',
+              overflow: 'auto',
+              backgroundColor: '#0b0b0b',
+              color: '#f0f0f0',
+              padding: '16px',
+            }}>
           {!selectedNode && !selectedEdge ? (
             <div style={{ color: '#999' }}>
               <p><strong>Properties</strong></p>
               <p style={{ fontSize: '12px', marginTop: '12px' }}>
                 Click a node or link to edit properties
               </p>
-              <hr style={{ margin: '16px 0', borderColor: '#ddd' }} />
+              <hr style={{ margin: '16px 0', borderColor: '#333' }} />
               <p style={{ fontSize: '12px', marginTop: '12px' }}>
                 <strong>Nodes:</strong> {nodes.length}
               </p>
