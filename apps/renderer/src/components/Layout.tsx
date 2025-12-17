@@ -3,11 +3,8 @@ import { Outlet, NavLink } from 'react-router-dom';
 import { 
   FolderOpen, 
   Network, 
-  PlayCircle, 
-  AlertTriangle, 
   FileText, 
   Settings,
-  ListChecks,
   Info
 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
@@ -16,9 +13,6 @@ import { mockAPI } from '../utils/mockAPI';
 const TAB_INFO = {
   '/projects': 'Manage your network simulation projects. Create new projects to organize different network topologies and scenarios.',
   '/designer': 'Design your network topology with a visual canvas. Add routers, switches, firewalls, servers and more to build your digital twin.',
-  '/scenarios': 'Create test scenarios like DDoS attacks, hardware failures, or data breaches. Define flows, faults, and attack events.',
-  '/simulation': 'Run simulations and view real-time metrics. See packet flows, policy evaluations, and event timelines.',
-  '/findings': 'Review security findings discovered during simulations. Filter by severity and view remediation recommendations.',
   '/reports': 'Generate and export reports in JSON or PDF format. Document your simulation results and findings.',
   '/settings': 'Configure application settings and review the Rules of Engagement for authorized testing.',
 };
@@ -121,102 +115,6 @@ export function Layout() {
                 boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
               }}>
                 {TAB_INFO['/designer']}
-              </div>
-            )}
-          </div>
-          
-          <div style={{ position: 'relative' }}>
-            <NavLink to="/scenarios" className={({ isActive }) => isActive ? 'active' : ''}>
-              <ListChecks size={16} style={{ display: 'inline', marginRight: '8px' }} />
-              Scenarios
-            </NavLink>
-            <Info 
-              size={14} 
-              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
-              onMouseEnter={() => setInfoPopup('/scenarios')}
-              onMouseLeave={() => setInfoPopup(null)}
-            />
-            {infoPopup === '/scenarios' && (
-              <div style={{ 
-                position: 'absolute', 
-                left: '100%', 
-                top: 0, 
-                marginLeft: '12px', 
-                background: '#1a1a1a', 
-                border: '1px solid #333', 
-                borderRadius: '6px', 
-                padding: '12px', 
-                width: '280px', 
-                fontSize: '13px', 
-                zIndex: 1000,
-                color: '#ccc',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
-              }}>
-                {TAB_INFO['/scenarios']}
-              </div>
-            )}
-          </div>
-          
-          <div style={{ position: 'relative' }}>
-            <NavLink to="/simulation" className={({ isActive }) => isActive ? 'active' : ''}>
-              <PlayCircle size={16} style={{ display: 'inline', marginRight: '8px' }} />
-              Simulation Runner
-            </NavLink>
-            <Info 
-              size={14} 
-              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
-              onMouseEnter={() => setInfoPopup('/simulation')}
-              onMouseLeave={() => setInfoPopup(null)}
-            />
-            {infoPopup === '/simulation' && (
-              <div style={{ 
-                position: 'absolute', 
-                left: '100%', 
-                top: 0, 
-                marginLeft: '12px', 
-                background: '#1a1a1a', 
-                border: '1px solid #333', 
-                borderRadius: '6px', 
-                padding: '12px', 
-                width: '280px', 
-                fontSize: '13px', 
-                zIndex: 1000,
-                color: '#ccc',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
-              }}>
-                {TAB_INFO['/simulation']}
-              </div>
-            )}
-          </div>
-          
-          <div style={{ position: 'relative' }}>
-            <NavLink to="/findings" className={({ isActive }) => isActive ? 'active' : ''}>
-              <AlertTriangle size={16} style={{ display: 'inline', marginRight: '8px' }} />
-              Findings
-            </NavLink>
-            <Info 
-              size={14} 
-              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.5 }}
-              onMouseEnter={() => setInfoPopup('/findings')}
-              onMouseLeave={() => setInfoPopup(null)}
-            />
-            {infoPopup === '/findings' && (
-              <div style={{ 
-                position: 'absolute', 
-                left: '100%', 
-                top: 0, 
-                marginLeft: '12px', 
-                background: '#1a1a1a', 
-                border: '1px solid #333', 
-                borderRadius: '6px', 
-                padding: '12px', 
-                width: '280px', 
-                fontSize: '13px', 
-                zIndex: 1000,
-                color: '#ccc',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
-              }}>
-                {TAB_INFO['/findings']}
               </div>
             )}
           </div>

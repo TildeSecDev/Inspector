@@ -1,6 +1,7 @@
 {
   "name": "inspectortwin",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "description": "Inspector Twin - Digital Twin Simulation and Security Assessment Platform",
   "workspaces": [
@@ -11,6 +12,8 @@
     "dev": "npm run dev -w @inspectortwin/desktop",
     "dev:renderer": "npm run dev -w @inspectortwin/renderer",
     "dev:desktop": "npm run dev -w @inspectortwin/desktop",
+    "dev:tauri": "concurrently \"npm run dev:renderer\" \"npm run tauri:start\"",
+    "tauri:start": "cd src-tauri && cargo tauri dev",
     "build": "npm run build -ws --if-present",
     "test": "npm run test -ws --if-present",
     "test:smoke": "playwright test",

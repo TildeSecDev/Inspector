@@ -1,8 +1,19 @@
 import { sampleProjects } from '@inspectortwin/shared';
-import { randomUUID } from 'crypto';
 
 // Mock API for browser mode (when Electron is not available)
 // Uses localStorage to persist data between sessions
+
+// Browser-compatible UUID generator
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+  return Math.random().toString(36).substring(2, 11);
+}
 
 const STORAGE_KEY = 'inspector-twin-data';
 
@@ -44,7 +55,7 @@ function getDefaultData(): MockData {
   const scenarios: any[] = [];
   
   sampleProjects.forEach(sampleProj => {
-    const projectId = randomUUID();
+    const projectId = generateUUID();
     const now = new Date().toISOString();
     
     projects.push({
@@ -57,7 +68,7 @@ function getDefaultData(): MockData {
     
     // Add topologies
     sampleProj.topologies.forEach(topo => {
-      const graphId = randomUUID();
+      const graphId = generateUUID();
       graphs.push({
         id: graphId,
         project_id: projectId,
@@ -71,7 +82,7 @@ function getDefaultData(): MockData {
     // Add scenarios
     sampleProj.scenarios.forEach(scen => {
       scenarios.push({
-        id: randomUUID(),
+        id: generateUUID(),
         project_id: projectId,
         name: scen.name,
         description: scen.description,
@@ -110,7 +121,7 @@ export const mockAPI = {
       const data = loadData();
       const now = new Date().toISOString();
       const newProject = {
-        id: randomUUID(),
+        id: generateUUID(),
         name: input.name,
         description: input.description || '',
         created_at: now,
@@ -159,7 +170,7 @@ export const mockAPI = {
         existing.updated_at = now;
       } else {
         data.graphs.push({
-          id: randomUUID(),
+          id: generateUUID(),
           project_id: projectId,
           name,
           graph,
@@ -182,7 +193,7 @@ export const mockAPI = {
       const data = loadData();
       const now = new Date().toISOString();
       const newScenario = {
-        id: randomUUID(),
+        id: generateUUID(),
         ...input,
         created_at: now,
         updated_at: now,
@@ -235,7 +246,7 @@ export const mockAPI = {
     async create(report: any) {
       const data = loadData();
       const newReport = {
-        id: randomUUID(),
+        id: generateUUID(),
         ...report,
         created_at: new Date().toISOString(),
       };

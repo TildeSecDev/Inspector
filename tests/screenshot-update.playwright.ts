@@ -89,12 +89,28 @@ test.describe('Inspector Twin - Full Application Screenshots', () => {
     console.log('✓ Screenshot saved: 4_twin_designer_no_project.png');
   });
 
-  test('4. Scenarios Page', async ({ page }) => {
-    // Navigate to Scenarios
-    await page.click('a:has-text("Scenarios")');
-    await page.waitForSelector('h1:has-text("Scenarios")');
+  test('4. Scenarios Tab in Twin Designer', async ({ page }) => {
+    // First create a project
+    await page.click('button:has-text("New Project")');
+    await page.fill('input[placeholder="Project Name"]', 'Test Scenarios Project');
+    await page.click('button[type="submit"]:has-text("Create")');
+    await page.waitForTimeout(1000);
     
-    // Take screenshot of empty state
+    // Navigate back to Projects and select the project
+    await page.click('a:has-text("Projects")');
+    await page.waitForTimeout(500);
+    await page.click('.card:has-text("Test Scenarios Project")');
+    await page.waitForTimeout(1000);
+    
+    // Navigate to Twin Designer
+    await page.click('a:has-text("Twin Designer")');
+    await page.waitForTimeout(500);
+    
+    // Click Scenarios tab
+    await page.click('button:has-text("Scenarios")');
+    await page.waitForTimeout(500);
+    
+    // Take screenshot of scenarios tab
     await page.screenshot({ 
       path: '.playwright-mcp/5_scenarios_page.png',
       fullPage: true 
@@ -103,10 +119,26 @@ test.describe('Inspector Twin - Full Application Screenshots', () => {
     console.log('✓ Screenshot saved: 5_scenarios_page.png');
   });
 
-  test('5. Simulation Runner Page', async ({ page }) => {
-    // Navigate to Simulation Runner
-    await page.click('a:has-text("Simulation")');
-    await page.waitForSelector('h1:has-text("Simulation Runner")');
+  test('5. Simulation Runner Tab in Twin Designer', async ({ page }) => {
+    // First create a project
+    await page.click('button:has-text("New Project")');
+    await page.fill('input[placeholder="Project Name"]', 'Test Runner Project');
+    await page.click('button[type="submit"]:has-text("Create")');
+    await page.waitForTimeout(1000);
+    
+    // Navigate back to Projects and select the project
+    await page.click('a:has-text("Projects")');
+    await page.waitForTimeout(500);
+    await page.click('.card:has-text("Test Runner Project")');
+    await page.waitForTimeout(1000);
+    
+    // Navigate to Twin Designer
+    await page.click('a:has-text("Twin Designer")');
+    await page.waitForTimeout(500);
+    
+    // Click Simulation Runner tab
+    await page.click('button:has-text("Simulation Runner")');
+    await page.waitForTimeout(500);
     
     // Take screenshot
     await page.screenshot({ 
@@ -117,10 +149,26 @@ test.describe('Inspector Twin - Full Application Screenshots', () => {
     console.log('✓ Screenshot saved: 6_simulation_runner.png');
   });
 
-  test('6. Findings Page', async ({ page }) => {
-    // Navigate to Findings
-    await page.click('a:has-text("Findings")');
-    await page.waitForSelector('h1:has-text("Findings")');
+  test('6. Findings Tab in Twin Designer', async ({ page }) => {
+    // First create a project
+    await page.click('button:has-text("New Project")');
+    await page.fill('input[placeholder="Project Name"]', 'Test Findings Project');
+    await page.click('button[type="submit"]:has-text("Create")');
+    await page.waitForTimeout(1000);
+    
+    // Navigate back to Projects and select the project
+    await page.click('a:has-text("Projects")');
+    await page.waitForTimeout(500);
+    await page.click('.card:has-text("Test Findings Project")');
+    await page.waitForTimeout(1000);
+    
+    // Navigate to Twin Designer
+    await page.click('a:has-text("Twin Designer")');
+    await page.waitForTimeout(500);
+    
+    // Click Findings tab
+    await page.click('button:has-text("Findings")');
+    await page.waitForTimeout(500);
     
     // Take screenshot
     await page.screenshot({ 
@@ -188,8 +236,8 @@ test.describe('Inspector Twin - Full Application Screenshots', () => {
         fullPage: true 
       });
       
-      // Navigate to scenarios
-      await page.click('a:has-text("Scenarios")');
+      // Click Scenarios tab in Twin Designer
+      await page.click('button:has-text("Scenarios")');
       await page.waitForTimeout(1000);
       
       await page.screenshot({ 

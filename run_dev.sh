@@ -30,11 +30,17 @@ else
     echo "✅ Dependencies already installed"
 fi
 
-# Start the application (renderer + electron)
-echo "🎯 Starting Inspector Twin (Vite + Electron)..."
+# Check for Rust/Cargo (required for Tauri)
+if ! command -v cargo &> /dev/null; then
+    echo "❌ Rust/Cargo is not installed. Please install Rust from https://rustup.rs/"
+    exit 1
+fi
+
+# Start the application (renderer + tauri)
+echo "🎯 Starting Inspector Twin (Vite + Tauri)..."
 echo ""
 echo "The application will open in a new window."
 echo "Press Ctrl+C to stop the development server."
 echo ""
 
-npm run dev
+npm run dev:tauri

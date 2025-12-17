@@ -13,6 +13,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useAppStore } from '../store/appStore';
+import { mockAPI } from '../utils/mockAPI';
 import { Save, Plus, Trash2, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,11 +42,14 @@ export function TwinDesignerPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'designer' | 'scenarios' | 'runner' | 'findings'>('designer');
+  const [scenarios, setScenarios] = useState<any[]>([]);
+  const [scenariosLoading, setScenariosLoading] = useState(false);
 
   // Load topology on mount
   useEffect(() => {
     const loadTopology = async () => {
-      if (!currentTopology || !window.electronAPI) {
+      if (!currentProject) {
         setLoading(false);
         return;
       }
@@ -53,43 +57,49 @@ export function TwinDesignerPage() {
       try {
         setLoading(true);
         setError(null);
-        const topology = await window.electronAPI.topology.getById(currentTopology.id);
         
-        if (topology.graph) {
-          // Convert stored graph format to React Flow format
-          const flowNodes: Node[] = (topology.graph.nodes || []).map((node: any) => ({
-            id: node.id,
-            type: 'default',
-            position: node.position || { x: 0, y: 0 },
-            data: {
-              label: node.label,
-              nodeType: node.type,
-              criticality: node.riskCriticality || 'medium',
-              tags: node.tags || [],
-            },
-            style: {
-              backgroundColor: nodeTypes.find(nt => nt.type === node.type)?.color || '#666',
-              color: '#fff',
-              padding: '10px',
-              borderRadius: '8px',
-              fontWeight: 'bold',
-            },
-          }));
+        // Get graphs for the project
+        const graphs = await mockAPI.graph.getByProjectId(currentProject.id);
+        
+        if (graphs.length > 0) {
+          const topology = graphs[0]; // Use first topology
+          
+          if (topology.graph) {
+            // Convert stored graph format to React Flow format
+            const flowNodes: Node[] = (topology.graph.nodes || []).map((node: any) => ({
+              id: node.id,
+              type: 'default',
+              position: node.position || { x: 0, y: 0 },
+              data: {
+                label: node.label,
+                nodeType: node.type,
+                criticality: node.riskCriticality || 'medium',
+                tags: node.tags || [],
+              },
+              style: {
+                backgroundColor: nodeTypes.find(nt => nt.type === node.type)?.color || '#666',
+                color: '#fff',
+                padding: '10px',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+              },
+            }));
 
-          const flowEdges: Edge[] = (topology.graph.links || []).map((link: any) => ({
-            id: link.id,
-            source: link.source,
-            target: link.target,
-            data: {
-              bandwidth: link.bandwidth,
-              latency: link.latency,
-              canFail: link.canFail,
-            },
-            label: `${link.bandwidth}Mbps`,
-          }));
+            const flowEdges: Edge[] = (topology.graph.links || []).map((link: any) => ({
+              id: link.id || `${link.source}-${link.target}`,
+              source: link.source,
+              target: link.target,
+              data: {
+                bandwidth: link.bandwidth,
+                latency: link.latency,
+                canFail: link.canFail,
+              },
+              label: `${link.bandwidth}Mbps`,
+            }));
 
-          setNodes(flowNodes);
-          setEdges(flowEdges);
+            setNodes(flowNodes);
+            setEdges(flowEdges);
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load topology');
@@ -100,7 +110,24 @@ export function TwinDesignerPage() {
     };
 
     loadTopology();
-  }, [currentTopology, setNodes, setEdges]);
+  }, [currentProject, setNodes, setEdges]);
+
+  // Load scenarios
+  useEffect(() => {
+    const loadScenarios = async () => {
+      if (!currentProject) return;
+      try {
+        setScenariosLoading(true);
+        const scens = await mockAPI.scenario.getByProjectId(currentProject.id);
+        setScenarios(scens || []);
+      } catch (err) {
+        console.error('Failed to load scenarios:', err);
+      } finally {
+        setScenariosLoading(false);
+      }
+    };
+    loadScenarios();
+  }, [currentProject]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -308,29 +335,61 @@ export function TwinDesignerPage() {
         </div>
       )}
 
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Canvas */}
-        <div style={{ flex: 1 }}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={handleNodeClick}
-            onEdgeClick={handleEdgeClick}
-            fitView
+      {/* Tabs */}
+      <div style={{
+        display: 'flex',
+        borderBottom: '1px solid #333',
+        backgroundColor: '#1a1a1a',
+        padding: '0 12px',
+      }}>
+        {['designer', 'scenarios', 'runner', 'findings'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab as any)}
+            style={{
+              padding: '12px 16px',
+              border: 'none',
+              backgroundColor: activeTab === tab ? '#0066cc' : 'transparent',
+              color: '#fff',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: activeTab === tab ? 'bold' : 'normal',
+              textTransform: 'capitalize',
+              borderBottom: activeTab === tab ? '3px solid #0066cc' : '3px solid transparent',
+              transition: 'all 0.2s',
+            }}
           >
-            <Controls />
-            <MiniMap />
-            <Background gap={12} size={1} />
-          </ReactFlow>
-        </div>
+            {tab === 'runner' ? 'Simulation Runner' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
 
-        {/* Properties Panel */}
-        <div style={{
-          width: '300px',
-          borderLeft: '1px solid #ddd',
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Designer Tab */}
+        {activeTab === 'designer' && (
+          <>
+            {/* Canvas */}
+            <div style={{ flex: 1 }}>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeClick={handleNodeClick}
+                onEdgeClick={handleEdgeClick}
+                fitView
+              >
+                <Controls />
+                <MiniMap />
+                <Background gap={12} size={1} />
+              </ReactFlow>
+            </div>
+
+            {/* Properties Panel */}
+            <div style={{
+              width: '300px',
+              borderLeft: '1px solid #ddd',
           overflow: 'auto',
           backgroundColor: '#f9f9f9',
           padding: '16px',
@@ -474,6 +533,80 @@ export function TwinDesignerPage() {
             </div>
           ) : null}
         </div>
+          </>
+        )}
+
+        {/* Scenarios Tab */}
+        {activeTab === 'scenarios' && (
+          <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
+            <h2 style={{ marginBottom: '16px', color: '#fff' }}>Scenarios</h2>
+            {scenariosLoading ? (
+              <div style={{ color: '#999' }}>Loading scenarios...</div>
+            ) : scenarios.length === 0 ? (
+              <div style={{ color: '#999' }}>No scenarios configured for this project</div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px' }}>
+                {scenarios.map((scenario: any) => (
+                  <div
+                    key={scenario.id}
+                    style={{
+                      border: '1px solid #333',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      background: '#1a1a1a',
+                      color: '#fff',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#0066cc')}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#333')}
+                  >
+                    <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>{scenario.name}</h3>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#999' }}>
+                      {scenario.description}
+                    </p>
+                    <button
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        backgroundColor: '#0066cc',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                      }}
+                    >
+                      Run Simulation
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Simulation Runner Tab */}
+        {activeTab === 'runner' && (
+          <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
+            <h2 style={{ marginBottom: '16px', color: '#fff' }}>Simulation Runner</h2>
+            <div style={{ color: '#999', fontSize: '14px' }}>
+              <p>Select a scenario from the Scenarios tab to run a simulation.</p>
+              <p>View real-time metrics, packet flows, policy evaluations, and event timelines.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Findings Tab */}
+        {activeTab === 'findings' && (
+          <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
+            <h2 style={{ marginBottom: '16px', color: '#fff' }}>Findings</h2>
+            <div style={{ color: '#999', fontSize: '14px' }}>
+              <p>Security findings from simulations will appear here.</p>
+              <p>Run scenarios to discover findings, then review them by severity.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
