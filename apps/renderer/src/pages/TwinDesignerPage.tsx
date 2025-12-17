@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -14,9 +14,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { useAppStore } from '../store/appStore';
 import { mockAPI } from '../utils/mockAPI';
-import { Save, Plus, Trash2, ChevronLeft } from 'lucide-react';
+import { Save, Plus, Trash2, ChevronLeft, X, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 const nodeTypes = [
   { type: 'router', label: 'Router', color: '#0066cc' },
   { type: 'switch', label: 'Switch', color: '#00aa66' },
@@ -36,7 +35,7 @@ export function TwinDesignerPage() {
   const { currentProject, currentTopology, setCurrentTopology } = useAppStore();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedNodeType, setSelectedNodeType] = useState(nodeTypes[3]); // Server default
+  const [selectedNodeType, setSelectedNodeType] = useState(nodeTypes[3]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,8 +44,14 @@ export function TwinDesignerPage() {
   const [activeTab, setActiveTab] = useState<'designer' | 'scenarios' | 'runner' | 'findings'>('designer');
   const [scenarios, setScenarios] = useState<any[]>([]);
   const [scenariosLoading, setScenariosLoading] = useState(false);
+  const [scenarioFormOpen, setScenarioFormOpen] = useState(false);
+  const [newScenarioName, setNewScenarioName] = useState('');
+  const [newScenarioDescription, setNewScenarioDescription] = useState('');
+  const [scenarioSaving, setScenarioSaving] = useState(false);
+  const [scenarioError, setScenarioError] = useState<string | null>(null);
+  const scenarioFormRef = useRef<HTMLDivElement | null>(null);
+  const [activeScenario, setActiveScenario] = useState<any | null>(null);
 
-  // Load topology on mount
   useEffect(() => {
     const loadTopology = async () => {
       if (!currentProject) {
@@ -57,15 +62,13 @@ export function TwinDesignerPage() {
       try {
         setLoading(true);
         setError(null);
-        
-        // Get graphs for the project
+
         const graphs = await mockAPI.graph.getByProjectId(currentProject.id);
-        
+
         if (graphs.length > 0) {
-          const topology = graphs[0]; // Use first topology
-          
+          const topology = graphs[0];
+
           if (topology.graph) {
-            // Convert stored graph format to React Flow format
             const flowNodes: Node[] = (topology.graph.nodes || []).map((node: any) => ({
               id: node.id,
               type: 'default',
@@ -77,11 +80,12 @@ export function TwinDesignerPage() {
                 tags: node.tags || [],
               },
               style: {
-                backgroundColor: nodeTypes.find(nt => nt.type === node.type)?.color || '#666',
+                backgroundColor: nodeTypes.find((nt) => nt.type === node.type)?.color || '#666',
                 color: '#fff',
                 padding: '10px',
                 borderRadius: '8px',
                 fontWeight: 'bold',
+                border: '2px solid #333',
               },
             }));
 
@@ -112,7 +116,6 @@ export function TwinDesignerPage() {
     loadTopology();
   }, [currentProject, setNodes, setEdges]);
 
-  // Load scenarios
   useEffect(() => {
     const loadScenarios = async () => {
       if (!currentProject) return;
@@ -120,6 +123,7 @@ export function TwinDesignerPage() {
         setScenariosLoading(true);
         const scens = await mockAPI.scenario.getByProjectId(currentProject.id);
         setScenarios(scens || []);
+        if (scens && scens.length > 0) setActiveScenario(scens[0]);
       } catch (err) {
         console.error('Failed to load scenarios:', err);
       } finally {
@@ -128,6 +132,13 @@ export function TwinDesignerPage() {
     };
     loadScenarios();
   }, [currentProject]);
+
+  useEffect(() => {
+    if (activeTab !== 'scenarios') {
+      setScenarioFormOpen(false);
+      setScenarioError(null);
+    }
+  }, [activeTab]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -167,6 +178,51 @@ export function TwinDesignerPage() {
     setNodes((nds) => nds.concat(newNode));
   };
 
+  const focusScenarioForm = () => {
+    setScenarioFormOpen(true);
+    requestAnimationFrame(() => {
+      if (scenarioFormRef.current) {
+        scenarioFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  };
+
+  const addScenario = async () => {
+    if (!currentProject) return;
+
+    const name = newScenarioName.trim();
+    const description = newScenarioDescription.trim();
+
+    if (!name) {
+      setScenarioError('Scenario title is required');
+      focusScenarioForm();
+      return;
+    }
+
+    try {
+      setScenarioSaving(true);
+      setScenarioError(null);
+      const created = await mockAPI.scenario.create({
+        project_id: currentProject.id,
+        name,
+        description,
+        faults: [],
+        flows: [],
+        attack_events: [],
+      });
+      setScenarios((prev) => [...prev, created]);
+      setActiveScenario(created);
+      setNewScenarioName('');
+      setNewScenarioDescription('');
+      setScenarioFormOpen(false);
+    } catch (err) {
+      console.error('Failed to create scenario:', err);
+      setScenarioError('Failed to create scenario');
+    } finally {
+      setScenarioSaving(false);
+    }
+  };
+
   const deleteSelectedNode = () => {
     if (!selectedNode) return;
     setNodes((nds) => nds.filter((n) => n.id !== selectedNode.id));
@@ -182,24 +238,14 @@ export function TwinDesignerPage() {
 
   const updateSelectedNode = (updates: Partial<Node>) => {
     if (!selectedNode) return;
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === selectedNode.id
-          ? { ...n, ...updates }
-          : n
-      )
-    );
+    setNodes((nds) => nds.map((n) => (n.id === selectedNode.id ? { ...n, ...updates } : n)));
     setSelectedNode({ ...selectedNode, ...updates });
   };
 
   const updateSelectedEdge = (updates: any) => {
     if (!selectedEdge) return;
     setEdges((eds) =>
-      eds.map((e) =>
-        e.id === selectedEdge.id
-          ? { ...e, data: { ...e.data, ...updates } }
-          : e
-      )
+      eds.map((e) => (e.id === selectedEdge.id ? { ...e, data: { ...e.data, ...updates } } : e))
     );
     setSelectedEdge({ ...selectedEdge, data: { ...selectedEdge.data, ...updates } });
   };
@@ -300,24 +346,34 @@ export function TwinDesignerPage() {
           {currentProject.name} {currentTopology ? '- Main Topology' : '- New Topology'}
         </h1>
 
-        <select
-          value={selectedNodeType.type}
-          onChange={(e) => {
-            const nodeType = nodeTypes.find((nt) => nt.type === e.target.value);
-            if (nodeType) setSelectedNodeType(nodeType);
-          }}
-          style={{ marginRight: '10px', width: 'auto', padding: '6px' }}
-        >
-          {nodeTypes.map((nt) => (
-            <option key={nt.type} value={nt.type}>
-              {nt.label}
-            </option>
-          ))}
-        </select>
-        <button onClick={addNode} disabled={saving}>
-          <Plus size={16} style={{ marginRight: '4px' }} />
-          Add Node
-        </button>
+        {activeTab === 'designer' && (
+          <>
+            <select
+              value={selectedNodeType.type}
+              onChange={(e) => {
+                const nodeType = nodeTypes.find((nt) => nt.type === e.target.value);
+                if (nodeType) setSelectedNodeType(nodeType);
+              }}
+              style={{ marginRight: '10px', width: 'auto', padding: '6px' }}
+            >
+              {nodeTypes.map((nt) => (
+                <option key={nt.type} value={nt.type}>
+                  {nt.label}
+                </option>
+              ))}
+            </select>
+            <button onClick={addNode} disabled={saving}>
+              <Plus size={16} style={{ marginRight: '4px' }} />
+              Add Node
+            </button>
+          </>
+        )}
+        {activeTab === 'scenarios' && (
+          <button onClick={focusScenarioForm} disabled={scenarioSaving}>
+            <Plus size={16} style={{ marginRight: '4px' }} />
+            Add Scenario
+          </button>
+        )}
         <button onClick={handleSave} disabled={saving}>
           <Save size={16} style={{ marginRight: '4px' }} />
           {saving ? 'Saving...' : 'Save'}
@@ -325,23 +381,26 @@ export function TwinDesignerPage() {
       </div>
 
       {error && (
-        <div style={{
-          backgroundColor: '#fee2e2',
-          color: '#991b1b',
-          padding: '12px 16px',
-          borderBottom: '1px solid #f5a5a5'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#fee2e2',
+            color: '#991b1b',
+            padding: '12px 16px',
+            borderBottom: '1px solid #f5a5a5',
+          }}
+        >
           <strong>Error:</strong> {error}
         </div>
       )}
 
-      {/* Tabs */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '1px solid #333',
-        backgroundColor: '#1a1a1a',
-        padding: '0 12px',
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          borderBottom: '1px solid #333',
+          backgroundColor: '#1a1a1a',
+          padding: '0 12px',
+        }}
+      >
         {['designer', 'scenarios', 'runner', 'findings'].map((tab) => (
           <button
             key={tab}
@@ -365,10 +424,8 @@ export function TwinDesignerPage() {
       </div>
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Designer Tab */}
         {activeTab === 'designer' && (
           <>
-            {/* Canvas */}
             <div style={{ flex: 1 }}>
               <ReactFlow
                 nodes={nodes}
@@ -386,167 +443,364 @@ export function TwinDesignerPage() {
               </ReactFlow>
             </div>
 
-            {/* Properties Panel */}
-            <div style={{
-              width: '300px',
-              borderLeft: '1px solid #333',
-              overflow: 'auto',
-              backgroundColor: '#0b0b0b',
-              color: '#f0f0f0',
-              padding: '16px',
-            }}>
-          {!selectedNode && !selectedEdge ? (
-            <div style={{ color: '#999' }}>
-              <p><strong>Properties</strong></p>
-              <p style={{ fontSize: '12px', marginTop: '12px' }}>
-                Click a node or link to edit properties
-              </p>
-              <hr style={{ margin: '16px 0', borderColor: '#333' }} />
-              <p style={{ fontSize: '12px', marginTop: '12px' }}>
-                <strong>Nodes:</strong> {nodes.length}
-              </p>
-              <p style={{ fontSize: '12px', marginTop: '4px' }}>
-                <strong>Links:</strong> {edges.length}
-              </p>
-            </div>
-          ) : selectedNode ? (
-            <div>
-              <h3 style={{ marginBottom: '12px', fontSize: '16px' }}>Node Properties</h3>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}>
-                  Label
-                </label>
-                <input
-                  type="text"
-                  value={selectedNode.data?.label || ''}
-                  onChange={(e) =>
-                    updateSelectedNode({
-                      ...selectedNode,
-                      data: { ...selectedNode.data, label: e.target.value },
-                    })
-                  }
-                  style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}>
-                  Criticality
-                </label>
-                <select
-                  value={selectedNode.data?.criticality || 'medium'}
-                  onChange={(e) =>
-                    updateSelectedNode({
-                      ...selectedNode,
-                      data: { ...selectedNode.data, criticality: e.target.value },
-                    })
-                  }
-                  style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
+            <div
+              style={{
+                width: '320px',
+                borderLeft: '1px solid #333',
+                backgroundColor: '#0b0b0b',
+                color: '#f0f0f0',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                gap: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{ margin: 0, fontSize: '16px' }}>Properties</h3>
+                <button
+                  onClick={() => {
+                    setSelectedNode(null);
+                    setSelectedEdge(null);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#888',
+                    cursor: 'pointer',
+                    padding: '4px',
+                  }}
+                  title="Close properties"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="critical">Critical</option>
-                </select>
+                  <X size={16} />
+                </button>
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}>
-                  Type: {selectedNode.data?.nodeType || 'Unknown'}
-                </label>
+              <div style={{ flex: 1, overflow: 'auto' }}>
+                {!selectedNode && !selectedEdge ? (
+                  <div style={{ color: '#999' }}>
+                    <p>
+                      <strong>Nothing selected</strong>
+                    </p>
+                    <p style={{ fontSize: '12px', marginTop: '12px' }}>
+                      Click a node or link to edit properties
+                    </p>
+                    <hr style={{ margin: '16px 0', borderColor: '#333' }} />
+                    <p style={{ fontSize: '12px', marginTop: '12px' }}>
+                      <strong>Nodes:</strong> {nodes.length}
+                    </p>
+                    <p style={{ fontSize: '12px', marginTop: '4px' }}>
+                      <strong>Links:</strong> {edges.length}
+                    </p>
+                  </div>
+                ) : selectedNode ? (
+                  <div>
+                    <h3 style={{ marginBottom: '12px', fontSize: '16px' }}>Node Properties</h3>
+                    <div style={{ marginBottom: '12px' }}>
+                      <label
+                        style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}
+                      >
+                        Label
+                      </label>
+                      <input
+                        type="text"
+                        value={selectedNode.data?.label || ''}
+                        onChange={(e) =>
+                          updateSelectedNode({
+                            ...selectedNode,
+                            data: { ...selectedNode.data, label: e.target.value },
+                          })
+                        }
+                        style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '12px' }}>
+                      <label
+                        style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}
+                      >
+                        Criticality
+                      </label>
+                      <select
+                        value={selectedNode.data?.criticality || 'medium'}
+                        onChange={(e) =>
+                          updateSelectedNode({
+                            ...selectedNode,
+                            data: { ...selectedNode.data, criticality: e.target.value },
+                          })
+                        }
+                        style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                      </select>
+                    </div>
+
+                    <div style={{ marginBottom: '12px' }}>
+                      <label
+                        style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}
+                      >
+                        Type: {selectedNode.data?.nodeType || 'Unknown'}
+                      </label>
+                    </div>
+
+                    <button
+                      onClick={deleteSelectedNode}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        backgroundColor: '#dc2626',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Trash2 size={16} style={{ marginRight: '4px' }} />
+                      Delete Node
+                    </button>
+                  </div>
+                ) : selectedEdge ? (
+                  <div>
+                    <h3 style={{ marginBottom: '12px', fontSize: '16px' }}>Link Properties</h3>
+                    <div style={{ marginBottom: '12px' }}>
+                      <label
+                        style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}
+                      >
+                        Bandwidth (Mbps)
+                      </label>
+                      <input
+                        type="number"
+                        value={selectedEdge.data?.bandwidth || 1000}
+                        onChange={(e) => updateSelectedEdge({ bandwidth: parseInt(e.target.value) || 0 })}
+                        style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '12px' }}>
+                      <label
+                        style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}
+                      >
+                        Latency (ms)
+                      </label>
+                      <input
+                        type="number"
+                        value={selectedEdge.data?.latency || 0}
+                        onChange={(e) => updateSelectedEdge({ latency: parseInt(e.target.value) || 0 })}
+                        style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedEdge.data?.canFail || false}
+                          onChange={(e) => updateSelectedEdge({ canFail: e.target.checked })}
+                        />
+                        <span style={{ fontSize: '12px' }}>Can Fail</span>
+                      </label>
+                    </div>
+
+                    <button
+                      onClick={deleteSelectedEdge}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        backgroundColor: '#dc2626',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Trash2 size={16} style={{ marginRight: '4px' }} />
+                      Delete Link
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
-              <button
-                onClick={deleteSelectedNode}
+              <div
                 style={{
-                  width: '100%',
-                  padding: '8px',
-                  backgroundColor: '#dc2626',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
+                  flex: 1,
+                  borderTop: '1px solid #333',
+                  paddingTop: '12px',
+                  overflow: 'auto',
                 }}
               >
-                <Trash2 size={16} style={{ marginRight: '4px' }} />
-                Delete Node
-              </button>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}
+                >
+                  <h3 style={{ margin: 0, fontSize: '16px' }}>Simulation Runner</h3>
+                </div>
+                {activeScenario ? (
+                  <div
+                    style={{
+                      border: '1px solid #333',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      background: '#111',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <p style={{ margin: 0, color: '#fff', fontWeight: 'bold' }}>{activeScenario.name}</p>
+                    <p style={{ margin: '6px 0 10px 0', color: '#bbb', fontSize: '13px' }}>
+                      {activeScenario.description || 'No description provided.'}
+                    </p>
+                    <button
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: '#0066cc',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                      }}
+                    >
+                      <Play size={14} style={{ marginRight: '6px' }} /> Run Scenario
+                    </button>
+                  </div>
+                ) : (
+                  <p style={{ color: '#999', marginBottom: '12px' }}>Select a scenario to run.</p>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {scenarios.length === 0 ? (
+                    <p style={{ color: '#777', fontSize: '13px' }}>No scenarios available.</p>
+                  ) : (
+                    scenarios.map((scenario: any) => (
+                      <button
+                        key={scenario.id}
+                        onClick={() => setActiveScenario(scenario)}
+                        style={{
+                          textAlign: 'left',
+                          padding: '10px',
+                          background: activeScenario?.id === scenario.id ? '#112b45' : '#1a1a1a',
+                          color: '#fff',
+                          border: '1px solid ' + (activeScenario?.id === scenario.id ? '#0066cc' : '#333'),
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <div style={{ fontWeight: 'bold' }}>{scenario.name}</div>
+                        <div style={{ fontSize: '12px', color: '#aaa' }}>
+                          {scenario.description || 'No description provided.'}
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
-          ) : selectedEdge ? (
-            <div>
-              <h3 style={{ marginBottom: '12px', fontSize: '16px' }}>Link Properties</h3>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}>
-                  Bandwidth (Mbps)
-                </label>
-                <input
-                  type="number"
-                  value={selectedEdge.data?.bandwidth || 1000}
-                  onChange={(e) =>
-                    updateSelectedEdge({ bandwidth: parseInt(e.target.value) || 0 })
-                  }
-                  style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', fontSize: '12px' }}>
-                  Latency (ms)
-                </label>
-                <input
-                  type="number"
-                  value={selectedEdge.data?.latency || 0}
-                  onChange={(e) =>
-                    updateSelectedEdge({ latency: parseInt(e.target.value) || 0 })
-                  }
-                  style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedEdge.data?.canFail || false}
-                    onChange={(e) =>
-                      updateSelectedEdge({ canFail: e.target.checked })
-                    }
-                  />
-                  <span style={{ fontSize: '12px' }}>Can Fail</span>
-                </label>
-              </div>
-
-              <button
-                onClick={deleteSelectedEdge}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  backgroundColor: '#dc2626',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                <Trash2 size={16} style={{ marginRight: '4px' }} />
-                Delete Link
-              </button>
-            </div>
-          ) : null}
-        </div>
           </>
         )}
 
-        {/* Scenarios Tab */}
         {activeTab === 'scenarios' && (
           <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
             <h2 style={{ marginBottom: '16px', color: '#fff' }}>Scenarios</h2>
+            {scenarioFormOpen && (
+              <div
+                ref={scenarioFormRef}
+                style={{
+                  border: '1px solid #333',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  background: '#111',
+                  marginBottom: '16px',
+                }}
+              >
+                <h3 style={{ margin: '0 0 12px 0', color: '#fff' }}>Add Scenario</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', color: '#ccc' }}>
+                      Scenario Title
+                    </label>
+                    <input
+                      type="text"
+                      value={newScenarioName}
+                      onChange={(e) => setNewScenarioName(e.target.value)}
+                      placeholder="e.g., Ransomware lateral movement"
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        borderRadius: '6px',
+                        border: '1px solid #444',
+                        background: '#0b0b0b',
+                        color: '#fff',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', color: '#ccc' }}>
+                      Description
+                    </label>
+                    <textarea
+                      value={newScenarioDescription}
+                      onChange={(e) => setNewScenarioDescription(e.target.value)}
+                      placeholder="What does this scenario simulate?"
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        borderRadius: '6px',
+                        border: '1px solid #444',
+                        background: '#0b0b0b',
+                        color: '#fff',
+                        resize: 'vertical',
+                      }}
+                    />
+                  </div>
+                  {scenarioError && (
+                    <div style={{ color: '#f97316', fontSize: '13px' }}>{scenarioError}</div>
+                  )}
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      onClick={addScenario}
+                      disabled={scenarioSaving}
+                      style={{
+                        padding: '10px 14px',
+                        backgroundColor: '#0066cc',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {scenarioSaving ? 'Adding...' : 'Add Scenario'}
+                    </button>
+                    <button
+                      onClick={() => setScenarioFormOpen(false)}
+                      style={{
+                        padding: '10px 14px',
+                        backgroundColor: '#2a2a2a',
+                        color: '#ccc',
+                        border: '1px solid #444',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {scenariosLoading ? (
               <div style={{ color: '#999' }}>Loading scenarios...</div>
             ) : scenarios.length === 0 ? (
               <div style={{ color: '#999' }}>No scenarios configured for this project</div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+                  gap: '12px',
+                }}
+              >
                 {scenarios.map((scenario: any) => (
                   <div
                     key={scenario.id}
@@ -561,6 +815,7 @@ export function TwinDesignerPage() {
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#0066cc')}
                     onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#333')}
+                    onClick={() => setActiveScenario(scenario)}
                   >
                     <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>{scenario.name}</h3>
                     <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#999' }}>
@@ -587,7 +842,6 @@ export function TwinDesignerPage() {
           </div>
         )}
 
-        {/* Simulation Runner Tab */}
         {activeTab === 'runner' && (
           <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
             <h2 style={{ marginBottom: '16px', color: '#fff' }}>Simulation Runner</h2>
@@ -598,7 +852,6 @@ export function TwinDesignerPage() {
           </div>
         )}
 
-        {/* Findings Tab */}
         {activeTab === 'findings' && (
           <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
             <h2 style={{ marginBottom: '16px', color: '#fff' }}>Findings</h2>
