@@ -401,7 +401,7 @@ export function TwinDesignerPage() {
           padding: '0 12px',
         }}
       >
-        {['designer', 'scenarios', 'runner', 'findings'].map((tab) => (
+        {['designer', 'scenarios', 'findings'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -418,7 +418,7 @@ export function TwinDesignerPage() {
               transition: 'all 0.2s',
             }}
           >
-            {tab === 'runner' ? 'Simulation Runner' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
@@ -839,16 +839,6 @@ export function TwinDesignerPage() {
                 ))}
               </div>
             )}
-          </div>
-        )}
-
-        {activeTab === 'runner' && (
-          <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
-            <h2 style={{ marginBottom: '16px', color: '#fff' }}>Simulation Runner</h2>
-            <div style={{ color: '#999', fontSize: '14px' }}>
-              <p>Select a scenario from the Scenarios tab to run a simulation.</p>
-              <p>View real-time metrics, packet flows, policy evaluations, and event timelines.</p>
-            </div>
           </div>
         )}
 
