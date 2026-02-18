@@ -102,19 +102,32 @@ if [ "$PLATFORM" = "Linux" ]; then
     fi
 fi
 
-# Check Node.js version
-if ! command -v node >/dev/null 2>&1; then
+# Check Node.js version (support nodejs binary on some Linux distros)
+NODE_BIN=""
+if command -v node >/dev/null 2>&1; then
+    NODE_BIN="node"
+elif command -v nodejs >/dev/null 2>&1; then
+    NODE_BIN="nodejs"
+    NODE_SHIM_DIR="/tmp/inspectortwin-node-shim"
+    mkdir -p "$NODE_SHIM_DIR"
+    cat >"$NODE_SHIM_DIR/node" <<'EOF'
+#!/bin/sh
+exec nodejs "$@"
+EOF
+    chmod +x "$NODE_SHIM_DIR/node"
+    export PATH="$NODE_SHIM_DIR:$PATH"
+else
     echo "❌ Node.js is not installed. Please install Node.js 18+ and try again."
     exit 1
 fi
 
-NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+NODE_VERSION=$($NODE_BIN -v | cut -d'v' -f2 | cut -d'.' -f1)
 if [ "$NODE_VERSION" -lt 18 ]; then
-    echo "❌ Node.js version 18+ is required. Current version: $(node -v)"
+    echo "❌ Node.js version 18+ is required. Current version: $($NODE_BIN -v)"
     exit 1
 fi
 
-echo "✅ Node.js $(node -v) detected"
+echo "✅ Node.js $($NODE_BIN -v) detected"
 
 # Install dependencies if needed
 if [ ! -d "node_modules" ]; then
