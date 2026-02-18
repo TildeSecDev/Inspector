@@ -1,0 +1,11 @@
+---
+rtr1:
+    username: 
+    password: 
+    platform: rare
+    hostname: 172.20.20.3
+rtr2:
+    username: 
+    password: 
+    platform: rare
+    hostname: 172.20.20.2
