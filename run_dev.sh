@@ -8,6 +8,17 @@ set -e
 echo "🚀 Inspector Twin - Starting Development Environment"
 echo ""
 
+# On Linux, re-run with sudo -E when not root
+if [ "$(uname -s)" = "Linux" ] && [ "$(id -u)" -ne 0 ]; then
+    if command -v sudo >/dev/null 2>&1; then
+        echo "🔐 Elevating with sudo -E -S for Linux system dependencies..."
+        exec sudo -E "$0" "$@"
+    else
+        echo "❌ sudo is required on Linux to install system dependencies."
+        exit 1
+    fi
+fi
+
 # Ensure scripts are executable (non-interactive)
 chmod +x ./run_dev.sh ./scripts/build.sh 2>/dev/null || true
 
