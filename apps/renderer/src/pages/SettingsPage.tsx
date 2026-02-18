@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store/appStore';
 
+interface ImportMetaEnv {
+  readonly BASE_URL: string;
+}
+
+declare global {
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
+}
+
 type Endpoint = {
   id: string;
   name: string;
