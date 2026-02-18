@@ -253,6 +253,14 @@ ipcMain.handle('lab:getStatus', async () => {
   return labRuntime.getStatus();
 });
 
+ipcMain.handle('lab:getLogs', async (_evt, serviceName: string, tail: number = 200) => {
+  ensureAuthorized();
+  if (!labRuntime) {
+    throw new Error('Lab is not running');
+  }
+  return labRuntime.getLogs(serviceName, tail);
+});
+
 // Settings operations
 ipcMain.handle('settings:get', async (_, key) => {
   return store.get(key);

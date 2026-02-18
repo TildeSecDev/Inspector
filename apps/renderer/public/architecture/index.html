@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inspector Twin — Architecture & Runtime</title>
+    <style>
+      :root { --bg:#f8fafc; --fg:#0f172a; --muted:#334155; --line:#e2e8f0; --card:#fff; --accent:#2563eb; }
+      html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:14px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+      header{padding:24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#f8fafc,#fff);position:sticky;top:0;z-index:2}
+      h1{margin:0 0 4px;font-size:22px} .sub{color:var(--muted);font-size:13px}
+      main{padding:16px 24px 56px;max-width:1200px}
+      .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+      .link{color:var(--accent);text-decoration:none;border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#fff}
+      section{margin:20px 0 28px} section>h2{margin:8px 0;font-size:18px}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+      .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+      .card h3{margin:0 0 8px;font-size:16px}
+      .kvs{display:grid;grid-template-columns:160px 1fr;gap:6px 10px}
+      .k{color:var(--muted)} code{background:#f1f5f9;border:1px solid #e2e8f0;padding:1px 5px;border-radius:6px}
+      .pill{display:inline-block;border:1px solid var(--line);padding:2px 8px;border-radius:999px;background:#fff;margin:2px 6px 2px 0;font-size:12px}
+      .flow{border-left:4px solid #94a3b8;padding-left:10px;margin:8px 0}
+      .muted{color:var(--muted)} footer{color:var(--muted);font-size:12px;padding:24px;border-top:1px solid var(--line)}
+      .warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:10px 12px;border-radius:8px}
+      .ok{background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;padding:10px 12px;border-radius:8px}
+      .btn{cursor:pointer;border:1px solid var(--line);padding:6px 8px;border-radius:8px;background:#fff}
+      .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+      dialog{border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+      pre{white-space:pre-wrap;word-break:break-word;background:#0b1021;color:#cbd5e1;padding:12px;border-radius:8px;max-height:60vh;overflow:auto}
+      iframe{width:100%;height:420px;border:1px solid var(--line);border-radius:10px}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Inspector Twin — Architecture & Runtime</h1>
+      <div id="meta" class="sub">Loading…</div>
+      <div class="toolbar">
+        <a class="link" href="./inspector-architecture.svg" target="_blank" rel="noopener">Open SVG</a>
+        <a class="link" href="./inspector-architecture.json" target="_blank" rel="noopener">View JSON</a>
+      </div>
+    </header>
+    <main>
+      <section>
+        <h2>Architecture Diagram</h2>
+        <iframe src="./inspector-architecture.svg" title="Architecture Diagram"></iframe>
+      </section>
+
+      <section id="endpoints">
+        <h2>Endpoints & Services</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Frontend</h3>
+            <div class="kvs" id="frontendInfo"></div>
+          </div>
+          <div class="card">
+            <h3>Desktop Hosts</h3>
+            <div class="kvs" id="hostsInfo"></div>
+          </div>
+          <div class="card">
+            <h3>Lab Runtime (Docker)</h3>
+            <div id="labInfo">
+              <div class="muted">Fetching status…</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Activity</h3>
+            <div class="kvs" id="activityInfo"></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Flows</h2>
+        <div id="flowsList"></div>
+      </section>
+    </main>
+    <footer>Inspector Twin</footer>
+
+    <dialog id="logsModal">
+      <form method="dialog">
+        <div class="card" style="min-width: 60vw; max-width: 85vw;">
+          <div class="row" style="justify-content: space-between;">
+            <h3 id="logsTitle">Service Logs</h3>
+            <div class="row">
+              <label>Tail</label>
+              <select id="logsTail" class="btn">
+                <option value="100">100</option>
+                <option value="200" selected>200</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+              </select>
+              <button class="btn" id="refreshLogs" type="button">Refresh</button>
+              <button class="btn" type="submit">Close</button>
+            </div>
+          </div>
+          <pre id="logsBody">Loading…</pre>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+      const S = (sel) => document.querySelector(sel);
+      const E = (tag, attrs = {}, children = []) => { const n = document.createElement(tag); for (const [k,v] of Object.entries(attrs)) { if (k==='class') n.className=v; else if (k==='html') n.innerHTML=v; else n.setAttribute(k,v); } if (!Array.isArray(children)) children=[children]; children.filter(Boolean).forEach(c=> n.appendChild(typeof c==='string'?document.createTextNode(c):c)); return n; };
+      const KV = (k,v) => E('div',{class:'kvs'},[E('div',{class:'k'},k),E('div',{},v)])
+
+      async function fetchJSON() {
+        const res = await fetch('./inspector-architecture.json', { cache: 'no-store' });
+        return res.ok ? res.json() : { layers: [], flows: [] };
+      }
+
+      function renderFlows(flows) {
+        const root = S('#flowsList'); root.innerHTML = '';
+        (flows||[]).forEach(f => root.appendChild(E('div',{class:'card flow'},[
+          E('div',{},[E('strong',{},(f.type||'flow')+': '), `${f.from} → ${f.to}`]),
+          f.description ? E('div',{class:'muted'},f.description) : null
+        ])));
+      }
+
+      function detectEnvironment() {
+        const hasElectron = !!(window.electronAPI);
+        const hasTauri = !!(window.__TAURI__ || window.__TAURI_INTERNALS__);
+        return { hasElectron, hasTauri };
+      }
+
+      function renderEndpoints() {
+        const { hasElectron, hasTauri } = detectEnvironment();
+        const f = S('#frontendInfo');
+        f.innerHTML = '';
+        f.appendChild(KV('URL', E('code',{}, window.location.origin)));
+        f.appendChild(KV('Mode', hasElectron? 'Desktop (Electron)': (hasTauri? 'Desktop (Tauri)': 'Browser')));
+
+        const h = S('#hostsInfo');
+        h.innerHTML = '';
+        h.appendChild(KV('Electron', hasElectron? 'Detected' : 'Not detected'));
+        h.appendChild(KV('Tauri', hasTauri? 'Detected' : 'Not detected'));
+      }
+
+      async function renderLab() {
+        const el = S('#labInfo');
+        const hasElectron = !!window.electronAPI;
+        if (!hasElectron) { el.innerHTML = ''; el.appendChild(E('div',{class:'warn'},'Lab status is only available in desktop mode.')); return; }
+        try {
+          const status = await window.electronAPI.lab.getStatus();
+          el.innerHTML = '';
+          el.appendChild(KV('Running', status.running ? 'Yes' : 'No'));
+          const list = E('div');
+          (status.services || []).forEach(svc => {
+            const row = E('div',{class:'row'},[
+              E('span',{class:'pill'},svc.name),
+              E('span',{},`status: ${svc.status}`),
+              E('span',{}, svc.ports?.length? `ports: ${svc.ports.join(', ')}` : 'ports: -'),
+              E('button',{class:'btn', type:'button', 'data-svc': svc.name},'View logs')
+            ]);
+            list.appendChild(row);
+          });
+          el.appendChild(KV('Services', list));
+
+          // Bind log buttons
+          el.querySelectorAll('button[data-svc]').forEach(btn => btn.addEventListener('click', async (e) => {
+            const name = e.currentTarget.getAttribute('data-svc');
+            openLogs(name);
+          }));
+        } catch (e) {
+          el.innerHTML = '';
+          el.appendChild(E('div',{class:'warn'},`Failed to get lab status: ${e}`));
+        }
+      }
+
+      // Logs modal
+      async function openLogs(serviceName) {
+        const dlg = S('#logsModal');
+        const title = S('#logsTitle');
+        const body = S('#logsBody');
+        const tailSel = S('#logsTail');
+        const refresh = S('#refreshLogs');
+        title.textContent = `Logs — ${serviceName}`;
+        body.textContent = 'Loading…';
+        dlg.showModal();
+        async function load() {
+          try {
+            const logs = await window.electronAPI.lab.getLogs(serviceName, Number(tailSel.value));
+            body.textContent = logs || '(no output)';
+          } catch (e) {
+            body.textContent = `Failed to fetch logs: ${e}`;
+          }
+        }
+        tailSel.onchange = load;
+        refresh.onclick = load;
+        load();
+      }
+
+      function renderActivity() {
+        const el = S('#activityInfo');
+        el.innerHTML = '';
+        // Last login (tracked locally per device)
+        const now = new Date();
+        const lastLogin = localStorage.getItem('it_last_login');
+        localStorage.setItem('it_last_login', now.toISOString());
+        el.appendChild(KV('Last Login', lastLogin ? new Date(lastLogin).toLocaleString() : 'First session'));
+        // Last simulation / Recent scans (best-effort)
+        // Browser mode: read mockAPI data
+        try {
+          const raw = localStorage.getItem('inspector-twin-data');
+          if (raw) {
+            const data = JSON.parse(raw);
+            const runs = data.runs || [];
+            const lastRun = runs[runs.length - 1];
+            el.appendChild(KV('Last Simulation', lastRun ? new Date(lastRun.created_at || Date.now()).toLocaleString() : 'N/A'));
+            const findings = (data.findings || []).length;
+            el.appendChild(KV('Recent Findings', String(findings)));
+            const reports = (data.reports || []).length;
+            el.appendChild(KV('Reports', String(reports)));
+          } else if (window.electronAPI) {
+            el.appendChild(KV('Last Simulation', 'N/A (desktop mode — not aggregated)'));
+            el.appendChild(KV('Recent Findings', 'N/A (desktop mode)'));
+            el.appendChild(KV('Reports', 'N/A (desktop mode)'));
+          }
+        } catch {}
+        el.appendChild(KV('Containerlab', 'Not configured'));
+      }
+
+      (async () => {
+        const meta = S('#meta');
+        try {
+          const data = await fetchJSON();
+          meta.textContent = `${data.name || 'Architecture'} • v${data.version || '1.0'} • ${data.generated_at || ''}`;
+          renderFlows(data.flows);
+        } catch { meta.textContent = 'Architecture'; }
+        renderEndpoints();
+        renderActivity();
+        renderLab();
+        // Periodically refresh lab status
+        setInterval(renderLab, 8000);
+      })();
+    </script>
+  </body>
+  </html>
+

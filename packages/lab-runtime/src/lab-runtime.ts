@@ -131,6 +131,18 @@ export class LabRuntime {
   }
 
   /**
+   * Get recent stdout/stderr logs for a service container
+   */
+  async getLogs(serviceName: string, tail: number = 200): Promise<string> {
+    const containerId = this.runningContainers.get(serviceName);
+    if (!containerId) throw new Error(`Service not found or not running: ${serviceName}`);
+    const container = this.docker.getContainer(containerId);
+    const logs = await container.logs({ stdout: true, stderr: true, tail, timestamps: true });
+    const buf = Buffer.isBuffer(logs) ? logs : Buffer.from(logs as any);
+    return buf.toString('utf8');
+  }
+
+  /**
    * Perform safety checks on container configuration
    */
   static validateConfig(config: LabConfig): { valid: boolean; errors: string[] } {

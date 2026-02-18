@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copy of docs/inspector-architecture.svg for runtime access -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="920" viewBox="0 0 1280 920" font-family="Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .title { font-size: 24px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 14px; fill: #334155; }
+      .box-title { font-size: 16px; font-weight: 700; fill: #0f172a; }
+      .item { font-size: 13px; fill: #334155; }
+      .small { font-size: 12px; fill: #475569; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; rx: 10; }
+      .layer { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; rx: 12; }
+      .accent { fill: #eff6ff; stroke: #bfdbfe; }
+      .accent2 { fill: #ecfeff; stroke: #a5f3fc; }
+      .accent3 { fill: #f0fdf4; stroke: #bbf7d0; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="920" fill="url(#bgGrad)"/>
+
+  <text class="title" x="40" y="56">Inspector Twin — Architecture Overview</text>
+  <text class="subtitle" x="40" y="80">Frontend (React/Vite), Middleware (Domain Packages), Backend (Electron/Tauri), and Scripts/Tooling</text>
+
+  <g transform="translate(40, 100)">
+    <rect class="layer" x="0" y="0" width="1200" height="160"/>
+    <text class="box-title" x="16" y="32">Frontend — React 18 + TypeScript + Vite (apps/renderer)</text>
+
+    <g transform="translate(16, 48)">
+      <rect class="box accent" x="0" y="0" width="360" height="96"/>
+      <text class="box-title" x="12" y="26">UI &amp; Navigation</text>
+      <text class="item" x="12" y="48">Pages: Projects, Twin Designer, Scenarios, Simulation, Findings, Reports, Settings</text>
+      <text class="item" x="12" y="68">State: Zustand store, local UI state</text>
+      <text class="small" x="12" y="86">Renders in WebView (Tauri/Electron) or browser (dev)</text>
+    </g>
+
+    <g transform="translate(400, 48)">
+      <rect class="box accent" x="0" y="0" width="360" height="96"/>
+      <text class="box-title" x="12" y="26">Data Access</text>
+      <text class="item" x="12" y="48">Primary: `window.electronAPI` (IPC to backend)</text>
+      <text class="item" x="12" y="68">Browser-only fallback: `mockAPI` (localStorage)</text>
+    </g>
+
+    <g transform="translate(784, 48)">
+      <rect class="box accent" x="0" y="0" width="400" height="96"/>
+      <text class="box-title" x="12" y="26">Key UI Dependencies</text>
+      <text class="item" x="12" y="48">React Flow (canvas), Monaco (policy DSL), Zod (validation)</text>
+      <text class="item" x="12" y="68">pdf-lib (preview/export), Router, Icons/Styling</text>
+    </g>
+  </g>
+
+  <line x1="640" y1="260" x2="640" y2="296" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g transform="translate(40, 300)">
+    <rect class="layer" x="0" y="0" width="1200" height="200"/>
+    <text class="box-title" x="16" y="32">Middleware — Domain Packages (packages/*)</text>
+
+    <g transform="translate(16, 48)">
+      <rect class="box accent2" x="0" y="0" width="360" height="128"/>
+      <text class="box-title" x="12" y="26">@inspectortwin/core-sim</text>
+      <text class="item" x="12" y="48">Simulation engine: routing, packet flow, failures</text>
+      <text class="small" x="12" y="68">Used by backend for `simulation:run`</text>
+      <text class="small" x="12" y="86">Validations in `validation.ts`</text>
+    </g>
+
+    <g transform="translate(400, 48)">
+      <rect class="box accent2" x="0" y="0" width="360" height="128"/>
+      <text class="box-title" x="12" y="26">@inspectortwin/project-store</text>
+      <text class="item" x="12" y="48">Repositories for projects, topologies, scenarios, runs</text>
+      <text class="small" x="12" y="68">Backed by SQLite (better-sqlite3)</text>
+      <text class="small" x="12" y="86">Used by Electron IPC handlers</text>
+    </g>
+
+    <g transform="translate(784, 48)">
+      <rect class="box accent2" x="0" y="0" width="400" height="128"/>
+      <text class="box-title" x="12" y="26">Other Packages</text>
+      <text class="item" x="12" y="48">@inspectortwin/policy-dsl — Firewall policy parser</text>
+      <text class="item" x="12" y="68">@inspectortwin/report-kit — JSON/PDF report generator</text>
+      <text class="item" x="12" y="88">@inspectortwin/lab-runtime — Local Docker lab (localhost only)</text>
+      <text class="small" x="12" y="106">@inspectortwin/shared — Types, Zod schemas, sample data</text>
+    </g>
+  </g>
+
+  <line x1="320" y1="500" x2="320" y2="548" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="960" y1="500" x2="960" y2="548" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g transform="translate(40, 550)">
+    <rect class="layer" x="0" y="0" width="1200" height="210"/>
+    <text class="box-title" x="16" y="32">Backend Hosts — Desktop Shells</text>
+
+    <g transform="translate(16, 52)">
+      <rect class="box accent3" x="0" y="0" width="560" height="140"/>
+      <text class="box-title" x="12" y="26">Electron Main Process (apps/desktop)</text>
+      <text class="item" x="12" y="48">IPC channels: project/*, topology/*, scenario/*, simulation/*, findings/*, report/*, lab/*, settings/*</text>
+      <text class="item" x="12" y="68">Uses domain packages for DB, simulation, reports, lab runtime</text>
+      <text class="small" x="12" y="88">Rules of Engagement enforcement (authorized local testing)</text>
+      <text class="small" x="12" y="106">Persists SQLite DB under userData</text>
+    </g>
+
+    <g transform="translate(624, 52)">
+      <rect class="box accent3" x="0" y="0" width="560" height="140"/>
+      <text class="box-title" x="12" y="26">Tauri v2 Backend (src-tauri)</text>
+      <text class="item" x="12" y="48">Rust main process + secure WebView</text>
+      <text class="item" x="12" y="68">Shell plugin enabled; IPC commands can be exposed</text>
+      <text class="small" x="12" y="88">Runs alongside Vite dev server in dev:tauri</text>
+      <text class="small" x="12" y="106">Future path for native integrations</text>
+    </g>
+  </g>
+
+  <g transform="translate(40, 780)">
+    <rect class="layer" x="0" y="0" width="1200" height="100"/>
+    <text class="box-title" x="16" y="32">System Resources</text>
+    <g transform="translate(16, 44)">
+      <rect class="box" x="0" y="-20" width="360" height="56"/>
+      <text class="item" x="12" y="6">SQLite DB — `inspectortwin.db` (userData)</text>
+    </g>
+    <g transform="translate(400, 44)">
+      <rect class="box" x="0" y="-20" width="360" height="56"/>
+      <text class="item" x="12" y="6">Documents/InspectorTwin — Report outputs (JSON/PDF)</text>
+    </g>
+    <g transform="translate(784, 44)">
+      <rect class="box" x="0" y="-20" width="400" height="56"/>
+      <text class="item" x="12" y="6">Docker Daemon (localhost only) — Optional lab runtime</text>
+    </g>
+  </g>
+
+  <line x1="296" y1="690" x2="240" y2="780" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="296" y1="690" x2="640" y2="780" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="984" y1="690" x2="984" y2="780" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g transform="translate(880, 100)">
+    <rect class="box" x="0" y="0" width="360" height="160"/>
+    <text class="box-title" x="12" y="26">Scripts &amp; Tooling</text>
+    <text class="item" x="12" y="48">scripts/build.sh — Build workspace packages</text>
+    <text class="item" x="12" y="68">scripts/seed.mjs — Seed sample data</text>
+    <text class="item" x="12" y="88">scripts/smoke-test.sh — Playwright smoke tests</text>
+    <text class="item" x="12" y="108">playwright.config.ts — E2E test config</text>
+    <text class="small" x="12" y="128">npm run dev:tauri — Vite + Tauri dev; npm run dev — Electron dev</text>
+  </g>
+
+  <line x1="1060" y1="260" x2="1060" y2="300" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" marker-end="url(#arrow)"/>
+  <line x1="1060" y1="260" x2="1060" y2="140" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" marker-end="url(#arrow)"/>
+
+  <g transform="translate(40, 860)">
+    <rect class="box" x="0" y="-28" width="480" height="40"/>
+    <circle cx="24" cy="-8" r="8" fill="#60a5fa"/>
+    <text class="small" x="40" y="-4">Solid arrows: primary data/control flow; Dotted: tooling/dev flow</text>
+  </g>
+</svg>

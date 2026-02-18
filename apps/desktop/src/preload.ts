@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     start: (config: any) => ipcRenderer.invoke('lab:start', config),
     stop: () => ipcRenderer.invoke('lab:stop'),
     getStatus: () => ipcRenderer.invoke('lab:getStatus'),
+    getLogs: (serviceName: string, tail?: number) => ipcRenderer.invoke('lab:getLogs', serviceName, tail ?? 200),
   },
 
   // Settings operations
