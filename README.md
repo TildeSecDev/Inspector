@@ -95,6 +95,57 @@ Visit the **Projects** page → Select **"SME Office + Cloud App"** → Explore 
 
 ---
 
+## 🌐 Network Topology Scanner (NEW!)
+
+Inspector Twin now includes a comprehensive **Network Topology Scanner** that discovers real network devices and automatically generates simulation configurations.
+
+### Features
+
+- **Comprehensive Discovery**: ARP, Nmap intensive scanning (all 65535 ports), Bluetooth device discovery
+- **OS & Service Detection**: Identifies operating systems, versions, services, and device types
+- **Topology Mapping**: Traces network paths, identifies routers/switches/access points, maps device connections
+- **Simulation-Ready Output**: Generates JSON, Containerlab YAML, and Docker Compose configurations
+- **OTLP Integration**: Forward real device telemetry to simulated environments for testing
+
+### Quick Start
+
+```bash
+# Scan your authorized local network (requires sudo)
+sudo ./scripts/scan-network-topology.sh
+
+# Review discovered devices
+cat network-scans/network-topology-*.json | jq '.devices | keys'
+
+# Deploy simulation
+docker-compose -f network-scans/network-topology-*-docker-compose.yml up -d
+```
+
+### Output
+
+The scanner generates:
+- **JSON**: Complete device inventory with OS, services, ports, MAC addresses
+- **Containerlab Config**: Ready-to-deploy network simulation
+- **Docker Compose Config**: Container-based digital twin
+- **Topology Map**: Connections, routing, and device relationships
+
+### Use Cases
+
+1. **Discover** → Scan authorized local network
+2. **Simulate** → Deploy containerlab/Docker digital twin
+3. **Forward Telemetry** → Configure OTLP to send real device logs/metrics to simulation
+4. **Test** → Run security assessments on simulation with real device behavior
+5. **Analyze** → Compare real vs simulated behavior, detect anomalies
+
+### Documentation
+
+- [Network Scanner README](scripts/NETWORK_SCANNER_README.md) - Complete documentation
+- [Integration Guide](scripts/INTEGRATION_GUIDE.md) - Connect real devices to simulation
+- [Quick Reference](scripts/QUICK_REFERENCE.md) - Command cheat sheet
+
+⚠️ **Only use on networks you own or have explicit written permission to test.**
+
+---
+
 ## 📸 Screenshots
 
 ### Projects Management
