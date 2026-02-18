@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inspector Twin — Architecture</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --fg: #0f172a;
+        --muted: #334155;
+        --line: #e2e8f0;
+        --card: #ffffff;
+        --accent: #2563eb;
+      }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font: 14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+      header { padding: 28px 24px 12px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg,#f8fafc,#fff); position: sticky; top: 0; z-index: 2; }
+      h1 { margin: 0 0 6px; font-size: 24px; }
+      .sub { color: var(--muted); font-size: 13px; }
+      main { padding: 16px 24px 56px; max-width: 1200px; }
+      .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+      .link { color: var(--accent); text-decoration: none; border: 1px solid var(--line); padding: 6px 10px; border-radius: 8px; background: #fff; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+      section { margin: 20px 0 28px; }
+      section > h2 { margin: 12px 0; font-size: 18px; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+      .card h3 { margin: 0 0 8px; font-size: 16px; }
+      .kvs { display: grid; grid-template-columns: 140px 1fr; gap: 6px 10px; }
+      .k { color: var(--muted); }
+      ul { margin: 6px 0 0 18px; padding: 0; }
+      code { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 1px 5px; border-radius: 6px; }
+      .pill { display:inline-block; border:1px solid var(--line); padding:2px 8px; border-radius:999px; background:#fff; margin:2px 6px 2px 0; font-size:12px; }
+      .flow { border-left: 4px solid #94a3b8; padding-left: 10px; margin: 8px 0; }
+      .muted { color: var(--muted); }
+      footer { color: var(--muted); font-size: 12px; padding: 24px; border-top: 1px solid var(--line); }
+      .warn { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:10px 12px; border-radius:8px; }
+      .ok { background:#ecfeff; border:1px solid #a5f3fc; color:#155e75; padding:10px 12px; border-radius:8px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Inspector Twin — Architecture</h1>
+      <div class="sub" id="meta">Loading details…</div>
+      <div class="toolbar">
+        <a class="link" href="./inspector-architecture.svg" target="_blank" rel="noopener">Open SVG Diagram</a>
+        <a class="link" href="./inspector-architecture.json" target="_blank" rel="noopener">View JSON</a>
+      </div>
+    </header>
+    <main>
+      <section id="layers">
+        <h2>Layers & Components</h2>
+        <div id="layersGrid" class="grid"></div>
+      </section>
+
+      <section id="flows">
+        <h2>Flows</h2>
+        <div id="flowsList"></div>
+      </section>
+
+      <section id="legend">
+        <h2>Legend</h2>
+        <div id="legendBody" class="card"></div>
+      </section>
+    </main>
+    <footer id="footer">Inspector Twin</footer>
+
+    <script>
+      async function loadData() {
+        // Prefer external JSON so the page stays in sync; fall back to inline if fetch fails.
+        try {
+          const res = await fetch('./inspector-architecture.json', { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return await res.json();
+        } catch (e) {
+          console.warn('Fetch failed, falling back to embedded data:', e);
+          const el = document.getElementById('embedded-arch-data');
+          if (!el) throw e;
+          return JSON.parse(el.textContent);
+        }
+      }
+
+      function el(tag, attrs = {}, children = []) {
+        const node = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs)) {
+          if (k === 'class') node.className = v; else if (k === 'html') node.innerHTML = v; else node.setAttribute(k, v);
+        }
+        if (!Array.isArray(children)) children = [children];
+        for (const c of children) {
+          if (c == null) continue;
+          node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+        }
+        return node;
+      }
+
+      function kv(key, value) {
+        return el('div', { class: 'kvs' }, [
+          el('div', { class: 'k' }, key),
+          el('div', {}, value)
+        ]);
+      }
+
+      function list(items) {
+        const ul = el('ul');
+        (items || []).forEach(i => ul.appendChild(el('li', {}, typeof i === 'string' ? i : JSON.stringify(i))));
+        return ul;
+      }
+
+      function pills(items) {
+        const wrap = el('div');
+        (items || []).forEach(i => wrap.appendChild(el('span', { class: 'pill' }, i)));
+        return wrap;
+      }
+
+      function renderComponent(c) {
+        const title = c.title || c.name || c.id;
+        const body = el('div');
+        if (c.path) body.appendChild(kv('Path', el('code', {}, c.path)));
+        if (c.pages) body.appendChild(kv('Pages', pills(c.pages)));
+        if (c.state) body.appendChild(kv('State', el('div', {}, `${c.state.library} — ${c.state.store_path}`)));
+        if (c.primary) body.appendChild(kv('Primary', el('div', {}, `${c.primary.api} (${c.primary.transport || 'IPC'})`)));
+        if (c.fallback) body.appendChild(kv('Fallback', el('div', {}, `${c.fallback.api} (${c.fallback.storage || ''})`)));
+        if (c.dependencies) body.appendChild(kv('Dependencies', list(c.dependencies)));
+        if (c.responsibilities) body.appendChild(kv('Responsibilities', list(c.responsibilities)));
+        if (c.key_files) body.appendChild(kv('Key Files', list((c.key_files || []).map(f => el('code', {}, f)))));
+        if (c.ipc_channels) body.appendChild(kv('IPC', list(c.ipc_channels.map(ch => el('code', {}, ch)))));
+        if (c.uses_packages) body.appendChild(kv('Uses', pills(c.uses_packages)));
+        if (c.persists) body.appendChild(kv('Persists', list((c.persists || []).map(p => `${p.target}: ${p.path}`))));
+        if (c.notes) body.appendChild(kv('Notes', list(c.notes)));
+        return el('div', { class: 'card' }, [ el('h3', {}, title), body ]);
+      }
+
+      function renderLayers(layers) {
+        const grid = document.getElementById('layersGrid');
+        grid.innerHTML = '';
+        (layers || []).forEach(layer => {
+          const box = el('div', { class: 'card' });
+          box.appendChild(el('h3', {}, layer.title || layer.id));
+          if (layer.path) box.appendChild(kv('Path', el('code', {}, layer.path)));
+
+          const comps = el('div', { class: 'grid' });
+          (layer.components || []).forEach(c => comps.appendChild(renderComponent(c)));
+
+          box.appendChild(comps);
+          grid.appendChild(box);
+        });
+      }
+
+      function renderFlows(flows) {
+        const root = document.getElementById('flowsList');
+        root.innerHTML = '';
+        (flows || []).forEach(f => {
+          const row = el('div', { class: 'card flow' }, [
+            el('div', {}, [el('strong', {}, (f.type || 'flow') + ': '), `${f.from} → ${f.to}`]),
+            f.description ? el('div', { class: 'muted' }, f.description) : null
+          ]);
+          root.appendChild(row);
+        });
+      }
+
+      function renderLegend(legend) {
+        const body = document.getElementById('legendBody');
+        body.innerHTML = '';
+        if (!legend) { body.appendChild(el('div', { class: 'warn' }, 'No legend available.')); return; }
+        if (legend.arrows) {
+          body.appendChild(kv('Arrows (solid)', legend.arrows.solid || ''));
+          body.appendChild(kv('Arrows (dotted)', legend.arrows.dotted || ''));
+        }
+      }
+
+      (async () => {
+        try {
+          const data = await loadData();
+          document.getElementById('meta').textContent = `${data.name || 'Architecture'} • v${data.version || '1.0'} • ${data.generated_at || ''}`;
+          document.getElementById('footer').textContent = data.name || 'Inspector Twin';
+          renderLayers(data.layers);
+          renderFlows(data.flows);
+          renderLegend(data.legend);
+        } catch (e) {
+          document.querySelector('main').prepend(el('div', { class: 'warn' }, `Failed to load architecture JSON: ${e}`));
+        }
+      })();
+    </script>
+
+    <!-- Optional embedded fallback JSON for local file viewing without a server. Keep minimal -->
+    <script id="embedded-arch-data" type="application/json">{"name":"Inspector Twin — Architecture","version":"1.0.0"}</script>
+  </body>
+</html>
+
