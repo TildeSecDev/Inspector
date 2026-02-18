@@ -8,8 +8,43 @@ set -e
 echo "🚀 Inspector Twin - Starting Development Environment"
 echo ""
 
+# Detect OS (macOS vs Linux)
+OS_NAME="$(uname -s)"
+case "$OS_NAME" in
+    Darwin)
+        PLATFORM="macOS"
+        ;;
+    Linux)
+        PLATFORM="Linux"
+        ;;
+    *)
+        echo "❌ Unsupported OS: $OS_NAME"
+        echo "This script supports macOS and Linux only."
+        exit 1
+        ;;
+esac
+
+echo "🖥️  Detected OS: $PLATFORM"
+echo ""
+
+# Verify environment and install prerequisites as needed
+if [ ! -f "./verify.sh" ]; then
+    echo "❌ verify.sh not found. Cannot verify prerequisites."
+    exit 1
+fi
+
+if [ ! -x "./verify.sh" ]; then
+    echo "⚠️  verify.sh is not executable. Attempting to continue with bash."
+    AUTO_YES=1 bash ./verify.sh
+else
+    AUTO_YES=1 ./verify.sh
+fi
+
+echo "✅ Environment verification complete"
+echo ""
+
 # Check Node.js version
-if ! command -v node &> /dev/null; then
+if ! command -v node >/dev/null 2>&1; then
     echo "❌ Node.js is not installed. Please install Node.js 18+ and try again."
     exit 1
 fi
@@ -31,7 +66,7 @@ else
 fi
 
 # Check for Rust/Cargo (required for Tauri)
-if ! command -v cargo &> /dev/null; then
+if ! command -v cargo >/dev/null 2>&1; then
     echo "❌ Rust/Cargo is not installed. Please install Rust from https://rustup.rs/"
     exit 1
 fi
