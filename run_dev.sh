@@ -102,8 +102,34 @@ if [ "$PLATFORM" = "Linux" ]; then
     fi
 fi
 
-# Check Node.js version (support nodejs binary on some Linux distros)
+# Check Node.js version (with nvm support on Linux)
 NODE_BIN=""
+
+# On Linux, check for nvm in $HOME first
+if [ "$(uname)" = "Linux" ]; then
+    # Try to load nvm from common locations
+    if [ -s "$HOME/.nvm/nvm.sh" ]; then
+        export NVM_DIR="$HOME/.nvm"
+        . "$NVM_DIR/nvm.sh" >/dev/null 2>&1
+        echo "📦 Loaded nvm from $NVM_DIR"
+    elif [ -s "$HOME/.config/nvm/nvm.sh" ]; then
+        export NVM_DIR="$HOME/.config/nvm"
+        . "$NVM_DIR/nvm.sh" >/dev/null 2>&1
+        echo "📦 Loaded nvm from $NVM_DIR"
+    fi
+    
+    # Also check for node in common nvm installation paths
+    if [ -z "$NODE_BIN" ] && [ -d "$HOME/.nvm/versions/node" ]; then
+        # Find the latest node version in nvm
+        LATEST_NODE=$(ls -1 "$HOME/.nvm/versions/node" | sort -V | tail -n1)
+        if [ -n "$LATEST_NODE" ] && [ -x "$HOME/.nvm/versions/node/$LATEST_NODE/bin/node" ]; then
+            export PATH="$HOME/.nvm/versions/node/$LATEST_NODE/bin:$PATH"
+            echo "📦 Added nvm node to PATH: $LATEST_NODE"
+        fi
+    fi
+fi
+
+# Now check for node binary
 if command -v node >/dev/null 2>&1; then
     NODE_BIN="node"
 elif command -v nodejs >/dev/null 2>&1; then
@@ -118,12 +144,23 @@ EOF
     export PATH="$NODE_SHIM_DIR:$PATH"
 else
     echo "❌ Node.js is not installed. Please install Node.js 18+ and try again."
+    if [ "$(uname)" = "Linux" ]; then
+        echo "ℹ️  To install via nvm:"
+        echo "    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash"
+        echo "    nvm install 18"
+    fi
     exit 1
 fi
 
 NODE_VERSION=$($NODE_BIN -v | cut -d'v' -f2 | cut -d'.' -f1)
 if [ "$NODE_VERSION" -lt 18 ]; then
     echo "❌ Node.js version 18+ is required. Current version: $($NODE_BIN -v)"
+    if [ "$(uname)" = "Linux" ] && [ -s "$HOME/.nvm/nvm.sh" ]; then
+        echo "ℹ️  To upgrade via nvm:"
+        echo "    nvm install 18"
+        echo "    nvm use 18"
+        echo "    nvm alias default 18"
+    fi
     exit 1
 fi
 
