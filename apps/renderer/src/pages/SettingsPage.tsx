@@ -26,6 +26,14 @@ type HealthStatus = {
   checkedAt?: string;
 };
 
+type UpdateResult = {
+  status: 'up-to-date' | 'updated' | 'error';
+  message: string;
+  previousCommit?: string;
+  currentCommit?: string;
+  output?: string;
+};
+
 export function SettingsPage() {
   const { roeAccepted, setRoeAccepted } = useAppStore();
   const [loading, setLoading] = useState(false);
@@ -47,6 +55,8 @@ export function SettingsPage() {
   const [containers, setContainers] = useState<DockerContainer[]>([]);
   const [dockerError, setDockerError] = useState<string | null>(null);
   const [dockerBusy, setDockerBusy] = useState(false);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateResult, setUpdateResult] = useState<UpdateResult | null>(null);
 
   useEffect(() => {
     setStatus(roeAccepted ? 'accepted' : 'not-accepted');
@@ -214,6 +224,31 @@ export function SettingsPage() {
     }
   };
 
+  const runUpdate = async () => {
+    if (!isTauri) {
+      setUpdateResult({
+        status: 'error',
+        message: 'Updates are available only in the desktop app.',
+      });
+      return;
+    }
+
+    setUpdateBusy(true);
+    setUpdateResult(null);
+    try {
+      const result = await tauriInvoke?.('run_app_update', { branch: 'main' });
+      if (!result) throw new Error('Tauri invoke unavailable.');
+      setUpdateResult(result as UpdateResult);
+    } catch (err: any) {
+      setUpdateResult({
+        status: 'error',
+        message: err?.message || String(err),
+      });
+    } finally {
+      setUpdateBusy(false);
+    }
+  };
+
   const resetRoe = async () => {
     setLoading(true);
     setMessage(null);
@@ -235,7 +270,7 @@ export function SettingsPage() {
   };
 
   return (
-    <div>
+    <div className="settings-page">
       <div className="toolbar">
         <h1 style={{ fontSize: '24px' }}>Settings</h1>
       </div>
@@ -399,6 +434,33 @@ export function SettingsPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="card">
+          <h3>Updates</h3>
+          <p style={{ color: '#ccc', marginBottom: '8px' }}>
+            Pull the latest changes from GitHub and rebuild. Your app data and reports remain intact.
+          </p>
+          <div className="button-group">
+            <button type="button" onClick={runUpdate} disabled={updateBusy}>
+              {updateBusy ? 'Updating...' : 'Check for update'}
+            </button>
+          </div>
+          {updateResult && (
+            <div style={{ marginTop: '12px' }}>
+              <p style={{ color: updateResult.status === 'error' ? '#fca5a5' : '#86efac' }}>
+                {updateResult.message}
+              </p>
+              {updateResult.previousCommit && updateResult.currentCommit && (
+                <p style={{ color: '#999', marginTop: '4px' }}>
+                  {updateResult.previousCommit} → {updateResult.currentCommit}
+                </p>
+              )}
+              {updateResult.output && (
+                <pre className="update-output">{updateResult.output}</pre>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="card">
