@@ -15,6 +15,7 @@ NC='\033[0m' # No Color
 
 ERRORS=0
 WARNINGS=0
+EXEC_WARNINGS=0
 AUTO_YES=${AUTO_YES:-0}
 REQUIRED_NODE_MAJOR=18
 REQUIRED_NPM_MAJOR=9
@@ -42,8 +43,16 @@ check_executable() {
     if [ -x "$1" ]; then
         echo -e "${GREEN}✓${NC} $1 (executable)"
     elif [ -f "$1" ]; then
+        if [ "$AUTO_YES" = "1" ]; then
+            chmod +x "$1" 2>/dev/null || true
+            if [ -x "$1" ]; then
+                echo -e "${GREEN}✓${NC} $1 (executable)"
+                return 0
+            fi
+        fi
         echo -e "${YELLOW}⚠${NC} $1 (not executable)"
         WARNINGS=$((WARNINGS + 1))
+        EXEC_WARNINGS=$((EXEC_WARNINGS + 1))
     else
         echo -e "${RED}✗${NC} $1 (MISSING)"
         ERRORS=$((ERRORS + 1))
@@ -177,6 +186,7 @@ ensure_rust() {
         if [ -s "$HOME/.cargo/env" ]; then
             # shellcheck source=/dev/null
             . "$HOME/.cargo/env"
+            hash -r
         fi
     fi
 }
@@ -330,8 +340,10 @@ if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
 elif [ $ERRORS -eq 0 ]; then
     echo -e "${YELLOW}⚠ $WARNINGS warnings${NC} (non-critical)"
     echo ""
-    echo "ℹ️ To fix executable permissions on macOS/Linux:"
-    echo "   chmod +x run_dev.sh scripts/build.sh"
+    if [ $EXEC_WARNINGS -gt 0 ]; then
+        echo "ℹ️ To fix executable permissions on macOS/Linux:"
+        echo "   chmod +x run_dev.sh scripts/build.sh"
+    fi
     exit 0
 else
     echo -e "${RED}✗ $ERRORS errors found${NC}"

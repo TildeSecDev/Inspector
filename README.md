@@ -191,6 +191,29 @@ rustc --version  # Should be 1.70+
 
    Then open http://localhost:5173 in your browser.
 
+### Linux
+
+**Run the dev setup script with elevated privileges** (installs required system deps):
+
+```bash
+sudo -E /home/kali/Inspector/Inspector/run_dev.sh
+```
+
+**Common Linux runtime warnings (non-fatal)**:
+
+- **libEGL DRI3/DRI2 warnings**: Usually indicates missing GPU acceleration in VM/remote sessions. The app should still run. If needed, force software rendering:
+
+   ```bash
+   LIBGL_ALWAYS_SOFTWARE=1 npm run dev:tauri
+   ```
+
+- **dconf warning about `/etc/dconf/db/local`**: Install dconf and update the DB:
+
+   ```bash
+   sudo apt-get install -y dconf-cli dconf-service
+   sudo dconf update
+   ```
+
 ## Project Structure
 
 ```
