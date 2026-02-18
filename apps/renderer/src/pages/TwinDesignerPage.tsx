@@ -51,6 +51,14 @@ export function TwinDesignerPage() {
   const [scenarioError, setScenarioError] = useState<string | null>(null);
   const scenarioFormRef = useRef<HTMLDivElement | null>(null);
   const [activeScenario, setActiveScenario] = useState<any | null>(null);
+  
+  // Network scan state
+  const [networkScanning, setNetworkScanning] = useState(false);
+  const [networkScanError, setNetworkScanError] = useState<string | null>(null);
+  const [networkScanResults, setNetworkScanResults] = useState<any[]>([]);
+  const [scanInterface, setScanInterface] = useState('');
+  const tauriInvoke = (window as any).__TAURI__?.core?.invoke;
+  const isTauri = typeof window !== 'undefined' && !!tauriInvoke;
 
   useEffect(() => {
     const loadTopology = async () => {
@@ -240,6 +248,78 @@ export function TwinDesignerPage() {
     if (!selectedNode) return;
     setNodes((nds) => nds.map((n) => (n.id === selectedNode.id ? { ...n, ...updates } : n)));
     setSelectedNode({ ...selectedNode, ...updates });
+  };
+
+  // Load saved network scan results
+  useEffect(() => {
+    const loadNetworkScans = async () => {
+      if (!currentProject) return;
+      try {
+        const scansKey = `network_scans_${currentProject.id}`;
+        const saved = localStorage.getItem(scansKey);
+        if (saved) {
+          setNetworkScanResults(JSON.parse(saved));
+        }
+      } catch (err) {
+        console.error('Failed to load network scans:', err);
+      }
+    };
+    loadNetworkScans();
+  }, [currentProject]);
+
+  // Trigger network scan
+  const runNetworkScan = async () => {
+    if (!currentProject) {
+      setNetworkScanError('No project selected');
+      return;
+    }
+
+    setNetworkScanning(true);
+    setNetworkScanError(null);
+
+    try {
+      if (isTauri) {
+        // Use Tauri command
+        const result = await tauriInvoke('run_network_scan', {
+          projectId: currentProject.id,
+          interface: scanInterface || null,
+        });
+
+        if (result.status === 'success' && result.scan_data) {
+          // Save scan result
+          const scanResult = {
+            id: `scan-${Date.now()}`,
+            projectId: currentProject.id,
+            timestamp: result.timestamp,
+            outputFile: result.output_file,
+            data: result.scan_data,
+            message: result.message,
+          };
+
+          const updatedScans = [...networkScanResults, scanResult];
+          setNetworkScanResults(updatedScans);
+
+          // Persist to localStorage
+          const scansKey = `network_scans_${currentProject.id}`;
+          localStorage.setItem(scansKey, JSON.stringify(updatedScans));
+
+          // Switch to findings tab
+          setActiveTab('findings');
+        } else {
+          setNetworkScanError(result.message || 'Scan failed');
+        }
+      } else {
+        // Browser mode - show instructions
+        setNetworkScanError(
+          'Network scanning requires the desktop app with root privileges. Run: sudo python3 scripts/network-topology-mapper.py'
+        );
+      }
+    } catch (err: any) {
+      setNetworkScanError(err?.message || 'Failed to run network scan');
+      console.error('Network scan error:', err);
+    } finally {
+      setNetworkScanning(false);
+    }
   };
 
   const updateSelectedEdge = (updates: any) => {
@@ -492,6 +572,110 @@ export function TwinDesignerPage() {
                     <p style={{ fontSize: '12px', marginTop: '4px' }}>
                       <strong>Links:</strong> {edges.length}
                     </p>
+
+                    <hr style={{ margin: '16px 0', borderColor: '#333' }} />
+                    
+                    <div style={{ marginTop: '16px' }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#fff' }}>
+                        Network Scan
+                      </h4>
+                      <p style={{ fontSize: '11px', marginBottom: '12px', color: '#999' }}>
+                        Discover devices on your local network and map topology
+                      </p>
+                      
+                      {!isTauri && (
+                        <div style={{
+                          backgroundColor: '#331a00',
+                          border: '1px solid #664400',
+                          padding: '8px',
+                          borderRadius: '4px',
+                          marginBottom: '12px',
+                          fontSize: '11px',
+                          color: '#ffaa00'
+                        }}>
+                          ⚠️ Scanning requires the desktop app
+                        </div>
+                      )}
+                      
+                      <input
+                        type="text"
+                        placeholder="Network interface (optional)"
+                        value={scanInterface}
+                        onChange={(e) => setScanInterface(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '6px',
+                          fontSize: '12px',
+                          marginBottom: '8px',
+                          backgroundColor: '#1a1a1a',
+                          border: '1px solid #333',
+                          borderRadius: '4px',
+                          color: '#fff',
+                          boxSizing: 'border-box'
+                        }}
+                        disabled={networkScanning}
+                      />
+                      
+                      <button
+                        onClick={runNetworkScan}
+                        disabled={networkScanning || !currentProject}
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          backgroundColor: networkScanning ? '#555' : '#0066cc',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: networkScanning ? 'wait' : 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        {networkScanning ? 'Scanning...' : '🔍 SCAN Network'}
+                      </button>
+                      
+                      {networkScanError && (
+                        <div style={{
+                          marginTop: '8px',
+                          padding: '8px',
+                          backgroundColor: '#330000',
+                          border: '1px solid #660000',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          color: '#ff6666'
+                        }}>
+                          {networkScanError}
+                        </div>
+                      )}
+                      
+                      {networkScanResults.length > 0 && (
+                        <div style={{ marginTop: '12px', fontSize: '11px' }}>
+                          <p style={{ color: '#4ade80', fontWeight: 'bold' }}>
+                            ✓ {networkScanResults.length} scan{networkScanResults.length !== 1 ? 's' : ''} completed
+                          </p>
+                          <button
+                            onClick={() => setActiveTab('findings')}
+                            style={{
+                              marginTop: '6px',
+                              width: '100%',
+                              padding: '6px',
+                              backgroundColor: '#1a1a1a',
+                              color: '#0066cc',
+                              border: '1px solid #333',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '11px'
+                            }}
+                          >
+                            View in Findings →
+                          </button>
+                        </div>
+                      )}
+                      
+                      <p style={{ fontSize: '10px', marginTop: '12px', color: '#666' }}>
+                        ⚠️ Only scan networks you own or have permission to test
+                      </p>
+                    </div>
                   </div>
                 ) : selectedNode ? (
                   <div>
@@ -845,10 +1029,156 @@ export function TwinDesignerPage() {
         {activeTab === 'findings' && (
           <div style={{ flex: 1, overflow: 'auto', padding: '16px', background: '#0f0f0f' }}>
             <h2 style={{ marginBottom: '16px', color: '#fff' }}>Findings</h2>
-            <div style={{ color: '#999', fontSize: '14px' }}>
-              <p>Security findings from simulations will appear here.</p>
-              <p>Run scenarios to discover findings, then review them by severity.</p>
-            </div>
+            
+            {networkScanResults.length === 0 ? (
+              <div style={{ color: '#999', fontSize: '14px' }}>
+                <p>No network scans yet.</p>
+                <p style={{ marginTop: '8px' }}>
+                  Use the <strong>SCAN</strong> button in the Properties panel to discover devices on your local network.
+                </p>
+                <p style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+                  Security findings from simulations will also appear here.
+                </p>
+              </div>
+            ) : (
+              <div>
+                {networkScanResults.map((scan, idx) => (
+                  <div
+                    key={scan.id}
+                    style={{
+                      marginBottom: '24px',
+                      padding: '16px',
+                      backgroundColor: '#1a1a1a',
+                      border: '1px solid #333',
+                      borderRadius: '8px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '16px', color: '#fff' }}>
+                          Network Scan #{networkScanResults.length - idx}
+                        </h3>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
+                          {new Date(scan.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                      <span style={{
+                        padding: '4px 8px',
+                        backgroundColor: '#00aa66',
+                        color: '#fff',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 'bold'
+                      }}>
+                        ✓ Complete
+                      </span>
+                    </div>
+
+                    {scan.message && (
+                      <p style={{ fontSize: '13px', color: '#4ade80', marginBottom: '12px' }}>
+                        {scan.message}
+                      </p>
+                    )}
+
+                    {scan.data && (
+                      <div>
+                        <div style={{ marginBottom: '16px' }}>
+                          <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '8px' }}>
+                            Network Information
+                          </h4>
+                          <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '8px', fontSize: '12px' }}>
+                            <span style={{ color: '#999' }}>Network:</span>
+                            <span style={{ color: '#fff', fontFamily: 'monospace' }}>
+                              {scan.data.metadata?.network_info?.network_cidr || 'N/A'}
+                            </span>
+                            <span style={{ color: '#999' }}>Gateway:</span>
+                            <span style={{ color: '#fff', fontFamily: 'monospace' }}>
+                              {scan.data.metadata?.network_info?.gateway || 'N/A'}
+                            </span>
+                            <span style={{ color: '#999' }}>Devices Found:</span>
+                            <span style={{ color: '#fff', fontWeight: 'bold' }}>
+                              {Object.keys(scan.data.devices || {}).length}
+                            </span>
+                          </div>
+                        </div>
+
+                        {scan.data.metadata?.topology && (
+                          <div style={{ marginBottom: '16px' }}>
+                            <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '8px' }}>
+                              Topology Summary
+                            </h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '8px', fontSize: '12px' }}>
+                              <span style={{ color: '#999' }}>Routers:</span>
+                              <span style={{ color: '#fff' }}>
+                                {scan.data.metadata.topology.routers?.length || 0}
+                              </span>
+                              <span style={{ color: '#999' }}>Switches:</span>
+                              <span style={{ color: '#fff' }}>
+                                {scan.data.metadata.topology.switches?.length || 0}
+                              </span>
+                              <span style={{ color: '#999' }}>Access Points:</span>
+                              <span style={{ color: '#fff' }}>
+                                {scan.data.metadata.topology.access_points?.length || 0}
+                              </span>
+                              <span style={{ color: '#999' }}>Endpoints:</span>
+                              <span style={{ color: '#fff' }}>
+                                {scan.data.metadata.topology.endpoints?.length || 0}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div style={{ marginBottom: '16px' }}>
+                          <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '8px' }}>
+                            Discovered Devices
+                          </h4>
+                          <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #333', borderRadius: '4px' }}>
+                            <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                              <thead style={{ position: 'sticky', top: 0, backgroundColor: '#0f0f0f', borderBottom: '1px solid #333' }}>
+                                <tr>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#999', fontWeight: 'bold' }}>IP Address</th>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#999', fontWeight: 'bold' }}>Hostname</th>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#999', fontWeight: 'bold' }}>Device Type</th>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#999', fontWeight: 'bold' }}>OS</th>
+                                  <th style={{ padding: '8px', textAlign: 'left', color: '#999', fontWeight: 'bold' }}>Ports</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {Object.entries(scan.data.devices || {}).map(([ip, device]: [string, any]) => (
+                                  <tr key={ip} style={{ borderBottom: '1px solid #222' }}>
+                                    <td style={{ padding: '8px', color: '#0066cc', fontFamily: 'monospace' }}>{ip}</td>
+                                    <td style={{ padding: '8px', color: '#fff' }}>{device.hostname || '—'}</td>
+                                    <td style={{ padding: '8px', color: '#999' }}>{device.device_type || 'unknown'}</td>
+                                    <td style={{ padding: '8px', color: '#999', fontSize: '10px' }}>
+                                      {device.os_detection?.name || '—'}
+                                    </td>
+                                    <td style={{ padding: '8px', color: '#999' }}>
+                                      {device.ports?.length || 0} open
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {scan.outputFile && (
+                          <div style={{ padding: '12px', backgroundColor: '#0f0f0f', borderRadius: '4px', fontSize: '11px' }}>
+                            <p style={{ color: '#999', marginBottom: '4px' }}>Full scan results:</p>
+                            <p style={{ color: '#0066cc', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                              {scan.outputFile}
+                            </p>
+                            <p style={{ color: '#666', marginTop: '8px', fontSize: '10px' }}>
+                              Containerlab and Docker Compose configs also generated
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -51,6 +51,16 @@ struct UpdateResult {
     output: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct NetworkScanResult {
+    status: String,
+    message: String,
+    output_file: Option<String>,
+    scan_data: Option<serde_json::Value>,
+    timestamp: String,
+}
+
 fn endpoints_path(app: &AppHandle) -> Result<PathBuf, String> {
     let dir = app
         .path()
@@ -165,6 +175,93 @@ fn list_docker_containers() -> Result<Vec<DockerContainer>, String> {
 }
 
 #[tauri::command]
+fn run_network_scan(app: AppHandle, project_id: String, interface: Option<String>) -> Result<NetworkScanResult, String> {
+    let repo_root = find_repo_root()?;
+    let script_path = repo_root.join("scripts/network-topology-mapper.py");
+    
+    if !script_path.exists() {
+        return Err("Network scanner script not found. Please ensure scripts/network-topology-mapper.py exists.".to_string());
+    }
+
+    // Create output directory
+    let output_dir = repo_root.join("network-scans");
+    fs::create_dir_all(&output_dir).map_err(|err| format!("Failed to create output directory: {err}"))?;
+
+    // Generate timestamped filename
+    let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S").to_string();
+    let output_file = output_dir.join(format!("network-scan-{}-{}.json", project_id, timestamp));
+
+    // Build command
+    let mut args = vec![
+        script_path.to_str().unwrap(),
+        "-o",
+        output_file.to_str().unwrap(),
+    ];
+
+    if let Some(iface) = interface.as_ref() {
+        args.push("-i");
+        args.push(iface);
+    }
+
+    // Check if running as root (required for network scanning)
+    let whoami_output = Command::new("whoami")
+        .output()
+        .map_err(|err| format!("Failed to check user: {err}"))?;
+    let current_user = String::from_utf8_lossy(&whoami_output.stdout).trim().to_string();
+
+    if current_user != "root" {
+        return Ok(NetworkScanResult {
+            status: "error".to_string(),
+            message: "Network scanning requires root privileges. Please run the app with sudo or use: sudo python3 scripts/network-topology-mapper.py".to_string(),
+            output_file: None,
+            scan_data: None,
+            timestamp,
+        });
+    }
+
+    // Run the network scanner
+    let output = Command::new("python3")
+        .args(&args)
+        .current_dir(&repo_root)
+        .output()
+        .map_err(|err| format!("Failed to run network scanner: {err}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Ok(NetworkScanResult {
+            status: "error".to_string(),
+            message: format!("Network scan failed: {}", stderr),
+            output_file: None,
+            scan_data: None,
+            timestamp,
+        });
+    }
+
+    // Read and parse the scan results
+    let scan_data = if output_file.exists() {
+        let data = fs::read_to_string(&output_file)
+            .map_err(|err| format!("Failed to read scan results: {err}"))?;
+        serde_json::from_str::<serde_json::Value>(&data).ok()
+    } else {
+        None
+    };
+
+    Ok(NetworkScanResult {
+        status: "success".to_string(),
+        message: format!("Network scan completed. Found {} devices.", 
+            scan_data.as_ref()
+                .and_then(|d| d.get("devices"))
+                .and_then(|d| d.as_object())
+                .map(|d| d.len())
+                .unwrap_or(0)
+        ),
+        output_file: Some(output_file.to_string_lossy().to_string()),
+        scan_data,
+        timestamp,
+    })
+}
+
+#[tauri::command]
 fn run_app_update(branch: String) -> Result<UpdateResult, String> {
     let repo_root = find_repo_root()?;
 
@@ -221,6 +318,7 @@ fn main() {
             remove_endpoint,
             list_docker_containers,
             run_app_update,
+            run_network_scan,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
