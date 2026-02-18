@@ -1,8 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf, process::Command, time::{SystemTime, UNIX_EPOCH}};
-use tauri::{AppHandle, Manager};
+use std::{fs, io::{BufRead, BufReader}, path::PathBuf, process::{Command, Stdio}, sync::{Arc, Mutex}, time::{SystemTime, UNIX_EPOCH}};
+use tauri::{AppHandle, Emitter, Manager};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -59,6 +59,13 @@ struct NetworkScanResult {
     output_file: Option<String>,
     scan_data: Option<serde_json::Value>,
     timestamp: String,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct NetworkScanLog {
+    level: String,
+    message: String,
 }
 
 fn endpoints_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -175,7 +182,19 @@ fn list_docker_containers() -> Result<Vec<DockerContainer>, String> {
 }
 
 #[tauri::command]
-fn run_network_scan(app: AppHandle, project_id: String, interface: Option<String>) -> Result<NetworkScanResult, String> {
+async fn run_network_scan(
+    app: AppHandle,
+    project_id: String,
+    interface: Option<String>,
+    nmap_timeout: Option<u64>,
+    nmap_parallel: Option<u32>,
+    nmap_min_rate: Option<u32>,
+    nmap_max_retries: Option<u32>,
+    nmap_min_parallelism: Option<u32>,
+    nmap_max_parallelism: Option<u32>,
+    nmap_initial_rtt: Option<String>,
+    nmap_max_rtt: Option<String>,
+) -> Result<NetworkScanResult, String> {
     let repo_root = find_repo_root()?;
     let script_path = repo_root.join("scripts/network-topology-mapper.py");
     
@@ -193,14 +212,55 @@ fn run_network_scan(app: AppHandle, project_id: String, interface: Option<String
 
     // Build command
     let mut args = vec![
-        script_path.to_str().unwrap(),
-        "-o",
-        output_file.to_str().unwrap(),
+        script_path.to_string_lossy().to_string(),
+        "-o".to_string(),
+        output_file.to_string_lossy().to_string(),
+        "--assume-yes".to_string(),
     ];
 
     if let Some(iface) = interface.as_ref() {
-        args.push("-i");
-        args.push(iface);
+        args.push("-i".to_string());
+        args.push(iface.to_string());
+    }
+
+    if let Some(timeout) = nmap_timeout {
+        args.push("--nmap-timeout".to_string());
+        args.push(timeout.to_string());
+    }
+
+    if let Some(parallel) = nmap_parallel {
+        args.push("--nmap-parallel".to_string());
+        args.push(parallel.to_string());
+    }
+
+    if let Some(min_rate) = nmap_min_rate {
+        args.push("--nmap-min-rate".to_string());
+        args.push(min_rate.to_string());
+    }
+
+    if let Some(max_retries) = nmap_max_retries {
+        args.push("--nmap-max-retries".to_string());
+        args.push(max_retries.to_string());
+    }
+
+    if let Some(min_parallelism) = nmap_min_parallelism {
+        args.push("--nmap-min-parallelism".to_string());
+        args.push(min_parallelism.to_string());
+    }
+
+    if let Some(max_parallelism) = nmap_max_parallelism {
+        args.push("--nmap-max-parallelism".to_string());
+        args.push(max_parallelism.to_string());
+    }
+
+    if let Some(initial_rtt) = nmap_initial_rtt.as_ref() {
+        args.push("--nmap-initial-rtt".to_string());
+        args.push(initial_rtt.to_string());
+    }
+
+    if let Some(max_rtt) = nmap_max_rtt.as_ref() {
+        args.push("--nmap-max-rtt".to_string());
+        args.push(max_rtt.to_string());
     }
 
     // Check if running as root (required for network scanning)
@@ -219,18 +279,88 @@ fn run_network_scan(app: AppHandle, project_id: String, interface: Option<String
         });
     }
 
-    // Run the network scanner
-    let output = Command::new("python3")
-        .args(&args)
-        .current_dir(&repo_root)
-        .output()
-        .map_err(|err| format!("Failed to run network scanner: {err}"))?;
+    let app_handle = app.clone();
+    let repo_root_for_scan = repo_root.clone();
+    let args_for_scan = args.clone();
+    let output = tauri::async_runtime::spawn_blocking(move || -> Result<(std::process::ExitStatus, String, String), String> {
+        let mut child = Command::new("python3")
+            .args(args_for_scan)
+            .current_dir(&repo_root_for_scan)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|err| format!("Failed to run network scanner: {err}"))?;
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
+        let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
+        let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
+
+        let stdout_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let stderr_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+
+        let stdout_lines_ref = Arc::clone(&stdout_lines);
+        let app_stdout = app_handle.clone();
+        let stdout_thread = std::thread::spawn(move || {
+            let reader = BufReader::new(stdout);
+            for line in reader.lines().flatten() {
+                let _ = app_stdout.emit(
+                    "network-scan-log",
+                    NetworkScanLog {
+                        level: "info".to_string(),
+                        message: line.clone(),
+                    },
+                );
+                if let Ok(mut lines) = stdout_lines_ref.lock() {
+                    lines.push(line);
+                }
+            }
+        });
+
+        let stderr_lines_ref = Arc::clone(&stderr_lines);
+        let app_stderr = app_handle.clone();
+        let stderr_thread = std::thread::spawn(move || {
+            let reader = BufReader::new(stderr);
+            for line in reader.lines().flatten() {
+                let _ = app_stderr.emit(
+                    "network-scan-log",
+                    NetworkScanLog {
+                        level: "error".to_string(),
+                        message: line.clone(),
+                    },
+                );
+                if let Ok(mut lines) = stderr_lines_ref.lock() {
+                    lines.push(line);
+                }
+            }
+        });
+
+        let status = child
+            .wait()
+            .map_err(|err| format!("Failed to wait for scanner: {err}"))?;
+
+        let _ = stdout_thread.join();
+        let _ = stderr_thread.join();
+
+        let stdout_collected = stdout_lines.lock().map_err(|_| "Failed to read stdout buffer")?.join("\n");
+        let stderr_collected = stderr_lines.lock().map_err(|_| "Failed to read stderr buffer")?.join("\n");
+
+        Ok((status, stdout_collected, stderr_collected))
+    })
+    .await
+    .map_err(|err| format!("Failed to await network scan: {err}"))??;
+
+    if !output.0.success() {
+        let stderr = output.2.trim().to_string();
+        let stdout = output.1.trim().to_string();
+        let details = if !stderr.is_empty() {
+            stderr
+        } else if !stdout.is_empty() {
+            stdout
+        } else {
+            "Unknown error (no output from scanner).".to_string()
+        };
         return Ok(NetworkScanResult {
             status: "error".to_string(),
-            message: format!("Network scan failed: {}", stderr),
+            message: format!("Network scan failed: {}", details),
             output_file: None,
             scan_data: None,
             timestamp,

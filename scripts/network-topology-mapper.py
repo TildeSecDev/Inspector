@@ -18,11 +18,17 @@ import argparse
 import socket
 from datetime import datetime
 from typing import Dict, List, Any, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
+ARP: Any = None
+Ether: Any = None
+srp: Any = None
+conf: Any = None
+
 try:
-    from scapy.all import ARP, Ether, srp, conf
+    from scapy.all import ARP, Ether, srp, conf  # type: ignore[import-not-found]
     SCAPY_AVAILABLE = True
 except ImportError:
     print("⚠️  scapy not available - ARP scanning will use system arp command")
@@ -32,12 +38,32 @@ except ImportError:
 class NetworkTopologyMapper:
     """Comprehensive network topology discovery and mapping."""
     
-    def __init__(self, output_file: str = "network-topology.json", interface: Optional[str] = None):
+    def __init__(
+        self,
+        output_file: str = "network-topology.json",
+        interface: Optional[str] = None,
+        nmap_timeout: int = 900,
+        nmap_parallelism: int = 6,
+        nmap_min_rate: Optional[int] = 300,
+        nmap_max_retries: int = 2,
+        nmap_min_parallelism: Optional[int] = None,
+        nmap_max_parallelism: Optional[int] = None,
+        nmap_initial_rtt: Optional[str] = "250ms",
+        nmap_max_rtt: Optional[str] = "1000ms",
+    ):
         self.output_file = output_file
         self.interface = interface
+        self.nmap_timeout = nmap_timeout
+        self.nmap_parallelism = max(1, nmap_parallelism)
+        self.nmap_min_rate = nmap_min_rate
+        self.nmap_max_retries = nmap_max_retries
+        self.nmap_min_parallelism = nmap_min_parallelism
+        self.nmap_max_parallelism = nmap_max_parallelism
+        self.nmap_initial_rtt = nmap_initial_rtt
+        self.nmap_max_rtt = nmap_max_rtt
         self.discovered_devices = {}
         self.topology_edges = []
-        self.scan_metadata = {
+        self.scan_metadata: Dict[str, Any] = {
             "scan_time": datetime.now().isoformat(),
             "scanner_version": "1.0.0",
             "scan_type": "comprehensive",
@@ -122,9 +148,14 @@ class NetworkTopologyMapper:
             
             # Calculate network CIDR
             if 'local_ip' in info and 'netmask' in info:
-                ip = ipaddress.IPv4Address(info['local_ip'])
-                netmask = ipaddress.IPv4Address(info['netmask'])
-                network = ipaddress.IPv4Network(f"{info['local_ip']}/{info['netmask']}", strict=False)
+                netmask_value = info['netmask']
+                if netmask_value.startswith('0x'):
+                    try:
+                        netmask_value = str(ipaddress.IPv4Address(int(netmask_value, 16)))
+                    except ValueError:
+                        pass
+                info['netmask'] = netmask_value
+                network = ipaddress.IPv4Network(f"{info['local_ip']}/{netmask_value}", strict=False)
                 info['network_cidr'] = str(network)
                 info['network_size'] = network.num_addresses
         
@@ -229,19 +260,40 @@ class NetworkTopologyMapper:
                 "-sV",
                 "-O",
                 "-A",
+                "-vv",
                 "-T4",
+                "--reason",
+                "--host-timeout", f"{self.nmap_timeout}s",
+                "--max-retries", str(self.nmap_max_retries),
                 "--traceroute",
-                "--script=default,discovery,version",
+                "--script=default,discovery,version and not (hostmap-robtex or http-robtex-shared-ns or targets-asn)",
                 "-p-",  # Scan all 65535 ports
                 "-oX", xml_file,
                 target
             ]
+
+            if self.nmap_min_rate is not None:
+                cmd.extend(["--min-rate", str(self.nmap_min_rate)])
+
+            if self.nmap_min_parallelism is not None:
+                cmd.extend(["--min-parallelism", str(self.nmap_min_parallelism)])
+
+            if self.nmap_max_parallelism is not None:
+                cmd.extend(["--max-parallelism", str(self.nmap_max_parallelism)])
+
+            if self.nmap_initial_rtt is not None:
+                cmd.extend(["--initial-rtt-timeout", str(self.nmap_initial_rtt)])
+
+            if self.nmap_max_rtt is not None:
+                cmd.extend(["--max-rtt-timeout", str(self.nmap_max_rtt)])
+            print(f"    ➜ Nmap command: {' '.join(cmd)}")
+            print(f"    ⏱️  Host timeout: {self.nmap_timeout}s")
             
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 minute timeout per host
+                timeout=self.nmap_timeout + 60  # Allow buffer over host timeout
             )
             
             if result.returncode == 0 and Path(xml_file).exists():
@@ -249,6 +301,12 @@ class NetworkTopologyMapper:
                 Path(xml_file).unlink()  # Clean up
             else:
                 print(f"    ⚠️  Nmap scan returned code {result.returncode}")
+                if result.stdout:
+                    print("    ⚠️  Nmap stdout (truncated):")
+                    print("\n".join(result.stdout.splitlines()[-20:]))
+                if result.stderr:
+                    print("    ⚠️  Nmap stderr (truncated):")
+                    print("\n".join(result.stderr.splitlines()[-20:]))
         
         except subprocess.TimeoutExpired:
             print(f"    ⚠️  Scan timeout for {target}")
@@ -282,16 +340,16 @@ class NetworkTopologyMapper:
             if os_elem is not None:
                 osmatch = os_elem.find('osmatch')
                 if osmatch is not None:
+                    os_class = osmatch.find('.//osclass')
                     info['os_detection'] = {
                         'name': osmatch.get('name', ''),
                         'accuracy': osmatch.get('accuracy', ''),
-                        'os_family': osmatch.find('.//osclass').get('osfamily', '') if osmatch.find('.//osclass') is not None else '',
-                        'os_gen': osmatch.find('.//osclass').get('osgen', '') if osmatch.find('.//osclass') is not None else '',
-                        'vendor': osmatch.find('.//osclass').get('vendor', '') if osmatch.find('.//osclass') is not None else ''
+                        'os_family': os_class.get('osfamily', '') if os_class is not None else '',
+                        'os_gen': os_class.get('osgen', '') if os_class is not None else '',
+                        'vendor': os_class.get('vendor', '') if os_class is not None else ''
                     }
                     
                     # Determine device type
-                    os_class = osmatch.find('.//osclass')
                     if os_class is not None:
                         device_type = os_class.get('type', 'unknown')
                         info['device_type'] = device_type
@@ -605,17 +663,48 @@ class NetworkTopologyMapper:
         
         # Intensive nmap scan on each discovered device
         print(f"\n🔬 Performing intensive nmap scans on {len(arp_devices)} devices...")
-        print("⏱️  This may take a while (up to 10 minutes per device)...\n")
-        
-        for idx, device in enumerate(arp_devices, 1):
-            ip = device['ip']
-            print(f"[{idx}/{len(arp_devices)}] Scanning {ip}")
-            
-            device_info = self.intensive_nmap_scan(ip)
-            device_info['mac'] = device.get('mac', '')
-            device_info['discovered_by'] = device.get('discovered_by', '')
-            
-            self.discovered_devices[ip] = device_info
+        print(f"⏱️  This may take a while (timeout per host: {self.nmap_timeout}s)...\n")
+
+        if self.nmap_parallelism <= 1 or len(arp_devices) <= 1:
+            for idx, device in enumerate(arp_devices, 1):
+                ip = device['ip']
+                print(f"[{idx}/{len(arp_devices)}] Scanning {ip}")
+                device_info = self.intensive_nmap_scan(ip)
+                device_info['mac'] = device.get('mac', '')
+                device_info['discovered_by'] = device.get('discovered_by', '')
+                self.discovered_devices[ip] = device_info
+        else:
+            print(f"⚡ Parallel scan enabled: {self.nmap_parallelism} workers")
+            device_map = {device['ip']: device for device in arp_devices}
+            with ThreadPoolExecutor(max_workers=self.nmap_parallelism) as executor:
+                futures = {
+                    executor.submit(self.intensive_nmap_scan, ip): ip
+                    for ip in device_map.keys()
+                }
+                completed = 0
+                total = len(futures)
+                for future in as_completed(futures):
+                    ip = futures[future]
+                    completed += 1
+                    print(f"[{completed}/{total}] Completed {ip}")
+                    try:
+                        device_info = future.result()
+                    except Exception as e:
+                        print(f"    ⚠️  Scan failed for {ip}: {e}")
+                        device_info = {
+                            'ip': ip,
+                            'scan_time': datetime.now().isoformat(),
+                            'ports': [],
+                            'services': [],
+                            'os_detection': {},
+                            'device_type': 'unknown',
+                            'distance_hops': None,
+                            'scan_error': str(e),
+                        }
+                    device = device_map[ip]
+                    device_info['mac'] = device.get('mac', '')
+                    device_info['discovered_by'] = device.get('discovered_by', '')
+                    self.discovered_devices[ip] = device_info
         
         # Analyze topology
         topology = self.determine_network_topology()
@@ -694,21 +783,99 @@ def main():
         action='store_true',
         help='Skip prerequisite checks (not recommended)'
     )
+    parser.add_argument(
+        '--nmap-timeout',
+        type=int,
+        default=900,
+        help='Max per-host nmap scan time in seconds (default: 900)'
+    )
+    parser.add_argument(
+        '--nmap-parallel',
+        type=int,
+        default=6,
+        help='Parallel nmap workers for host scans (default: 6)'
+    )
+    parser.add_argument(
+        '--nmap-min-rate',
+        type=int,
+        default=300,
+        help='Minimum nmap packet rate (packets/second, default: 300)'
+    )
+    parser.add_argument(
+        '--nmap-max-retries',
+        type=int,
+        default=2,
+        help='Max nmap probe retransmissions (default: 2)'
+    )
+    parser.add_argument(
+        '--nmap-min-parallelism',
+        type=int,
+        default=None,
+        help='Minimum Nmap probe parallelism (per host group)'
+    )
+    parser.add_argument(
+        '--nmap-max-parallelism',
+        type=int,
+        default=None,
+        help='Maximum Nmap probe parallelism (per host group)'
+    )
+    parser.add_argument(
+        '--nmap-initial-rtt',
+        type=str,
+        default='250ms',
+        help='Initial RTT timeout (default: 250ms)'
+    )
+    parser.add_argument(
+        '--nmap-max-rtt',
+        type=str,
+        default='1000ms',
+        help='Max RTT timeout (default: 1000ms)'
+    )
+    parser.add_argument(
+        '--assume-yes',
+        action='store_true',
+        help='Assume yes for prompts (non-interactive use)'
+    )
     
     args = parser.parse_args()
     
+    def confirm_or_exit(prompt, expected, assume_yes=False):
+        if assume_yes:
+            return
+        if not sys.stdin.isatty():
+            print("Non-interactive session without --assume-yes. Aborting.")
+            sys.exit(1)
+        response = input(prompt)
+        if response.strip().lower() != expected:
+            print("Scan cancelled.")
+            sys.exit(0)
+
     # Check if running as root
     import os
     if os.geteuid() != 0:
         print("⚠️  WARNING: Not running as root. Some scans may fail.")
         print("    Run with: sudo python3 network-topology-mapper.py")
-        response = input("Continue anyway? (y/N): ")
-        if response.lower() != 'y':
-            sys.exit(1)
+        if args.assume_yes:
+            print("Proceeding due to --assume-yes.")
+        else:
+            if not sys.stdin.isatty():
+                print("Non-interactive session without --assume-yes. Aborting.")
+                sys.exit(1)
+            response = input("Continue anyway? (y/N): ")
+            if response.lower() != 'y':
+                sys.exit(1)
     
     mapper = NetworkTopologyMapper(
         output_file=args.output,
-        interface=args.interface
+        interface=args.interface,
+        nmap_timeout=args.nmap_timeout,
+        nmap_parallelism=args.nmap_parallel,
+        nmap_min_rate=args.nmap_min_rate,
+        nmap_max_retries=args.nmap_max_retries,
+        nmap_min_parallelism=args.nmap_min_parallelism,
+        nmap_max_parallelism=args.nmap_max_parallelism,
+        nmap_initial_rtt=args.nmap_initial_rtt,
+        nmap_max_rtt=args.nmap_max_rtt
     )
     
     # Check prerequisites
@@ -720,10 +887,7 @@ def main():
     print("\n⚠️  AUTHORIZATION NOTICE")
     print("This tool performs intensive network reconnaissance.")
     print("Only use on networks you own or have explicit written permission to test.")
-    response = input("\nI confirm I am authorized to scan this network (yes/no): ")
-    if response.lower() != 'yes':
-        print("Scan cancelled.")
-        sys.exit(0)
+    confirm_or_exit("\nI confirm I am authorized to scan this network (yes/no): ", "yes", args.assume_yes)
     
     # Run scan
     try:

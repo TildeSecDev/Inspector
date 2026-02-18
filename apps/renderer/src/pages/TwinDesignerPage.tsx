@@ -56,8 +56,26 @@ export function TwinDesignerPage() {
   const [networkScanning, setNetworkScanning] = useState(false);
   const [networkScanError, setNetworkScanError] = useState<string | null>(null);
   const [networkScanResults, setNetworkScanResults] = useState<any[]>([]);
+  const [networkScanLogs, setNetworkScanLogs] = useState<any[]>([]);
+  const [liveScanDevices, setLiveScanDevices] = useState<Record<string, any>>({});
+  const [liveScanDeviceOrder, setLiveScanDeviceOrder] = useState<string[]>([]);
   const [scanInterface, setScanInterface] = useState('');
+  const [nmapParallel, setNmapParallel] = useState(6);
+  const [nmapMinRate, setNmapMinRate] = useState(300);
+  const [nmapMaxRetries, setNmapMaxRetries] = useState(2);
+  const [nmapMinParallelism, setNmapMinParallelism] = useState('');
+  const [nmapMaxParallelism, setNmapMaxParallelism] = useState('');
+  const [nmapInitialRtt, setNmapInitialRtt] = useState('250ms');
+  const [nmapMaxRtt, setNmapMaxRtt] = useState('1000ms');
+  const [nmapHostTimeout, setNmapHostTimeout] = useState(900);
+  const [useNmapParallel, setUseNmapParallel] = useState(true);
+  const [useMinRate, setUseMinRate] = useState(true);
+  const [useMaxRetries, setUseMaxRetries] = useState(true);
+  const [useParallelism, setUseParallelism] = useState(true);
+  const [useRtt, setUseRtt] = useState(true);
+  const [useHostTimeout, setUseHostTimeout] = useState(true);
   const tauriInvoke = (window as any).__TAURI__?.core?.invoke;
+  const tauriListen = (window as any).__TAURI__?.event?.listen;
   const isTauri = typeof window !== 'undefined' && !!tauriInvoke;
 
   useEffect(() => {
@@ -267,6 +285,89 @@ export function TwinDesignerPage() {
     loadNetworkScans();
   }, [currentProject]);
 
+  useEffect(() => {
+    if (!isTauri || !tauriListen) return;
+    let unlisten: (() => void) | null = null;
+
+    const setupListener = async () => {
+      try {
+        unlisten = await tauriListen('network-scan-log', (event: any) => {
+          const payload = event.payload as { level?: string; message?: string };
+          if (!payload?.message) return;
+          setNetworkScanLogs((prev) => {
+            const next = [
+              ...prev,
+              {
+                level: payload.level || 'info',
+                message: payload.message,
+                timestamp: new Date().toISOString(),
+              },
+            ];
+            return next.slice(-500);
+          });
+
+          const arpMatch = payload.message.match(/Found:\s+(\d+\.\d+\.\d+\.\d+)\s+\(([0-9A-Fa-f:]{17})\)/);
+          if (arpMatch) {
+            const ip = arpMatch[1];
+            const mac = arpMatch[2];
+            setLiveScanDevices((prev) => ({
+              ...prev,
+              [ip]: {
+                ip,
+                mac,
+                status: prev[ip]?.status || 'discovered',
+                lastUpdate: new Date().toISOString(),
+              },
+            }));
+            setLiveScanDeviceOrder((prev) => (prev.includes(ip) ? prev : [...prev, ip]));
+            return;
+          }
+
+          const scanningMatch = payload.message.match(/Scanning\s+(\d+\.\d+\.\d+\.\d+)/);
+          if (scanningMatch) {
+            const ip = scanningMatch[1];
+            setLiveScanDevices((prev) => ({
+              ...prev,
+              [ip]: {
+                ip,
+                mac: prev[ip]?.mac,
+                status: 'scanning',
+                lastUpdate: new Date().toISOString(),
+              },
+            }));
+            setLiveScanDeviceOrder((prev) => (prev.includes(ip) ? prev : [...prev, ip]));
+            return;
+          }
+
+          const completedMatch = payload.message.match(/Completed\s+(\d+\.\d+\.\d+\.\d+)/);
+          if (completedMatch) {
+            const ip = completedMatch[1];
+            setLiveScanDevices((prev) => ({
+              ...prev,
+              [ip]: {
+                ip,
+                mac: prev[ip]?.mac,
+                status: 'completed',
+                lastUpdate: new Date().toISOString(),
+              },
+            }));
+            setLiveScanDeviceOrder((prev) => (prev.includes(ip) ? prev : [...prev, ip]));
+          }
+        });
+      } catch (err) {
+        console.error('Failed to listen for scan logs:', err);
+      }
+    };
+
+    setupListener();
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, [isTauri]);
+
   // Trigger network scan
   const runNetworkScan = async () => {
     if (!currentProject) {
@@ -276,13 +377,33 @@ export function TwinDesignerPage() {
 
     setNetworkScanning(true);
     setNetworkScanError(null);
+    setNetworkScanLogs([]);
+    setLiveScanDevices({});
+    setLiveScanDeviceOrder([]);
 
     try {
       if (isTauri) {
+        const minParallelismValue = useParallelism && nmapMinParallelism.trim()
+          ? Number(nmapMinParallelism)
+          : null;
+        const maxParallelismValue = useParallelism && nmapMaxParallelism.trim()
+          ? Number(nmapMaxParallelism)
+          : null;
+        const initialRttValue = useRtt && nmapInitialRtt.trim() ? nmapInitialRtt.trim() : null;
+        const maxRttValue = useRtt && nmapMaxRtt.trim() ? nmapMaxRtt.trim() : null;
+
         // Use Tauri command
         const result = await tauriInvoke('run_network_scan', {
           projectId: currentProject.id,
           interface: scanInterface || null,
+          nmapTimeout: useHostTimeout ? nmapHostTimeout : null,
+          nmapParallel: useNmapParallel ? nmapParallel : null,
+          nmapMinRate: useMinRate ? nmapMinRate : null,
+          nmapMaxRetries: useMaxRetries ? nmapMaxRetries : null,
+          nmapMinParallelism: Number.isFinite(minParallelismValue as number) ? minParallelismValue : null,
+          nmapMaxParallelism: Number.isFinite(maxParallelismValue as number) ? maxParallelismValue : null,
+          nmapInitialRtt: initialRttValue,
+          nmapMaxRtt: maxRttValue,
         });
 
         if (result.status === 'success' && result.scan_data) {
@@ -615,6 +736,142 @@ export function TwinDesignerPage() {
                         }}
                         disabled={networkScanning}
                       />
+
+                      <div style={{ marginBottom: '10px', padding: '8px', border: '1px solid #222', borderRadius: '4px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#fff', marginBottom: '6px' }}>
+                          Nmap Performance Tuning
+                        </div>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', marginBottom: '6px' }}>
+                          <input
+                            type="checkbox"
+                            checked={useNmapParallel}
+                            onChange={(e) => setUseNmapParallel(e.target.checked)}
+                            disabled={networkScanning}
+                          />
+                          Parallel workers
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={nmapParallel}
+                          onChange={(e) => setNmapParallel(Number(e.target.value || 1))}
+                          disabled={networkScanning || !useNmapParallel}
+                          style={{ width: '100%', padding: '6px', fontSize: '11px', marginBottom: '8px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                        />
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', marginBottom: '6px' }}>
+                          <input
+                            type="checkbox"
+                            checked={useHostTimeout}
+                            onChange={(e) => setUseHostTimeout(e.target.checked)}
+                            disabled={networkScanning}
+                          />
+                          Host timeout (seconds)
+                        </label>
+                        <input
+                          type="number"
+                          min={60}
+                          value={nmapHostTimeout}
+                          onChange={(e) => setNmapHostTimeout(Number(e.target.value || 60))}
+                          disabled={networkScanning || !useHostTimeout}
+                          style={{ width: '100%', padding: '6px', fontSize: '11px', marginBottom: '8px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                        />
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', marginBottom: '6px' }}>
+                          <input
+                            type="checkbox"
+                            checked={useMinRate}
+                            onChange={(e) => setUseMinRate(e.target.checked)}
+                            disabled={networkScanning}
+                          />
+                          Min rate (pps)
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={nmapMinRate}
+                          onChange={(e) => setNmapMinRate(Number(e.target.value || 1))}
+                          disabled={networkScanning || !useMinRate}
+                          style={{ width: '100%', padding: '6px', fontSize: '11px', marginBottom: '8px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                        />
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', marginBottom: '6px' }}>
+                          <input
+                            type="checkbox"
+                            checked={useMaxRetries}
+                            onChange={(e) => setUseMaxRetries(e.target.checked)}
+                            disabled={networkScanning}
+                          />
+                          Max retries
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={nmapMaxRetries}
+                          onChange={(e) => setNmapMaxRetries(Number(e.target.value || 0))}
+                          disabled={networkScanning || !useMaxRetries}
+                          style={{ width: '100%', padding: '6px', fontSize: '11px', marginBottom: '8px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                        />
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', marginBottom: '6px' }}>
+                          <input
+                            type="checkbox"
+                            checked={useParallelism}
+                            onChange={(e) => setUseParallelism(e.target.checked)}
+                            disabled={networkScanning}
+                          />
+                          Probe parallelism (min/max)
+                        </label>
+                        <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                          <input
+                            type="number"
+                            min={1}
+                            placeholder="Min"
+                            value={nmapMinParallelism}
+                            onChange={(e) => setNmapMinParallelism(e.target.value)}
+                            disabled={networkScanning || !useParallelism}
+                            style={{ flex: 1, padding: '6px', fontSize: '11px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                          />
+                          <input
+                            type="number"
+                            min={1}
+                            placeholder="Max"
+                            value={nmapMaxParallelism}
+                            onChange={(e) => setNmapMaxParallelism(e.target.value)}
+                            disabled={networkScanning || !useParallelism}
+                            style={{ flex: 1, padding: '6px', fontSize: '11px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                          />
+                        </div>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', marginBottom: '6px' }}>
+                          <input
+                            type="checkbox"
+                            checked={useRtt}
+                            onChange={(e) => setUseRtt(e.target.checked)}
+                            disabled={networkScanning}
+                          />
+                          RTT timeouts
+                        </label>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="text"
+                            placeholder="Initial (250ms)"
+                            value={nmapInitialRtt}
+                            onChange={(e) => setNmapInitialRtt(e.target.value)}
+                            disabled={networkScanning || !useRtt}
+                            style={{ flex: 1, padding: '6px', fontSize: '11px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Max (1000ms)"
+                            value={nmapMaxRtt}
+                            onChange={(e) => setNmapMaxRtt(e.target.value)}
+                            disabled={networkScanning || !useRtt}
+                            style={{ flex: 1, padding: '6px', fontSize: '11px', backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', color: '#fff', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      </div>
                       
                       <button
                         onClick={runNetworkScan}
@@ -633,6 +890,96 @@ export function TwinDesignerPage() {
                       >
                         {networkScanning ? 'Scanning...' : '🔍 SCAN Network'}
                       </button>
+
+                      {networkScanning && (
+                        <div style={{ marginTop: '8px' }}>
+                          <div style={{ fontSize: '11px', color: '#999', marginBottom: '6px' }}>
+                            Scan in progress. Live output updates below.
+                          </div>
+                          <progress style={{ width: '100%' }} />
+                        </div>
+                      )}
+
+                      {(networkScanning || networkScanLogs.length > 0) && (
+                        <details style={{ marginTop: '8px' }} open={networkScanning}>
+                          <summary style={{ cursor: 'pointer', color: '#999', fontSize: '11px' }}>
+                            Live scan output ({networkScanLogs.length})
+                          </summary>
+                          <div
+                            style={{
+                              maxHeight: '160px',
+                              overflowY: 'auto',
+                              backgroundColor: '#111',
+                              border: '1px solid #333',
+                              borderRadius: '4px',
+                              padding: '6px',
+                              marginTop: '6px',
+                              fontSize: '10px',
+                              fontFamily: 'monospace',
+                              whiteSpace: 'pre-wrap'
+                            }}
+                          >
+                            {networkScanLogs.length === 0 ? (
+                              <div style={{ color: '#666' }}>Waiting for scanner output...</div>
+                            ) : (
+                              networkScanLogs.map((log: any, index: number) => (
+                                <div
+                                  key={`${log.timestamp}-${index}`}
+                                  style={{ color: log.level === 'error' ? '#ff6666' : '#ccc' }}
+                                >
+                                  {log.message}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </details>
+                      )}
+
+                      {(networkScanning || liveScanDeviceOrder.length > 0) && (
+                        <details style={{ marginTop: '8px' }} open={networkScanning}>
+                          <summary style={{ cursor: 'pointer', color: '#999', fontSize: '11px' }}>
+                            Live devices ({liveScanDeviceOrder.length})
+                          </summary>
+                          <div
+                            style={{
+                              maxHeight: '200px',
+                              overflowY: 'auto',
+                              backgroundColor: '#111',
+                              border: '1px solid #333',
+                              borderRadius: '4px',
+                              padding: '6px',
+                              marginTop: '6px',
+                              fontSize: '10px'
+                            }}
+                          >
+                            {liveScanDeviceOrder.length === 0 ? (
+                              <div style={{ color: '#666' }}>Waiting for ARP discoveries...</div>
+                            ) : (
+                              liveScanDeviceOrder.map((ip) => {
+                                const device = liveScanDevices[ip];
+                                const status = device?.status || 'discovered';
+                                const statusColor = status === 'completed' ? '#4ade80' : status === 'scanning' ? '#fbbf24' : '#999';
+                                return (
+                                  <div
+                                    key={ip}
+                                    style={{
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center',
+                                      padding: '4px 0',
+                                      borderBottom: '1px solid #222'
+                                    }}
+                                  >
+                                    <div style={{ color: '#fff', fontFamily: 'monospace' }}>{ip}</div>
+                                    <div style={{ color: '#777', fontFamily: 'monospace' }}>{device?.mac || '—'}</div>
+                                    <div style={{ color: statusColor }}>{status}</div>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </details>
+                      )}
                       
                       {networkScanError && (
                         <div style={{

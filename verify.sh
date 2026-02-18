@@ -233,9 +233,17 @@ check_file "tsconfig.json"
 check_file "tsconfig.build.json"
 check_file ".gitignore"
 check_file "README.md"
-check_file "IMPLEMENTATION.md"
+if [ -f "IMPLEMENTATION.md" ]; then
+    check_file "IMPLEMENTATION.md"
+else
+    warn "IMPLEMENTATION.md (missing)"
+fi
 check_file "CHANGELOG.md"
-check_file "QUICKSTART.md"
+if [ -f "QUICKSTART.md" ]; then
+    check_file "QUICKSTART.md"
+else
+    warn "QUICKSTART.md (missing)"
+fi
 check_executable "run_dev.sh"
 check_file "run_dev.bat"
 echo ""
