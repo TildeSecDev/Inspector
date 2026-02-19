@@ -65,14 +65,16 @@ class AuthorizationWarningDialog(QDialog):
         message_label.setFont(message_font)
         message_label.setWordWrap(True)
         message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        message_label.setMinimumHeight(80)
         message_label.setStyleSheet("color: white; background: transparent;")
         content_layout.addWidget(message_label)
         
-        content_layout.addSpacing(20)
+        content_layout.addSpacing(30)
         
         # I Understand button
         understand_btn = QPushButton("I Understand")
         understand_btn.setFixedHeight(50)
+        understand_btn.setMinimumWidth(200)
         understand_btn.setStyleSheet("""
             QPushButton {
                 background-color: white;
@@ -91,7 +93,9 @@ class AuthorizationWarningDialog(QDialog):
             }
         """)
         understand_btn.clicked.connect(self.accept)
-        content_layout.addWidget(understand_btn)
+        button_layout = QVBoxLayout()
+        button_layout.addWidget(understand_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        content_layout.addLayout(button_layout)
         
         # Add content widget to main layout with centering
         layout.addStretch()
@@ -104,8 +108,8 @@ class AuthorizationWarningDialog(QDialog):
         
         layout.addLayout(h_layout, stretch=1)
         
-        # Set dialog size
-        self.setFixedSize(600, 400)
+        # Set dialog size - increased to fit all content
+        self.setFixedSize(750, 480)
         
         # Center on screen
         self.move(self.screen().geometry().center() - self.rect().center())
