@@ -3,8 +3,9 @@ Topology Canvas Widget - Visual editor for network topologies
 """
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsItem
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF
-from PyQt6.QtGui import QPainter, QPen, QBrush, QColor, QFont
+from PyQt6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QPaintDevice
 from inspector_qt6.models.topology import Topology, Node, Link, Position, UIProperties, NodeProperties
+from typing import Optional
 
 
 class NodeItem(QGraphicsItem):
@@ -26,7 +27,9 @@ class NodeItem(QGraphicsItem):
     def boundingRect(self) -> QRectF:
         return QRectF(-self.width/2, -self.height/2, self.width, self.height)
     
-    def paint(self, painter, option, widget=None):
+    def paint(self, painter: Optional[QPainter], option, widget: Optional[QPaintDevice] = None):
+        if painter is None:
+            return
         # Draw node rectangle
         painter.setBrush(QBrush(self.color))
         painter.setPen(QPen(Qt.GlobalColor.black, 2))
@@ -66,7 +69,9 @@ class LinkItem(QGraphicsItem):
         target_pos = self.target_item.pos()
         return QRectF(source_pos, target_pos).normalized().adjusted(-10, -10, 10, 10)
     
-    def paint(self, painter, option, widget=None):
+    def paint(self, painter: Optional[QPainter], option, widget: Optional[QPaintDevice] = None):
+        if painter is None:
+            return
         source_pos = self.source_item.pos()
         target_pos = self.target_item.pos()
         
@@ -83,8 +88,8 @@ class TopologyCanvas(QGraphicsView):
     def __init__(self):
         super().__init__()
         
-        self.scene = QGraphicsScene()
-        self.setScene(self.scene)
+        self._scene = QGraphicsScene()
+        self.setScene(self._scene)
         
         # Configure view
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -92,8 +97,8 @@ class TopologyCanvas(QGraphicsView):
         self.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.FullViewportUpdate)
         
         # Scene settings
-        self.scene.setSceneRect(-1000, -1000, 2000, 2000)
-        self.scene.setBackgroundBrush(QBrush(QColor("#F5F5F5")))
+        self._scene.setSceneRect(-1000, -1000, 2000, 2000)
+        self._scene.setBackgroundBrush(QBrush(QColor("#F5F5F5")))
         
         # Topology data
         self.topology = Topology(name="Untitled")
@@ -104,7 +109,7 @@ class TopologyCanvas(QGraphicsView):
         self.zoom_factor = 1.0
         
         # Connect signals
-        self.scene.selectionChanged.connect(self.on_selection_changed)
+        self._scene.selectionChanged.connect(self.on_selection_changed)
     
     def load_topology(self, topology: Topology):
         """Load a topology into the canvas"""
@@ -114,7 +119,7 @@ class TopologyCanvas(QGraphicsView):
         # Create node items
         for node in topology.nodes:
             node_item = NodeItem(node)
-            self.scene.addItem(node_item)
+            self._scene.addItem(node_item)
             self.node_items[node.id] = node_item
         
         # Create link items
@@ -124,7 +129,7 @@ class TopologyCanvas(QGraphicsView):
             
             if source_item and target_item:
                 link_item = LinkItem(link, source_item, target_item)
-                self.scene.addItem(link_item)
+                self._scene.addItem(link_item)
                 self.link_items.append(link_item)
     
     def get_topology(self) -> Topology:
@@ -133,20 +138,20 @@ class TopologyCanvas(QGraphicsView):
     
     def clear_canvas(self):
         """Clear the canvas"""
-        self.scene.clear()
+        self._scene.clear()
         self.node_items.clear()
         self.link_items.clear()
     
-    def add_node(self, node: Node, position: QPointF = None):
+    def add_node(self, node: Node, position: Optional[QPointF] = None):
         """Add a node to the canvas"""
-        if position:
+        if position is not None:
             node.ui.position.x = position.x()
             node.ui.position.y = position.y()
         
         self.topology.nodes.append(node)
         
         node_item = NodeItem(node)
-        self.scene.addItem(node_item)
+        self._scene.addItem(node_item)
         self.node_items[node.id] = node_item
         
         self.topology_changed.emit()
@@ -155,7 +160,7 @@ class TopologyCanvas(QGraphicsView):
         """Remove a node from the canvas"""
         if node_id in self.node_items:
             node_item = self.node_items[node_id]
-            self.scene.removeItem(node_item)
+            self._scene.removeItem(node_item)
             del self.node_items[node_id]
             
             # Remove from topology
@@ -201,7 +206,7 @@ class TopologyCanvas(QGraphicsView):
     
     def on_selection_changed(self):
         """Handle selection change"""
-        selected_items = self.scene.selectedItems()
+        selected_items = self._scene.selectedItems()
         if selected_items:
             item = selected_items[0]
             if isinstance(item, NodeItem):

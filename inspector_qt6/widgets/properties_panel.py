@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QFormLayout, QLineEdit,
     QTextEdit, QLabel, QPushButton, QGroupBox, QScrollArea
 )
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, Qt
 from inspector_qt6.models.topology import Node
 
 

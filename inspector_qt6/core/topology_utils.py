@@ -4,7 +4,7 @@ Python port of the TypeScript topology-utils.ts
 """
 import re
 import json
-from typing import Dict, List, Set, Tuple, Any
+from typing import Dict, List, Set, Tuple, Any, Optional
 from inspector_qt6.models.topology import Topology, Node, Link
 
 
@@ -129,12 +129,12 @@ def escape_yaml_string(s: str) -> str:
         re.search(r'^\s|\s$', s) or 
         ': ' in s):
         # Use single quotes and escape single quotes
-        return f"'{s.replace(\"'\", \"''\")}'"
+        return f"'{s.replace(chr(39), chr(39) + chr(39))}'"
     
     return s
 
 
-def generate_node_id(name: str, existing_ids: Set[str] = None) -> str:
+def generate_node_id(name: str, existing_ids: Optional[Set[str]] = None) -> str:
     """
     Generates unique node ID based on name
     
@@ -159,7 +159,7 @@ def generate_node_id(name: str, existing_ids: Set[str] = None) -> str:
     return node_id
 
 
-def generate_link_id(source_id: str, target_id: str, existing_ids: Set[str] = None) -> str:
+def generate_link_id(source_id: str, target_id: str, existing_ids: Optional[Set[str]] = None) -> str:
     """
     Generates unique link ID based on endpoints
     

@@ -45,7 +45,7 @@ class SettingsPage(QWidget):
         tabs.addTab(docker_tab, "Docker")
         
         # Advanced settings
-       advanced_tab = self.create_advanced_tab()
+        advanced_tab = self.create_advanced_tab()
         tabs.addTab(advanced_tab, "Advanced")
         
         layout.addWidget(tabs)

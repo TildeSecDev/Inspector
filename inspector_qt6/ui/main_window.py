@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QToolBar, QStatusBar, QMessageBox, QFileDialog, QDockWidget
 )
 from PyQt6.QtCore import Qt, QSettings
-from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtGui import QAction, QIcon, QCloseEvent
 from inspector_qt6.widgets.topology_canvas import TopologyCanvas
 from inspector_qt6.widgets.device_palette import DevicePalette
 from inspector_qt6.widgets.properties_panel import PropertiesPanel
@@ -16,6 +16,7 @@ from inspector_qt6.core.topology_utils import (
     validate_topology
 )
 import json
+from typing import Optional
 
 
 class MainWindow(QMainWindow):
@@ -77,14 +78,18 @@ class MainWindow(QMainWindow):
         self.create_toolbars()
         
         # Status bar
-        self.statusBar().showMessage("Ready")
+        status_bar = self.statusBar()
+        assert status_bar is not None
+        status_bar.showMessage("Ready")
     
     def create_menus(self):
         """Create application menus"""
         menubar = self.menuBar()
+        assert menubar is not None
         
         # File menu
         file_menu = menubar.addMenu("&File")
+        assert file_menu is not None
         
         new_action = QAction("&New", self)
         new_action.setShortcut("Ctrl+N")
@@ -121,6 +126,7 @@ class MainWindow(QMainWindow):
         
         # Edit menu
         edit_menu = menubar.addMenu("&Edit")
+        assert edit_menu is not None
         
         validate_action = QAction("&Validate Topology", self)
         validate_action.setShortcut("Ctrl+V")
@@ -129,6 +135,7 @@ class MainWindow(QMainWindow):
         
         # View menu
         view_menu = menubar.addMenu("&View")
+        assert view_menu is not None
         
         zoom_in_action = QAction("Zoom &In", self)
         zoom_in_action.setShortcut("Ctrl++")
@@ -147,6 +154,7 @@ class MainWindow(QMainWindow):
         
         # Help menu
         help_menu = menubar.addMenu("&Help")
+        assert help_menu is not None
         
         about_action = QAction("&About", self)
         about_action.triggered.connect(self.show_about)
@@ -183,7 +191,9 @@ class MainWindow(QMainWindow):
         self.current_topology = Topology(name="Untitled")
         self.current_file = None
         self.topology_canvas.load_topology(self.current_topology)
-        self.statusBar().showMessage("New topology created")
+        status_bar = self.statusBar()
+        assert status_bar is not None
+        status_bar.showMessage("New topology created")
     
     def open_topology(self):
         """Open an existing topology file"""
@@ -202,7 +212,9 @@ class MainWindow(QMainWindow):
                 self.current_topology = Topology.from_dict(data)
                 self.current_file = filename
                 self.topology_canvas.load_topology(self.current_topology)
-                self.statusBar().showMessage(f"Opened: {filename}")
+                status_bar = self.statusBar()
+                assert status_bar is not None
+                status_bar.showMessage(f"Opened: {filename}")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to open file:\n{str(e)}")
     
@@ -212,7 +224,9 @@ class MainWindow(QMainWindow):
             try:
                 self.current_topology = self.topology_canvas.get_topology()
                 export_topology_json(self.current_topology, self.current_file)
-                self.statusBar().showMessage(f"Saved: {self.current_file}")
+                status_bar = self.statusBar()
+                assert status_bar is not None
+                status_bar.showMessage(f"Saved: {self.current_file}")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file:\n{str(e)}")
         else:
@@ -232,7 +246,9 @@ class MainWindow(QMainWindow):
                 self.current_topology = self.topology_canvas.get_topology()
                 export_topology_json(self.current_topology, filename)
                 self.current_file = filename
-                self.statusBar().showMessage(f"Saved: {filename}")
+                status_bar = self.statusBar()
+                assert status_bar is not None
+                status_bar.showMessage(f"Saved: {filename}")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save file:\n{str(e)}")
     
@@ -249,7 +265,9 @@ class MainWindow(QMainWindow):
             try:
                 self.current_topology = self.topology_canvas.get_topology()
                 export_topology_yaml(self.current_topology, filename)
-                self.statusBar().showMessage(f"Exported: {filename}")
+                status_bar = self.statusBar()
+                assert status_bar is not None
+                status_bar.showMessage(f"Exported: {filename}")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to export file:\n{str(e)}")
     
@@ -274,7 +292,9 @@ class MainWindow(QMainWindow):
     
     def on_topology_changed(self):
         """Handle topology changes"""
-        self.statusBar().showMessage("Topology modified")
+        status_bar = self.statusBar()
+        assert status_bar is not None
+        status_bar.showMessage("Topology modified")
     
     def on_node_selected(self, node_id: str):
         """Handle node selection"""
@@ -308,11 +328,13 @@ class MainWindow(QMainWindow):
         if state:
             self.restoreState(state)
     
-    def closeEvent(self, event):
+    def closeEvent(self, a0: Optional[QCloseEvent]) -> None:
         """Handle window close event"""
+        if a0 is None:
+            return
         # Save window state
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
         
         # TODO: Check for unsaved changes
-        event.accept()
+        a0.accept()
