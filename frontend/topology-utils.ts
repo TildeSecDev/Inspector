@@ -8,13 +8,13 @@
  * @param {Object} topology - Frontend topology object
  * @returns {string} YAML string ready for containerlab
  */
-export function topologyToYaml(topology) {
+export function topologyToYaml(topology: any): string {
   // Build YAML string
   let yaml = `name: ${topology.name}\n\ntopology:\n`;
 
   // Add nodes
   yaml += `  nodes:\n`;
-  topology.nodes.forEach((node) => {
+  topology.nodes.forEach((node: any) => {
     yaml += `    ${node.id}:\n`;
     yaml += `      kind: ${node.kind}\n`;
     if (node.image) {
@@ -24,7 +24,7 @@ export function topologyToYaml(topology) {
     // Add exec commands if present
     if (node.properties.exec && node.properties.exec.length > 0) {
       yaml += `      exec:\n`;
-      node.properties.exec.forEach((cmd) => {
+      node.properties.exec.forEach((cmd: any) => {
         yaml += `        - ${escapeYamlString(cmd)}\n`;
       });
     }
@@ -43,7 +43,7 @@ export function topologyToYaml(topology) {
     // Add binds/volumes if present
     if (node.properties.binds && node.properties.binds.length > 0) {
       yaml += `      binds:\n`;
-      node.properties.binds.forEach((bind) => {
+      node.properties.binds.forEach((bind: any) => {
         yaml += `        - ${escapeYamlString(bind)}\n`;
       });
     }
@@ -52,7 +52,7 @@ export function topologyToYaml(topology) {
   // Add links
   if (topology.links && topology.links.length > 0) {
     yaml += `  links:\n`;
-    topology.links.forEach((link) => {
+    topology.links.forEach((link: any) => {
       const sourceEndpoint = `${link.source.deviceId}:${link.source.interface}`;
       const targetEndpoint = `${link.target.deviceId}:${link.target.interface}`;
       yaml += `    - endpoints: ["${sourceEndpoint}", "${targetEndpoint}"]\n`;
@@ -67,7 +67,7 @@ export function topologyToYaml(topology) {
  * @param {Object} topology - Topology object to validate
  * @returns {Object} { valid: boolean, errors: string[] }
  */
-export function validateTopology(topology) {
+export function validateTopology(topology: any): { valid: boolean; errors: string[] } {
   const errors = [];
 
   // Check required fields
@@ -81,7 +81,7 @@ export function validateTopology(topology) {
 
   // Validate nodes
   const nodeIds = new Set();
-  topology.nodes?.forEach((node) => {
+  topology.nodes?.forEach((node: any) => {
     if (!node.id) errors.push(`Node missing id`);
     if (!node.kind) errors.push(`Node ${node.id} missing kind`);
     if (!node.name) errors.push(`Node ${node.id} missing name`);
@@ -93,7 +93,7 @@ export function validateTopology(topology) {
   });
 
   // Validate links
-  topology.links?.forEach((link, idx) => {
+  topology.links?.forEach((link: any, idx: number) => {
     if (!link.source?.deviceId) {
       errors.push(`Link ${idx} missing source deviceId`);
     }
@@ -127,7 +127,7 @@ export function validateTopology(topology) {
  * @param {string} str - String to escape
  * @returns {string} Escaped string
  */
-function escapeYamlString(str) {
+function escapeYamlString(str: any): string {
   if (!str) return '""';
 
   // Check if string needs quoting
@@ -149,7 +149,7 @@ function escapeYamlString(str) {
  * @param {Set} existingIds - Set of existing IDs
  * @returns {string} Unique node ID
  */
-export function generateNodeId(name, existingIds = new Set()) {
+export function generateNodeId(name: any, existingIds: Set<any> = new Set()): string {
   let id = name.toLowerCase().replace(/\s+/g, "-");
   let counter = 1;
 
@@ -168,7 +168,7 @@ export function generateNodeId(name, existingIds = new Set()) {
  * @param {Set} existingIds - Set of existing IDs
  * @returns {string} Unique link ID
  */
-export function generateLinkId(sourceId, targetId, existingIds = new Set()) {
+export function generateLinkId(sourceId: any, targetId: any, existingIds: Set<any> = new Set()): string {
   let id = `link-${sourceId}-${targetId}`;
   let counter = 1;
 
@@ -186,7 +186,7 @@ export function generateLinkId(sourceId, targetId, existingIds = new Set()) {
  * @param {Set} existingIds - Set of existing node IDs
  * @returns {Object} New node object
  */
-export function createNodeFromTemplate(template, existingIds = new Set()) {
+export function createNodeFromTemplate(template: any, existingIds: Set<any> = new Set()): any {
   const nodeId = generateNodeId(template.name, existingIds);
 
   return {
@@ -209,7 +209,7 @@ export function createNodeFromTemplate(template, existingIds = new Set()) {
  * @param {Object} updates - Property updates
  * @returns {Object} Updated node
  */
-export function updateNode(node, updates) {
+export function updateNode(node: any, updates: any): any {
   return {
     ...node,
     ...updates,
@@ -225,7 +225,7 @@ export function updateNode(node, updates) {
  * @param {Object} topology - Topology object
  * @param {string} filename - Output filename
  */
-export function exportTopologyJson(topology, filename) {
+export function exportTopologyJson(topology: any, filename: string): void {
   const jsonString = JSON.stringify(topology, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
   downloadFile(blob, filename);
@@ -236,7 +236,7 @@ export function exportTopologyJson(topology, filename) {
  * @param {Object} topology - Topology object
  * @param {string} filename - Output filename
  */
-export function exportTopologyYaml(topology, filename) {
+export function exportTopologyYaml(topology: any, filename: string): void {
   const yamlString = topologyToYaml(topology);
   const blob = new Blob([yamlString], { type: "text/yaml" });
   downloadFile(blob, `${filename}.yml`);
@@ -247,7 +247,7 @@ export function exportTopologyYaml(topology, filename) {
  * @param {Blob} blob - File content as blob
  * @param {string} filename - Filename
  */
-function downloadFile(blob, filename) {
+function downloadFile(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -263,11 +263,11 @@ function downloadFile(blob, filename) {
  * @param {Object} topology - Topology object
  * @returns {Object} { hasDuplicates: boolean, duplicates: string[] }
  */
-export function checkInterfaceDuplicates(topology) {
-  const interfaceUsage = {};
-  const duplicates = [];
+export function checkInterfaceDuplicates(topology: any) {
+  const interfaceUsage: Record<string, boolean> = {};
+  const duplicates: string[] = [];
 
-  topology.links?.forEach((link) => {
+  topology.links?.forEach((link: any) => {
     const sourceKey = `${link.source.deviceId}:${link.source.interface}`;
     const targetKey = `${link.target.deviceId}:${link.target.interface}`;
 
@@ -295,10 +295,10 @@ export function checkInterfaceDuplicates(topology) {
  * @param {Object} node - Node object
  * @returns {string[]} Array of available interface names
  */
-export function getAvailableInterfaces(topology, nodeId, node) {
+export function getAvailableInterfaces(topology: any, nodeId: any, node: any): string[] {
   const usedInterfaces = new Set();
 
-  topology.links?.forEach((link) => {
+  topology.links?.forEach((link: any) => {
     if (link.source.deviceId === nodeId) {
       usedInterfaces.add(link.source.interface);
     }
