@@ -49,11 +49,13 @@ class ReportsPage(QWidget):
     def init_ui(self):
         """Initialize the UI"""
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(40, 40, 40, 40)
+        layout.setSpacing(25)
         
         # Title
         toolbar = QHBoxLayout()
         title = QLabel("Reports")
-        title.setStyleSheet("font-size: 24px; font-weight: bold;")
+        title.setStyleSheet("font-size: 28px; font-weight: bold; color: white;")
         toolbar.addWidget(title)
         toolbar.addStretch()
         layout.addLayout(toolbar)
@@ -61,19 +63,30 @@ class ReportsPage(QWidget):
         # Generate report section
         generate_group = QGroupBox("Generate New Report")
         generate_layout = QVBoxLayout(generate_group)
+        generate_layout.setSpacing(15)
         
         format_layout = QHBoxLayout()
+        format_layout.setSpacing(15)
         format_layout.addWidget(QLabel("Format:"))
         
-        json_btn = QPushButton("Generate JSON")
+        json_btn = QPushButton("📄 Generate JSON")
+        json_btn.setMinimumHeight(45)
+        json_btn.setMinimumWidth(150)
+        json_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         json_btn.clicked.connect(lambda: self.generate_report("json"))
         format_layout.addWidget(json_btn)
         
-        pdf_btn = QPushButton("Generate PDF")
+        pdf_btn = QPushButton("📋 Generate PDF")
+        pdf_btn.setMinimumHeight(45)
+        pdf_btn.setMinimumWidth(150)
+        pdf_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         pdf_btn.clicked.connect(lambda: self.generate_report("pdf"))
         format_layout.addWidget(pdf_btn)
         
-        yaml_btn = QPushButton("Generate YAML")
+        yaml_btn = QPushButton("📝 Generate YAML")
+        yaml_btn.setMinimumHeight(45)
+        yaml_btn.setMinimumWidth(150)
+        yaml_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         yaml_btn.clicked.connect(lambda: self.generate_report("yaml"))
         format_layout.addWidget(yaml_btn)
         
@@ -96,16 +109,34 @@ class ReportsPage(QWidget):
         reports_layout.addWidget(self.reports_list)
         
         report_buttons = QHBoxLayout()
+        report_buttons.setSpacing(10)
         
-        open_btn = QPushButton("Open")
+        open_btn = QPushButton("📂 Open")
+        open_btn.setMinimumHeight(40)
+        open_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         open_btn.clicked.connect(self.open_selected_report)
         report_buttons.addWidget(open_btn)
         
-        delete_btn = QPushButton("Delete")
+        delete_btn = QPushButton("🗑️ Delete")
+        delete_btn.setMinimumHeight(40)
+        delete_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        delete_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #c0392b;
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #e74c3c;
+            }
+        """)
         delete_btn.clicked.connect(self.delete_report)
         report_buttons.addWidget(delete_btn)
         
-        refresh_btn = QPushButton("Refresh")
+        refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn.setMinimumHeight(40)
+        refresh_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         refresh_btn.clicked.connect(self.load_reports)
         report_buttons.addWidget(refresh_btn)
         

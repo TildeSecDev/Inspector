@@ -2,31 +2,47 @@
 Main application window for Inspector Twin
 """
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
-    QToolBar, QStatusBar, QMessageBox, QFileDialog, QDockWidget
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget,
+    QToolBar, QStatusBar, QMessageBox, QFileDialog, QPushButton, QLabel
 )
 from PyQt6.QtCore import Qt, QSettings
 from PyQt6.QtGui import QAction, QIcon, QCloseEvent
-from inspector_qt6.widgets.topology_canvas import TopologyCanvas
-from inspector_qt6.widgets.device_palette import DevicePalette
-from inspector_qt6.widgets.properties_panel import PropertiesPanel
+from inspector_qt6.pages.projects_page import ProjectsPage
+from inspector_qt6.pages.project_detail_page import ProjectDetailPage
+from inspector_qt6.pages.reports_page import ReportsPage
+from inspector_qt6.pages.settings_page import SettingsPage
+from inspector_qt6.ui.styles import (
+    SIDEBAR_STYLESHEET, SIDEBAR_TITLE_STYLESHEET, SIDEBAR_BUTTON_STYLESHEET,
+    WARNING_BOX_STYLESHEET, WARNING_TITLE_STYLESHEET, WARNING_TEXT_STYLESHEET
+)
 from inspector_qt6.models.topology import Topology
 from inspector_qt6.core.topology_utils import (
     export_topology_json, export_topology_yaml,
     validate_topology
 )
 import json
-from typing import Optional
+from typing import Optional, Dict, Any
+
+
+class NavButton(QPushButton):
+    """Styled navigation button for sidebar"""
+    
+    def __init__(self, text: str, parent=None):
+        super().__init__(text, parent)
+        self.setCheckable(True)
+        self.setStyleSheet(SIDEBAR_BUTTON_STYLESHEET)
 
 
 class MainWindow(QMainWindow):
-    """Main application window"""
+    """Main application window with sidebar navigation"""
     
     def __init__(self):
         super().__init__()
         self.current_topology = Topology(name="Untitled")
         self.current_file = None
+        self.current_project: Optional[Dict[str, Any]] = None
         self.settings = QSettings("TildeSec", "InspectorTwin")
+        self.nav_buttons = []
         
         self.init_ui()
         self.restore_state()
@@ -41,46 +57,105 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
         
-        # Create splitter for resizable sections
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        main_layout.addWidget(splitter)
+        # Left sidebar navigation
+        sidebar = QWidget()
+        sidebar.setStyleSheet(SIDEBAR_STYLESHEET)
+        sidebar.setFixedWidth(220)
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        sidebar_layout.setSpacing(0)
         
-        # Device Palette (left sidebar)
-        self.device_palette = DevicePalette()
-        palette_dock = QDockWidget("Device Palette", self)
-        palette_dock.setWidget(self.device_palette)
-        palette_dock.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetMovable | 
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-        )
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, palette_dock)
+        # App title in sidebar
+        title_label = QLabel("Inspector Twin")
+        title_label.setStyleSheet(SIDEBAR_TITLE_STYLESHEET)
+        sidebar_layout.addWidget(title_label)
         
-        # Topology Canvas (center)
-        self.topology_canvas = TopologyCanvas()
-        self.topology_canvas.topology_changed.connect(self.on_topology_changed)
-        self.topology_canvas.node_selected.connect(self.on_node_selected)
-        splitter.addWidget(self.topology_canvas)
+        # Navigation buttons (Projects, Reports, Settings only - Twin Designer accessed via projects)
+        nav_data = [
+            ("📁  Projects", 0),
+            ("📊  Reports", 1),
+            ("⚙️  Settings", 2),
+        ]
         
-        # Properties Panel (right sidebar)
-        self.properties_panel = PropertiesPanel()
-        self.properties_panel.properties_updated.connect(self.on_properties_updated)
-        properties_dock = QDockWidget("Properties", self)
-        properties_dock.setWidget(self.properties_panel)
-        properties_dock.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetMovable | 
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-        )
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, properties_dock)
+        for label, page_idx in nav_data:
+            btn = NavButton(label)
+            btn.clicked.connect(lambda checked, idx=page_idx: self.navigate_to_page(idx))
+            self.nav_buttons.append(btn)
+            sidebar_layout.addWidget(btn)
         
-        # Create menus and toolbars
+        sidebar_layout.addStretch()
+        
+        # Warning box at bottom of sidebar
+        warning_box = QWidget()
+        warning_box.setStyleSheet(WARNING_BOX_STYLESHEET)
+        warning_layout = QVBoxLayout(warning_box)
+        warning_layout.setContentsMargins(12, 12, 12, 12)
+        warning_layout.setSpacing(5)
+        
+        warning_title = QLabel("⚠️  Authorized Testing Only")
+        warning_title.setStyleSheet(WARNING_TITLE_STYLESHEET)
+        warning_layout.addWidget(warning_title)
+        
+        warning_text = QLabel("Inspector Twin is designed for simulation and authorized local testing only. Do not use it to target real systems without written permission.")
+        warning_text.setWordWrap(True)
+        warning_text.setStyleSheet(WARNING_TEXT_STYLESHEET)
+        warning_layout.addWidget(warning_text)
+        
+        sidebar_layout.addWidget(warning_box)
+        
+        main_layout.addWidget(sidebar)
+        
+        # Stacked widget for pages
+        self.pages = QStackedWidget()
+        main_layout.addWidget(self.pages, stretch=1)
+        
+        # Create and add pages (Projects is page 0, then project detail as overlay)
+        self.projects_page = ProjectsPage()
+        self.projects_page.project_selected.connect(self.on_project_selected)
+        self.pages.addWidget(self.projects_page)  # 0
+        
+        self.reports_page = ReportsPage()
+        self.pages.addWidget(self.reports_page)  # 1
+        
+        self.settings_page = SettingsPage()
+        self.pages.addWidget(self.settings_page)  # 2
+        
+        # Project detail page (accessed by selecting a project, not via sidebar)
+        self.project_detail_page = ProjectDetailPage()
+        self.project_detail_page.back_to_projects.connect(lambda: self.navigate_to_page(0))
+        self.pages.addWidget(self.project_detail_page)  # 3
+        
+        # Set Projects as default
+        self.navigate_to_page(0)
+        
+        # Create menus
         self.create_menus()
-        self.create_toolbars()
         
         # Status bar
         status_bar = self.statusBar()
         assert status_bar is not None
         status_bar.showMessage("Ready")
+    
+    def navigate_to_page(self, page_index: int):
+        """Navigate to a specific page"""
+        self.pages.setCurrentIndex(page_index)
+        
+        # Update nav button states (only for non-project-detail pages)
+        if page_index < 3:  # Not project detail page
+            for i, btn in enumerate(self.nav_buttons):
+                btn.setChecked(i == page_index)
+    
+    def on_project_selected(self, project: Dict[str, Any]):
+        """Handle project selection - open project detail view"""
+        self.current_project = project
+        self.project_detail_page.load_project(project)
+        self.pages.setCurrentIndex(3)  # Show project detail page
+        
+        # Deselect all nav buttons when showing project detail
+        for btn in self.nav_buttons:
+            btn.setChecked(False)
     
     def create_menus(self):
         """Create application menus"""
@@ -91,31 +166,10 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("&File")
         assert file_menu is not None
         
-        new_action = QAction("&New", self)
+        new_action = QAction("&New Project", self)
         new_action.setShortcut("Ctrl+N")
-        new_action.triggered.connect(self.new_topology)
+        new_action.triggered.connect(lambda: self.navigate_to_page(0))
         file_menu.addAction(new_action)
-        
-        open_action = QAction("&Open...", self)
-        open_action.setShortcut("Ctrl+O")
-        open_action.triggered.connect(self.open_topology)
-        file_menu.addAction(open_action)
-        
-        save_action = QAction("&Save", self)
-        save_action.setShortcut("Ctrl+S")
-        save_action.triggered.connect(self.save_topology)
-        file_menu.addAction(save_action)
-        
-        save_as_action = QAction("Save &As...", self)
-        save_as_action.setShortcut("Ctrl+Shift+S")
-        save_as_action.triggered.connect(self.save_topology_as)
-        file_menu.addAction(save_as_action)
-        
-        file_menu.addSeparator()
-        
-        export_yaml_action = QAction("Export as &YAML...", self)
-        export_yaml_action.triggered.connect(self.export_yaml)
-        file_menu.addAction(export_yaml_action)
         
         file_menu.addSeparator()
         
@@ -124,33 +178,21 @@ class MainWindow(QMainWindow):
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
         
-        # Edit menu
-        edit_menu = menubar.addMenu("&Edit")
-        assert edit_menu is not None
-        
-        validate_action = QAction("&Validate Topology", self)
-        validate_action.setShortcut("Ctrl+V")
-        validate_action.triggered.connect(self.validate_current_topology)
-        edit_menu.addAction(validate_action)
-        
         # View menu
         view_menu = menubar.addMenu("&View")
         assert view_menu is not None
         
-        zoom_in_action = QAction("Zoom &In", self)
-        zoom_in_action.setShortcut("Ctrl++")
-        zoom_in_action.triggered.connect(self.topology_canvas.zoom_in)
-        view_menu.addAction(zoom_in_action)
+        projects_action = QAction("&Projects", self)
+        projects_action.triggered.connect(lambda: self.navigate_to_page(0))
+        view_menu.addAction(projects_action)
         
-        zoom_out_action = QAction("Zoom &Out", self)
-        zoom_out_action.setShortcut("Ctrl+-")
-        zoom_out_action.triggered.connect(self.topology_canvas.zoom_out)
-        view_menu.addAction(zoom_out_action)
+        reports_action = QAction("&Reports", self)
+        reports_action.triggered.connect(lambda: self.navigate_to_page(1))
+        view_menu.addAction(reports_action)
         
-        reset_zoom_action = QAction("&Reset Zoom", self)
-        reset_zoom_action.setShortcut("Ctrl+0")
-        reset_zoom_action.triggered.connect(self.topology_canvas.reset_zoom)
-        view_menu.addAction(reset_zoom_action)
+        settings_action = QAction("&Settings", self)
+        settings_action.triggered.connect(lambda: self.navigate_to_page(2))
+        view_menu.addAction(settings_action)
         
         # Help menu
         help_menu = menubar.addMenu("&Help")
@@ -160,152 +202,11 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
     
-    def create_toolbars(self):
-        """Create application toolbars"""
-        toolbar = QToolBar("Main Toolbar")
-        toolbar.setMovable(False)
-        self.addToolBar(toolbar)
-        
-        # Add toolbar actions
-        new_action = QAction("New", self)
-        new_action.triggered.connect(self.new_topology)
-        toolbar.addAction(new_action)
-        
-        open_action = QAction("Open", self)
-        open_action.triggered.connect(self.open_topology)
-        toolbar.addAction(open_action)
-        
-        save_action = QAction("Save", self)
-        save_action.triggered.connect(self.save_topology)
-        toolbar.addAction(save_action)
-        
-        toolbar.addSeparator()
-        
-        validate_action = QAction("Validate", self)
-        validate_action.triggered.connect(self.validate_current_topology)
-        toolbar.addAction(validate_action)
-    
-    def new_topology(self):
-        """Create a new topology"""
-        # TODO: Check for unsaved changes
-        self.current_topology = Topology(name="Untitled")
-        self.current_file = None
-        self.topology_canvas.load_topology(self.current_topology)
-        status_bar = self.statusBar()
-        assert status_bar is not None
-        status_bar.showMessage("New topology created")
-    
-    def open_topology(self):
-        """Open an existing topology file"""
-        filename, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open Topology",
-            "",
-            "JSON Files (*.json);;All Files (*)"
-        )
-        
-        if filename:
-            try:
-                with open(filename, 'r') as f:
-                    data = json.load(f)
-                
-                self.current_topology = Topology.from_dict(data)
-                self.current_file = filename
-                self.topology_canvas.load_topology(self.current_topology)
-                status_bar = self.statusBar()
-                assert status_bar is not None
-                status_bar.showMessage(f"Opened: {filename}")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to open file:\n{str(e)}")
-    
-    def save_topology(self):
-        """Save the current topology"""
-        if self.current_file:
-            try:
-                self.current_topology = self.topology_canvas.get_topology()
-                export_topology_json(self.current_topology, self.current_file)
-                status_bar = self.statusBar()
-                assert status_bar is not None
-                status_bar.showMessage(f"Saved: {self.current_file}")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to save file:\n{str(e)}")
-        else:
-            self.save_topology_as()
-    
-    def save_topology_as(self):
-        """Save the topology with a new filename"""
-        filename, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save Topology As",
-            "",
-            "JSON Files (*.json);;All Files (*)"
-        )
-        
-        if filename:
-            try:
-                self.current_topology = self.topology_canvas.get_topology()
-                export_topology_json(self.current_topology, filename)
-                self.current_file = filename
-                status_bar = self.statusBar()
-                assert status_bar is not None
-                status_bar.showMessage(f"Saved: {filename}")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to save file:\n{str(e)}")
-    
-    def export_yaml(self):
-        """Export topology as YAML"""
-        filename, _ = QFileDialog.getSaveFileName(
-            self,
-            "Export as YAML",
-            "",
-            "YAML Files (*.yml *.yaml);;All Files (*)"
-        )
-        
-        if filename:
-            try:
-                self.current_topology = self.topology_canvas.get_topology()
-                export_topology_yaml(self.current_topology, filename)
-                status_bar = self.statusBar()
-                assert status_bar is not None
-                status_bar.showMessage(f"Exported: {filename}")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to export file:\n{str(e)}")
-    
-    def validate_current_topology(self):
-        """Validate the current topology"""
-        self.current_topology = self.topology_canvas.get_topology()
-        valid, errors = validate_topology(self.current_topology)
-        
-        if valid:
-            QMessageBox.information(
-                self,
-                "Validation Successful",
-                "The topology is valid!"
-            )
-        else:
-            error_text = "\n".join(f"• {error}" for error in errors)
-            QMessageBox.warning(
-                self,
-                "Validation Errors",
-                f"The topology has validation errors:\n\n{error_text}"
-            )
-    
     def on_topology_changed(self):
         """Handle topology changes"""
         status_bar = self.statusBar()
         assert status_bar is not None
         status_bar.showMessage("Topology modified")
-    
-    def on_node_selected(self, node_id: str):
-        """Handle node selection"""
-        # Update properties panel with selected node
-        node = next((n for n in self.current_topology.nodes if n.id == node_id), None)
-        if node:
-            self.properties_panel.load_node(node)
-    
-    def on_properties_updated(self, node_id: str, properties: dict):
-        """Handle property updates"""
-        self.topology_canvas.update_node_properties(node_id, properties)
     
     def show_about(self):
         """Show about dialog"""

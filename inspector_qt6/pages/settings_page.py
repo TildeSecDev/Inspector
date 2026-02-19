@@ -23,10 +23,12 @@ class SettingsPage(QWidget):
     def init_ui(self):
         """Initialize the UI"""
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(40, 40, 40, 40)
+        layout.setSpacing(25)
         
         # Title
         title = QLabel("Settings")
-        title.setStyleSheet("font-size: 24px; font-weight: bold; padding: 10px;")
+        title.setStyleSheet("font-size: 28px; font-weight: bold; color: white; padding-bottom: 10px;")
         layout.addWidget(title)
         
         # Tab widget for different settings sections
@@ -52,13 +54,31 @@ class SettingsPage(QWidget):
         
         # Action buttons
         button_layout = QHBoxLayout()
+        button_layout.setSpacing(15)
         button_layout.addStretch()
         
-        save_btn = QPushButton("Save Settings")
+        save_btn = QPushButton("💾 Save Settings")
+        save_btn.setMinimumHeight(45)
+        save_btn.setMinimumWidth(150)
+        save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         save_btn.clicked.connect(self.save_settings)
         button_layout.addWidget(save_btn)
         
-        reset_btn = QPushButton("Reset to Defaults")
+        reset_btn = QPushButton("🔄 Reset to Defaults")
+        reset_btn.setMinimumHeight(45)
+        reset_btn.setMinimumWidth(180)
+        reset_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        reset_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #34495e;
+                color: white;
+                font-weight: bold;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #4a5f7f;
+            }
+        """)
         reset_btn.clicked.connect(self.reset_settings)
         button_layout.addWidget(reset_btn)
         

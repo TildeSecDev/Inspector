@@ -1,11 +1,12 @@
 """
 Topology Canvas Widget - Visual editor for network topologies
 """
-from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsItem
-from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF
-from PyQt6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QPaintDevice
-from inspector_qt6.models.topology import Topology, Node, Link, Position, UIProperties, NodeProperties
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsItem, QGraphicsLineItem, QMenu
+from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QRectF, QLineF
+from PyQt6.QtGui import QPainter, QPen, QBrush, QColor, QFont, QPaintDevice, QMouseEvent
+from inspector_qt6.models.topology import Topology, Node, Link, Position, UIProperties, NodeProperties, LinkEndpoint
 from typing import Optional
+import uuid
 
 
 class NodeItem(QGraphicsItem):
@@ -105,11 +106,26 @@ class TopologyCanvas(QGraphicsView):
         self.node_items = {}  # node_id -> NodeItem
         self.link_items = []  # List of LinkItems
         
+        # Link creation state
+        self.creating_link = False
+        self.link_source_node = None
+        self.temp_link_line = None
+        self.link_mode_enabled = False
+        self.link_type_options = []
+        
         # Zoom settings
         self.zoom_factor = 1.0
         
         # Connect signals
         self._scene.selectionChanged.connect(self.on_selection_changed)
+
+    def set_link_mode(self, enabled: bool):
+        """Enable or disable link creation mode"""
+        self.link_mode_enabled = enabled
+
+    def set_link_type_options(self, options: list[dict]):
+        """Set link type options for the link creation menu"""
+        self.link_type_options = options
     
     def load_topology(self, topology: Topology):
         """Load a topology into the canvas"""
@@ -211,3 +227,163 @@ class TopologyCanvas(QGraphicsView):
             item = selected_items[0]
             if isinstance(item, NodeItem):
                 self.node_selected.emit(item.node.id)
+    
+    def mousePressEvent(self, event: Optional[QMouseEvent]) -> None:
+        """Handle mouse press for link creation"""
+        if event is None:
+            return
+        
+        # Check if link mode, Ctrl key, or right-click is used for link creation
+        if (self.link_mode_enabled or
+            (event.modifiers() & Qt.KeyboardModifier.ControlModifier) or
+            event.button() == Qt.MouseButton.RightButton):
+            # Get item at mouse position
+            pos = self.mapToScene(event.pos())
+            item = self._scene.itemAt(pos, self.transform())
+            
+            if isinstance(item, NodeItem):
+                # Start creating a link
+                self.creating_link = True
+                self.link_source_node = item
+                self.setDragMode(QGraphicsView.DragMode.NoDrag)
+                
+                # Create temporary line
+                self.temp_link_line = QGraphicsLineItem()
+                self.temp_link_line.setPen(QPen(QColor("#3498db"), 2, Qt.PenStyle.DashLine))
+                self.temp_link_line.setLine(QLineF(pos, pos))
+                self._scene.addItem(self.temp_link_line)
+                
+                event.accept()
+                return
+        
+        # Default behavior
+        super().mousePressEvent(event)
+    
+    def mouseMoveEvent(self, event: Optional[QMouseEvent]) -> None:
+        """Handle mouse move for link creation"""
+        if event is None:
+            return
+        
+        if self.creating_link and self.temp_link_line and self.link_source_node:
+            # Update temporary line
+            source_pos = self.link_source_node.scenePos()
+            current_pos = self.mapToScene(event.pos())
+            self.temp_link_line.setLine(QLineF(source_pos, current_pos))
+            event.accept()
+            return
+        
+        # Default behavior
+        super().mouseMoveEvent(event)
+    
+    def mouseReleaseEvent(self, event: Optional[QMouseEvent]) -> None:
+        """Handle mouse release for link creation"""
+        if event is None:
+            return
+        
+        if self.creating_link and self.link_source_node:
+            # Get item at release position
+            pos = self.mapToScene(event.pos())
+            item = self._scene.itemAt(pos, self.transform())
+            
+            if isinstance(item, NodeItem) and item != self.link_source_node:
+                # Choose link type and create link between nodes
+                link_type = None
+                link_params = {}
+                interface_prefix = "eth"
+                if self.link_type_options:
+                    menu = QMenu(self)
+                    for option in self.link_type_options:
+                        action = menu.addAction(option["label"])
+                        if action is not None:
+                            action.setData(option)
+                    selected = menu.exec(event.globalPosition().toPoint())
+                    if selected is None:
+                        # Cancelled selection
+                        self._cleanup_link_drag()
+                        return
+                    option = selected.data()
+                    link_type = option.get("link_type")
+                    link_params = option.get("link_params", {})
+                    interface_prefix = option.get("interface_prefix", "eth")
+                
+                # Create link between nodes
+                self.create_link(
+                    self.link_source_node.node.id,
+                    item.node.id,
+                    link_type=link_type,
+                    link_params=link_params,
+                    interface_prefix=interface_prefix
+                )
+            
+            # Clean up temporary line
+            self._cleanup_link_drag()
+            event.accept()
+            return
+        
+        # Default behavior
+        super().mouseReleaseEvent(event)
+    
+    def create_link(
+        self,
+        source_id: str,
+        target_id: str,
+        link_type: Optional[str] = None,
+        link_params: Optional[dict] = None,
+        interface_prefix: str = "eth"
+    ):
+        """Create a link between two nodes"""
+        # Check if link already exists
+        for link in self.topology.links:
+            if ((link.source.deviceId == source_id and link.target.deviceId == target_id) or
+                (link.source.deviceId == target_id and link.target.deviceId == source_id)):
+                return  # Link already exists
+        
+        # Get node items
+        source_item = self.node_items.get(source_id)
+        target_item = self.node_items.get(target_id)
+        
+        if not source_item or not target_item:
+            return
+        
+        # Create link model
+        source_iface = self._next_interface(source_id, interface_prefix)
+        target_iface = self._next_interface(target_id, interface_prefix)
+        link = Link(
+            id=str(uuid.uuid4()),
+            source=LinkEndpoint(deviceId=source_id, interface=source_iface),
+            target=LinkEndpoint(deviceId=target_id, interface=target_iface),
+            link_type=link_type,
+            link_params=link_params or {}
+        )
+        
+        self.topology.links.append(link)
+        
+        # Create visual link
+        link_item = LinkItem(link, source_item, target_item)
+        self._scene.addItem(link_item)
+        self.link_items.append(link_item)
+        
+        self.topology_changed.emit()
+
+    def _next_interface(self, node_id: str, prefix: str) -> str:
+        """Compute next interface name for a node with a given prefix"""
+        used = []
+        for link in self.topology.links:
+            if link.source.deviceId == node_id and link.source.interface.startswith(prefix):
+                used.append(link.source.interface)
+            if link.target.deviceId == node_id and link.target.interface.startswith(prefix):
+                used.append(link.target.interface)
+        
+        index = 0
+        while f"{prefix}{index}" in used:
+            index += 1
+        return f"{prefix}{index}"
+
+    def _cleanup_link_drag(self):
+        """Reset temporary link drag state"""
+        if self.temp_link_line:
+            self._scene.removeItem(self.temp_link_line)
+            self.temp_link_line = None
+        self.creating_link = False
+        self.link_source_node = None
+        self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)

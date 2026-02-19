@@ -54,6 +54,12 @@ def topology_to_yaml(topology: Topology) -> str:
             source_endpoint = f"{link.source.deviceId}:{link.source.interface}"
             target_endpoint = f"{link.target.deviceId}:{link.target.interface}"
             yaml_lines.append(f'    - endpoints: ["{source_endpoint}", "{target_endpoint}"]')
+            if link.link_type:
+                yaml_lines.append(f"      type: {link.link_type}")
+            if link.link_params:
+                yaml_lines.append("      params:")
+                for key, value in link.link_params.items():
+                    yaml_lines.append(f"        {key}: {escape_yaml_string(str(value))}")
     
     return "\n".join(yaml_lines)
 

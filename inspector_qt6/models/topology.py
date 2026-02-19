@@ -47,6 +47,8 @@ class Link(BaseModel):
     id: Optional[str] = None
     source: LinkEndpoint
     target: LinkEndpoint
+    link_type: Optional[str] = None
+    link_params: Dict[str, Any] = Field(default_factory=dict)
 
 
 class Topology(BaseModel):
