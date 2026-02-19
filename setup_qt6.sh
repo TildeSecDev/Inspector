@@ -21,6 +21,25 @@ if [ "$(printf '%s\n' "$required_version" "$python_version" | sort -V | head -n1
     exit 1
 fi
 
+# Check for containerlab
+echo ""
+echo "Checking for containerlab..."
+if ! command -v clab &> /dev/null; then
+    echo "containerlab is not installed. Installing..."
+    
+    # Install containerlab
+    bash -c "$(curl -sL https://get.containerlab.dev)"
+    
+    if ! command -v clab &> /dev/null; then
+        echo "Warning: containerlab installation may have failed. Please ensure 'clab' is in your PATH."
+        echo "Visit https://containerlab.dev/install/ for manual installation instructions."
+    else
+        echo "✓ containerlab installed successfully"
+    fi
+else
+    echo "✓ containerlab is already installed"
+fi
+
 # Create virtual environment
 echo ""
 echo "Creating virtual environment..."
