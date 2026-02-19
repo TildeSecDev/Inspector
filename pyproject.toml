@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inspector-twin"
+version = "0.1.0"
+description = "Digital Twin Simulation and Security Assessment Platform - PyQt6 Edition"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Inspector Twin Team"}
+]
+keywords = ["network", "simulation", "security", "digital-twin", "pyqt6"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Topic :: System :: Networking",
+    "Topic :: Security",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "PyQt6>=6.7.0",
+    "PyQt6-WebEngine>=6.7.0",
+    "scapy>=2.5.0",
+    "python-nmap>=0.7.1",
+    "PyYAML>=6.0.1",
+    "pydantic>=2.6.1",
+    "jsonschema>=4.21.1",
+    "reportlab>=4.0.9",
+    "SQLAlchemy>=2.0.25",
+    "matplotlib>=3.8.2",
+    "networkx>=3.2.1",
+    "Pillow>=10.2.0",
+    "python-dateutil>=2.8.2",
+    "click>=8.1.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.1.1",
+    "mypy>=1.8.0",
+    "pytest>=8.0.0",
+    "pytest-qt>=4.3.1",
+]
+
+[project.scripts]
+inspector-twin = "inspector_twin.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
