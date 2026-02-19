@@ -25,16 +25,30 @@ fi
 echo ""
 echo "Checking for containerlab..."
 if ! command -v clab &> /dev/null; then
-    echo "containerlab is not installed. Installing..."
+    echo "containerlab is not installed. Attempting installation..."
     
-    # Install containerlab
-    bash -c "$(curl -sL https://get.containerlab.dev)"
-    
-    if ! command -v clab &> /dev/null; then
-        echo "Warning: containerlab installation may have failed. Please ensure 'clab' is in your PATH."
-        echo "Visit https://containerlab.dev/install/ for manual installation instructions."
+    # Detect OS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - try Homebrew first
+        if command -v brew &> /dev/null; then
+            echo "Installing containerlab via Homebrew..."
+            brew install containerlab
+        else
+            echo "Homebrew not found. Installing containerlab using official installer..."
+            bash -c "$(curl -sL https://get.containerlab.dev)" || true
+        fi
     else
+        # Linux - use official installer
+        echo "Installing containerlab using official installer..."
+        bash -c "$(curl -sL https://get.containerlab.dev)" || true
+    fi
+    
+    if command -v clab &> /dev/null; then
         echo "✓ containerlab installed successfully"
+    else
+        echo "⚠ Warning: containerlab installation failed or skipped."
+        echo "  Some features requiring network simulation will not be available."
+        echo "  You can manually install containerlab from: https://containerlab.dev/install/"
     fi
 else
     echo "✓ containerlab is already installed"
