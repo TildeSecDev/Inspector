@@ -56,18 +56,6 @@ echo "==================================="
 echo "Setup complete!"
 echo "==================================="
 echo ""
-echo "Would you like to start the application now? (y/n)"
-read -r response
-
-if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-    echo ""
-    echo "Starting Inspector Twin..."
-    echo ""
-    python -m inspector_qt6
-else
-    echo ""
-    echo "To run the application later:"
-    echo "  1. Activate the virtual environment: source venv/bin/activate"
-    echo "  2. Run the application: python -m inspector_qt6"
-    echo ""
-fi
+echo "Starting Inspector Twin..."
+echo ""
+python -m inspector_qt6

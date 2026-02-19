@@ -50,19 +50,8 @@ echo ===================================
 echo Setup complete!
 echo ===================================
 echo.
-set /p response="Would you like to start the application now? (y/n): "
-
-if /i "%response%"=="y" (
-    echo.
-    echo Starting Inspector Twin...
-    echo.
-    python -m inspector_qt6
-) else (
-    echo.
-    echo To run the application later:
-    echo   1. Activate the virtual environment: venv\Scripts\activate.bat
-    echo   2. Run the application: python -m inspector_qt6
-    echo.
-)
+echo Starting Inspector Twin...
+echo.
+python -m inspector_qt6
 
 pause
