@@ -358,13 +358,34 @@ background-color: #2c3e50;
 border-right: 1px solid #1a252f;
 """
 
+SIDEBAR_HEADER_STYLESHEET = """
+background-color: #1a252f;
+border-bottom: 1px solid #17202a;
+"""
+
 SIDEBAR_TITLE_STYLESHEET = """
-padding: 20px 15px;
+padding: 18px 15px;
 font-size: 18px;
 font-weight: bold;
 color: #ecf0f1;
-background-color: #1a252f;
-border-bottom: 1px solid #17202a;
+background-color: transparent;
+"""
+
+SIDEBAR_MENU_BUTTON_STYLESHEET = """
+QPushButton {
+    background-color: transparent;
+    color: #ecf0f1;
+    border: none;
+    font-size: 16px;
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+QPushButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+QPushButton:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
 """
 
 SIDEBAR_BUTTON_STYLESHEET = """
@@ -390,23 +411,23 @@ QPushButton:checked {
 """
 
 WARNING_BOX_STYLESHEET = """
-background-color: #f39c12;
-padding: 15px;
+background-color: #d97706;
+padding: 14px;
 margin: 10px;
-border-radius: 5px;
+border-radius: 8px;
 """
 
 WARNING_TITLE_STYLESHEET = """
-color: #000;
+color: #ffffff;
 font-weight: bold;
 font-size: 13px;
-margin-bottom: 5px;
+margin-bottom: 6px;
 background: transparent;
 """
 
 WARNING_TEXT_STYLESHEET = """
-color: #000;
-font-size: 11px;
+color: #ffffff;
+font-size: 12px;
 background: transparent;
 """
 

@@ -3,7 +3,7 @@ Main application window for Inspector Twin
 """
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget,
-    QToolBar, QStatusBar, QMessageBox, QFileDialog, QPushButton, QLabel
+    QToolBar, QStatusBar, QMessageBox, QFileDialog, QPushButton, QLabel, QMenu
 )
 from PyQt6.QtCore import Qt, QSettings
 from PyQt6.QtGui import QAction, QIcon, QCloseEvent
@@ -12,7 +12,8 @@ from inspector_qt6.pages.project_detail_page import ProjectDetailPage
 from inspector_qt6.pages.reports_page import ReportsPage
 from inspector_qt6.pages.settings_page import SettingsPage
 from inspector_qt6.ui.styles import (
-    SIDEBAR_STYLESHEET, SIDEBAR_TITLE_STYLESHEET, SIDEBAR_BUTTON_STYLESHEET,
+    SIDEBAR_STYLESHEET, SIDEBAR_HEADER_STYLESHEET, SIDEBAR_TITLE_STYLESHEET,
+    SIDEBAR_MENU_BUTTON_STYLESHEET, SIDEBAR_BUTTON_STYLESHEET,
     WARNING_BOX_STYLESHEET, WARNING_TITLE_STYLESHEET, WARNING_TEXT_STYLESHEET
 )
 from inspector_qt6.models.topology import Topology
@@ -67,10 +68,25 @@ class MainWindow(QMainWindow):
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
         sidebar_layout.setSpacing(0)
         
-        # App title in sidebar
-        title_label = QLabel("Inspector Twin")
+        # App header in sidebar (Inspector Twins + menu button)
+        header_widget = QWidget()
+        header_widget.setStyleSheet(SIDEBAR_HEADER_STYLESHEET)
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(10, 10, 10, 10)
+        header_layout.setSpacing(6)
+        
+        title_label = QLabel("Inspector Twins")
         title_label.setStyleSheet(SIDEBAR_TITLE_STYLESHEET)
-        sidebar_layout.addWidget(title_label)
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+        
+        menu_btn = QPushButton("≡")
+        menu_btn.setStyleSheet(SIDEBAR_MENU_BUTTON_STYLESHEET)
+        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        menu_btn.clicked.connect(self.show_app_menu)
+        header_layout.addWidget(menu_btn)
+        
+        sidebar_layout.addWidget(header_widget)
         
         # Navigation buttons (Projects, Reports, Settings only - Twin Designer accessed via projects)
         nav_data = [
@@ -201,6 +217,21 @@ class MainWindow(QMainWindow):
         about_action = QAction("&About", self)
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
+
+    def show_app_menu(self):
+        """Show a compact app menu from the sidebar header"""
+        menu = QMenu(self)
+        menu.addAction("Projects", lambda: self.navigate_to_page(0))
+        menu.addAction("Reports", lambda: self.navigate_to_page(1))
+        menu.addAction("Settings", lambda: self.navigate_to_page(2))
+        menu.addSeparator()
+        menu.addAction("About", self.show_about)
+        menu.addAction("Quit", self.close)
+        
+        # Position menu under the header button
+        button = self.sender()
+        if isinstance(button, QPushButton):
+            menu.exec(button.mapToGlobal(button.rect().bottomLeft()))
     
     def on_topology_changed(self):
         """Handle topology changes"""
