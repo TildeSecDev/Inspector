@@ -15,6 +15,27 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Check for containerlab
+echo.
+echo Checking for containerlab...
+where clab >nul 2>nul
+if errorlevel 1 (
+    echo containerlab is not installed. Installing...
+    echo.
+    REM Install containerlab using the official installer
+    powershell -Command "& { iwr -useb https://get.containerlab.dev | iex }"
+    
+    where clab >nul 2>nul
+    if errorlevel 1 (
+        echo Warning: containerlab installation may have failed. Please ensure 'clab' is in your PATH.
+        echo Visit https://containerlab.dev/install/ for manual installation instructions.
+    ) else (
+        echo Checkmark containerlab installed successfully
+    )
+) else (
+    echo Checkmark containerlab is already installed
+)
+
 REM Create virtual environment
 echo.
 echo Creating virtual environment...
