@@ -222,7 +222,7 @@ export function ProjectsPage() {
                       </div>
                       <p style={{ color: '#999', marginTop: '8px' }}>{project.description || 'No description'}</p>
                       <p style={{ color: '#666', fontSize: '12px', marginTop: '12px' }}>
-                        Created: {new Date(project.createdAt).toLocaleDateString()}
+                        Created: {new Date(project.createdAt ?? project.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>

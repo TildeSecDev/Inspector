@@ -224,9 +224,9 @@ export function ReportsPage() {
                           <td style={{ padding: '12px', color: '#666' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <Calendar size={14} />
-                              {new Date(report.createdAt).toLocaleDateString()}
+                              {new Date(report.createdAt ?? report.created_at).toLocaleDateString()}
                               <Clock size={14} style={{ marginLeft: '8px' }} />
-                              {new Date(report.createdAt).toLocaleTimeString()}
+                              {new Date(report.createdAt ?? report.created_at).toLocaleTimeString()}
                             </div>
                           </td>
                           <td style={{ padding: '12px', textAlign: 'center' }}>
