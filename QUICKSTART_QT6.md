@@ -75,12 +75,20 @@ inspector_qt6/
 │   ├── topology_canvas.py         # Visual editor
 │   ├── device_palette.py          # Device templates
 │   └── properties_panel.py        # Property editor
+├── pages/
+│   ├── projects_page.py           # Projects management
+│   ├── settings_page.py           # Application settings
+│   └── reports_page.py            # Report generation
 ├── models/
 │   └── topology.py                # Data models
-└── core/
-    └── topology_utils.py          # Utilities
+├── core/
+│   └── topology_utils.py          # Utilities
+├── frontend/                      # Original frontend assets
+└── containerlab_examples/         # Containerlab examples
 
-Scripts:
+Additional:
+├── OTLP/                          # OpenTelemetry collector
+├── scripts/                       # Utility scripts  
 ├── setup_qt6.sh                   # Setup (Unix)
 ├── setup_qt6.bat                  # Setup (Windows)
 └── verify_qt6.sh                  # Verification

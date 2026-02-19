@@ -1,0 +1,105 @@
+{
+  "name": "rtr000",
+  "type": "clab",
+  "clab": {
+    "config": {
+      "prefix": "clab",
+      "mgmt": {
+        "network": "clab",
+        "bridge": "br-9354ea7c2a4f",
+        "ipv4-subnet": "172.20.20.0/24",
+        "ipv4-gw": "172.20.20.1",
+        "ipv6-subnet": "3fff:172:20:20::/64",
+        "ipv6-gw": "3fff:172:20:20::1",
+        "external-access": true
+      }
+    }
+  },
+  "ssh-pub-keys": [],
+  "nodes": {
+    "rtr1": {
+      "index": "0",
+      "shortname": "rtr1",
+      "longname": "clab-rtr000-rtr1",
+      "fqdn": "rtr1.rtr000.io",
+      "group": "",
+      "labdir": "/home/user/freeRtr-containerlab/clab-rtr000/rtr1",
+      "kind": "rare",
+      "image": "ghcr.io/rare-freertr/freertr-containerlab:latest",
+      "mgmt-net": "",
+      "mgmt-intf": "",
+      "mgmt-ipv4-address": "172.20.20.3",
+      "mgmt-ipv4-prefix-length": 24,
+      "mgmt-ipv6-address": "3fff:172:20:20::3",
+      "mgmt-ipv6-prefix-length": 64,
+      "mac-address": "",
+      "labels": {
+        "clab-git-branch": "main",
+        "clab-git-hash": "bf3fcc5",
+        "clab-mgmt-net-bridge": "br-9354ea7c2a4f",
+        "clab-node-group": "",
+        "clab-node-kind": "rare",
+        "clab-node-lab-dir": "/home/user/freeRtr-containerlab/clab-rtr000/rtr1",
+        "clab-node-longname": "clab-rtr000-rtr1",
+        "clab-node-name": "rtr1",
+        "clab-node-type": "",
+        "clab-owner": "user",
+        "clab-topo-file": "/home/user/freeRtr-containerlab/rtr000.clab.yml",
+        "containerlab": "rtr000"
+      },
+      "port-bindings": [
+      ]
+    },
+    "rtr2": {
+      "index": "1",
+      "shortname": "rtr2",
+      "longname": "clab-rtr000-rtr2",
+      "fqdn": "rtr2.rtr000.io",
+      "group": "",
+      "labdir": "/home/user/freeRtr-containerlab/clab-rtr000/rtr2",
+      "kind": "rare",
+      "image": "ghcr.io/rare-freertr/freertr-containerlab:latest",
+      "mgmt-net": "",
+      "mgmt-intf": "",
+      "mgmt-ipv4-address": "172.20.20.2",
+      "mgmt-ipv4-prefix-length": 24,
+      "mgmt-ipv6-address": "3fff:172:20:20::2",
+      "mgmt-ipv6-prefix-length": 64,
+      "mac-address": "",
+      "labels": {
+        "clab-git-branch": "main",
+        "clab-git-hash": "bf3fcc5",
+        "clab-mgmt-net-bridge": "br-9354ea7c2a4f",
+        "clab-node-group": "",
+        "clab-node-kind": "rare",
+        "clab-node-lab-dir": "/home/user/freeRtr-containerlab/clab-rtr000/rtr2",
+        "clab-node-longname": "clab-rtr000-rtr2",
+        "clab-node-name": "rtr2",
+        "clab-node-type": "",
+        "clab-owner": "user",
+        "clab-topo-file": "/home/user/freeRtr-containerlab/rtr000.clab.yml",
+        "containerlab": "rtr000"
+      },
+      "port-bindings": [
+      ]
+    }
+  },
+  "links": [
+    {
+      "endpoints": {
+        "a": {
+          "node": "rtr1",
+          "interface": "eth1",
+          "mac": "aa:c1:ab:bd:85:cd",
+          "peer": "z"
+        },
+        "z": {
+          "node": "rtr2",
+          "interface": "eth1",
+          "mac": "aa:c1:ab:70:ac:ef",
+          "peer": "a"
+        }
+      }
+    }
+  ]
+}

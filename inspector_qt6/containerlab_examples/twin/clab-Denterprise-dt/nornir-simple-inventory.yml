@@ -1,0 +1,41 @@
+---
+isp:
+    username: 
+    password: 
+    platform: linux
+    hostname: 172.20.20.2
+kali:
+    username: 
+    password: 
+    platform: linux
+    hostname: 172.20.20.4
+pc1:
+    username: 
+    password: 
+    platform: linux
+    hostname: 172.20.20.5
+pc2:
+    username: 
+    password: 
+    platform: linux
+    hostname: 172.20.20.6
+server1:
+    username: 
+    password: 
+    platform: linux
+    hostname: 172.20.20.7
+server2:
+    username: 
+    password: 
+    platform: linux
+    hostname: 172.20.20.8
+core:
+    username: 
+    password: 
+    platform: rare
+    hostname: 172.20.20.3
+fw:
+    username: 
+    password: 
+    platform: rare
+    hostname: 172.20.20.9

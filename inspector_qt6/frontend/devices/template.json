@@ -1,0 +1,36 @@
+{
+  "id": "device-unique-id",
+  "name": "Device Name",
+  "kind": "linux|rare|docker|etc",
+  "image": "image:tag",
+  "properties": {
+    "exec": [],
+    "env": {},
+    "binds": [],
+    "IP": "10.0.0.0/24",
+    "GW": "10.0.0.1"
+  },
+  "ui": {
+    "icon": "icon-name",
+    "color": "#6366f1",
+    "category": "router|server|client|attacker|network",
+    "position": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "configurableFields": [
+    "name",
+    "image",
+    "exec",
+    "env",
+    "binds",
+    "IP",
+    "GW"
+  ],
+  "validation": {
+    "requiresImage": true,
+    "requiresKind": true,
+    "requiresConfig": true
+  }
+}

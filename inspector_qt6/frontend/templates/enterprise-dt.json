@@ -1,0 +1,414 @@
+{
+  "name": "Denterprise-dt",
+  "description": "Enterprise dual-tier network with ISP, firewall, core router, users, servers, and attacker node",
+  "nodes": [
+    {
+      "id": "isp",
+      "name": "ISP",
+      "kind": "linux",
+      "image": "nicolaka/netshoot:latest",
+      "properties": {
+        "exec": [
+          "ip addr add 203.0.113.1/24 dev eth1",
+          "sysctl -w net.ipv4.ip_forward=1",
+          "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE",
+          "ip route add 10.0.0.0/8 via 203.0.113.2 dev eth1"
+        ],
+        "env": {
+          "IP": "203.0.113.1/24",
+          "GW": "203.0.113.2"
+        },
+        "binds": [],
+        "IP": "203.0.113.1/24",
+        "GW": "203.0.113.2"
+      },
+      "ui": {
+        "icon": "globe",
+        "color": "#8b5cf6",
+        "category": "network",
+        "position": {
+          "x": 300,
+          "y": -200
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env"
+      ]
+    },
+    {
+      "id": "fw",
+      "name": "FW",
+      "kind": "rare",
+      "image": "ghcr.io/rare-freertr/freertr-containerlab:latest",
+      "properties": {
+        "exec": [],
+        "env": {
+          "DATAPLANE_TYPE": "pcapInt",
+          "INIT_VRF": "true"
+        },
+        "binds": ["./configs/fw:/config"],
+        "IP": "",
+        "GW": ""
+      },
+      "ui": {
+        "icon": "shield",
+        "color": "#06b6d4",
+        "category": "router",
+        "position": {
+          "x": 300,
+          "y": -50
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "env",
+        "binds"
+      ]
+    },
+    {
+      "id": "core",
+      "name": "Core",
+      "kind": "rare",
+      "image": "ghcr.io/rare-freertr/freertr-containerlab:latest",
+      "properties": {
+        "exec": [],
+        "env": {
+          "DATAPLANE_TYPE": "pcapInt",
+          "INIT_VRF": "true"
+        },
+        "binds": ["./configs/core:/config"],
+        "IP": "",
+        "GW": ""
+      },
+      "ui": {
+        "icon": "zap",
+        "color": "#06b6d4",
+        "category": "router",
+        "position": {
+          "x": 300,
+          "y": 100
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "env",
+        "binds"
+      ]
+    },
+    {
+      "id": "pc1",
+      "name": "PC1",
+      "kind": "linux",
+      "image": "alpine",
+      "properties": {
+        "exec": [
+          "ip addr add 10.0.10.10/24 dev eth1",
+          "ip route del",
+          "ip route add default via 10.0.10.1 dev eth1",
+          "printf 'nameserver 1.1.1.1\\nnameserver 8.8.8.8\\n' > /etc/resolv.conf"
+        ],
+        "env": {
+          "IP": "10.0.10.10/24",
+          "GW": "10.0.10.1"
+        },
+        "binds": [],
+        "IP": "10.0.10.10/24",
+        "GW": "10.0.10.1"
+      },
+      "ui": {
+        "icon": "monitor",
+        "color": "#3b82f6",
+        "category": "client",
+        "position": {
+          "x": 100,
+          "y": 200
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env",
+        "IP",
+        "GW",
+        "binds"
+      ]
+    },
+    {
+      "id": "pc2",
+      "name": "PC2",
+      "kind": "linux",
+      "image": "alpine",
+      "properties": {
+        "exec": [
+          "ip addr add 10.0.10.11/24 dev eth1",
+          "ip route del",
+          "ip route add default via 10.0.10.1 dev eth1",
+          "printf 'nameserver 1.1.1.1\\nnameserver 8.8.8.8\\n' > /etc/resolv.conf"
+        ],
+        "env": {
+          "IP": "10.0.10.11/24",
+          "GW": "10.0.10.1"
+        },
+        "binds": [],
+        "IP": "10.0.10.11/24",
+        "GW": "10.0.10.1"
+      },
+      "ui": {
+        "icon": "monitor",
+        "color": "#3b82f6",
+        "category": "client",
+        "position": {
+          "x": 500,
+          "y": 200
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env",
+        "IP",
+        "GW",
+        "binds"
+      ]
+    },
+    {
+      "id": "server1",
+      "name": "Server1",
+      "kind": "linux",
+      "image": "alpine",
+      "properties": {
+        "exec": [
+          "ip addr add 10.0.20.10/24 dev eth1",
+          "ip route del",
+          "ip route add default via 10.0.20.1 dev eth1",
+          "printf 'nameserver 1.1.1.1\\nnameserver 8.8.8.8\\n' > /etc/resolv.conf"
+        ],
+        "env": {
+          "IP": "10.0.20.10/24",
+          "GW": "10.0.20.1"
+        },
+        "binds": ["./data/server1:/data"],
+        "IP": "10.0.20.10/24",
+        "GW": "10.0.20.1"
+      },
+      "ui": {
+        "icon": "database",
+        "color": "#10b981",
+        "category": "server",
+        "position": {
+          "x": 100,
+          "y": 400
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env",
+        "IP",
+        "GW",
+        "binds"
+      ]
+    },
+    {
+      "id": "server2",
+      "name": "Server2",
+      "kind": "linux",
+      "image": "alpine",
+      "properties": {
+        "exec": [
+          "ip addr add 10.0.20.11/24 dev eth1",
+          "ip route del",
+          "ip route add default via 10.0.20.1 dev eth1",
+          "printf 'nameserver 1.1.1.1\\nnameserver 8.8.8.8\\n' > /etc/resolv.conf"
+        ],
+        "env": {
+          "IP": "10.0.20.11/24",
+          "GW": "10.0.20.1"
+        },
+        "binds": ["./data/server2:/data"],
+        "IP": "10.0.20.11/24",
+        "GW": "10.0.20.1"
+      },
+      "ui": {
+        "icon": "database",
+        "color": "#10b981",
+        "category": "server",
+        "position": {
+          "x": 500,
+          "y": 400
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env",
+        "IP",
+        "GW",
+        "binds"
+      ]
+    },
+    {
+      "id": "kali",
+      "name": "Kali",
+      "kind": "linux",
+      "image": "kalilinux/kali-rolling",
+      "properties": {
+        "exec": [
+          "ip addr add 10.0.30.10/24 dev eth1",
+          "ip link set eth1 up",
+          "ip route del default via 172.20.20.1 dev eth0",
+          "ip route add default via 10.0.30.1 dev eth1",
+          "printf 'nameserver 1.1.1.1\\nnameserver 8.8.8.8\\n' > /etc/resolv.conf",
+          "sysctl -w net.ipv6.conf.all.disable_ipv6=1",
+          "sysctl -w net.ipv6.conf.default.disable_ipv6=1"
+        ],
+        "env": {
+          "IP": "10.0.30.10/24",
+          "GW": "10.0.30.1"
+        },
+        "binds": [],
+        "IP": "10.0.30.10/24",
+        "GW": "10.0.30.1"
+      },
+      "ui": {
+        "icon": "alert-triangle",
+        "color": "#ef4444",
+        "category": "attacker",
+        "position": {
+          "x": 300,
+          "y": 400
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env",
+        "IP",
+        "GW",
+        "binds"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "id": "link-isp-fw",
+      "source": {
+        "deviceId": "isp",
+        "interface": "eth1"
+      },
+      "target": {
+        "deviceId": "fw",
+        "interface": "ethernet1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2
+      }
+    },
+    {
+      "id": "link-fw-core",
+      "source": {
+        "deviceId": "fw",
+        "interface": "ethernet2"
+      },
+      "target": {
+        "deviceId": "core",
+        "interface": "ethernet1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2
+      }
+    },
+    {
+      "id": "link-core-pc1",
+      "source": {
+        "deviceId": "core",
+        "interface": "ethernet2"
+      },
+      "target": {
+        "deviceId": "pc1",
+        "interface": "eth1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2
+      }
+    },
+    {
+      "id": "link-core-pc2",
+      "source": {
+        "deviceId": "core",
+        "interface": "ethernet3"
+      },
+      "target": {
+        "deviceId": "pc2",
+        "interface": "eth1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2
+      }
+    },
+    {
+      "id": "link-core-server1",
+      "source": {
+        "deviceId": "core",
+        "interface": "ethernet4"
+      },
+      "target": {
+        "deviceId": "server1",
+        "interface": "eth1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2
+      }
+    },
+    {
+      "id": "link-core-server2",
+      "source": {
+        "deviceId": "core",
+        "interface": "ethernet5"
+      },
+      "target": {
+        "deviceId": "server2",
+        "interface": "eth1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2
+      }
+    },
+    {
+      "id": "link-core-kali",
+      "source": {
+        "deviceId": "core",
+        "interface": "ethernet6"
+      },
+      "target": {
+        "deviceId": "kali",
+        "interface": "eth1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2
+      }
+    }
+  ],
+  "metadata": {
+    "created": "2024-01-01T00:00:00Z",
+    "modified": "2024-01-01T00:00:00Z",
+    "version": "1.0"
+  }
+}

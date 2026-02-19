@@ -1,0 +1,102 @@
+{
+  "name": "basic-network",
+  "description": "Simple 2-node network topology",
+  "nodes": [
+    {
+      "id": "pc1",
+      "name": "PC1",
+      "kind": "linux",
+      "image": "alpine",
+      "properties": {
+        "exec": [
+          "ip addr add 10.0.10.10/24 dev eth1",
+          "ip route add default via 10.0.10.1 dev eth1"
+        ],
+        "env": {
+          "IP": "10.0.10.10/24",
+          "GW": "10.0.10.1"
+        },
+        "binds": [],
+        "IP": "10.0.10.10/24",
+        "GW": "10.0.10.1"
+      },
+      "ui": {
+        "icon": "server",
+        "color": "#3b82f6",
+        "category": "client",
+        "position": {
+          "x": 100,
+          "y": 100
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env",
+        "IP",
+        "GW",
+        "binds"
+      ]
+    },
+    {
+      "id": "pc2",
+      "name": "PC2",
+      "kind": "linux",
+      "image": "alpine",
+      "properties": {
+        "exec": [
+          "ip addr add 10.0.10.11/24 dev eth1",
+          "ip route add default via 10.0.10.1 dev eth1"
+        ],
+        "env": {
+          "IP": "10.0.10.11/24",
+          "GW": "10.0.10.1"
+        },
+        "binds": [],
+        "IP": "10.0.10.11/24",
+        "GW": "10.0.10.1"
+      },
+      "ui": {
+        "icon": "server",
+        "color": "#3b82f6",
+        "category": "client",
+        "position": {
+          "x": 300,
+          "y": 100
+        }
+      },
+      "configurableFields": [
+        "name",
+        "image",
+        "exec",
+        "env",
+        "IP",
+        "GW",
+        "binds"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "id": "link1",
+      "source": {
+        "deviceId": "pc1",
+        "interface": "eth1"
+      },
+      "target": {
+        "deviceId": "pc2",
+        "interface": "eth1"
+      },
+      "ui": {
+        "style": "solid",
+        "width": 2,
+        "color": "#000000"
+      }
+    }
+  ],
+  "metadata": {
+    "created": "2024-01-01T00:00:00Z",
+    "version": "1.0"
+  }
+}
