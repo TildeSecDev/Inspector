@@ -74,6 +74,8 @@ export function TwinDesignerPage() {
   const [useParallelism, setUseParallelism] = useState(true);
   const [useRtt, setUseRtt] = useState(true);
   const [useHostTimeout, setUseHostTimeout] = useState(true);
+  const [networkScanCollapsed, setNetworkScanCollapsed] = useState(true);
+  const [buildStatus, setBuildStatus] = useState<'idle' | 'building' | 'success' | 'failed'>('idle');
   const tauriInvoke = (window as any).__TAURI__?.core?.invoke;
   const tauriListen = (window as any).__TAURI__?.event?.listen;
   const isTauri = typeof window !== 'undefined' && !!tauriInvoke;
@@ -504,6 +506,95 @@ export function TwinDesignerPage() {
     }
   };
 
+  const handleBuild = async () => {
+    if (!currentTopology) {
+      setError('Please save topology first before building');
+      return;
+    }
+
+    try {
+      setBuildStatus('building');
+      setError(null);
+
+      const graph = {
+        nodes: nodes.map((n) => ({
+          id: n.id,
+          type: n.data?.nodeType || 'server',
+          label: n.data?.label || 'Node',
+          position: n.position,
+          tags: n.data?.tags || [],
+          riskCriticality: n.data?.criticality || 'medium',
+          interfaces: [],
+        })),
+        links: edges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          type: 'ethernet',
+          bandwidth: e.data?.bandwidth || 1000,
+          latency: e.data?.latency || 0,
+          loss: 0,
+          jitter: 0,
+          canFail: e.data?.canFail || false,
+          failed: false,
+        })),
+      };
+
+      const response = await fetch('/api/topology/build', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topologyId: currentTopology.id, graph }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Build failed with status ${response.status}`);
+      }
+
+      setBuildStatus('success');
+      alert('Topology built successfully!');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to build topology';
+      setError(errorMsg);
+      setBuildStatus('failed');
+      console.error('Build failed:', err);
+    }
+  };
+
+  const handleStatus = async () => {
+    if (!currentTopology) return;
+
+    try {
+      const response = await fetch(`/api/topology/${currentTopology.id}/status`);
+      const data = await response.json();
+      alert(`Status: ${JSON.stringify(data, null, 2)}`);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to get status';
+      setError(errorMsg);
+      console.error('Status check failed:', err);
+    }
+  };
+
+  const handleStop = async () => {
+    if (!currentTopology) return;
+
+    try {
+      const response = await fetch(`/api/topology/${currentTopology.id}/stop`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Stop failed with status ${response.status}`);
+      }
+
+      setBuildStatus('idle');
+      alert('Topology stopped successfully!');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to stop topology';
+      setError(errorMsg);
+      console.error('Stop failed:', err);
+    }
+  };
+
   if (!currentProject) {
     return (
       <div>
@@ -697,9 +788,36 @@ export function TwinDesignerPage() {
                     <hr style={{ margin: '16px 0', borderColor: '#333' }} />
                     
                     <div style={{ marginTop: '16px' }}>
-                      <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#fff' }}>
+                      <button
+                        onClick={() => setNetworkScanCollapsed(!networkScanCollapsed)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          background: 'transparent',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          marginBottom: '8px',
+                          width: '100%'
+                        }}
+                      >
+                        <span style={{
+                          display: 'inline-block',
+                          transform: networkScanCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.2s',
+                          fontSize: '16px'
+                        }}>
+                          ▼
+                        </span>
                         Network Scan
-                      </h4>
+                      </button>
+
+                      {!networkScanCollapsed && (
+                      <div>
                       <p style={{ fontSize: '11px', marginBottom: '12px', color: '#999' }}>
                         Discover devices on your local network and map topology
                       </p>
@@ -1022,6 +1140,8 @@ export function TwinDesignerPage() {
                       <p style={{ fontSize: '10px', marginTop: '12px', color: '#666' }}>
                         ⚠️ Only scan networks you own or have permission to test
                       </p>
+                      </div>
+                      )}
                     </div>
                   </div>
                 ) : selectedNode ? (
@@ -1224,6 +1344,62 @@ export function TwinDesignerPage() {
                       </button>
                     ))
                   )}
+                </div>
+
+                <div style={{ borderTop: '1px solid #333', paddingTop: '12px', marginTop: '12px' }}>
+                  <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: '#fff' }}>Build Controls</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      onClick={handleBuild}
+                      disabled={nodes.length === 0 || buildStatus === 'building'}
+                      style={{
+                        padding: '10px',
+                        backgroundColor: buildStatus === 'building' ? '#555' : buildStatus === 'success' ? '#10b981' : '#0066cc',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: buildStatus === 'building' ? 'wait' : nodes.length === 0 ? 'not-allowed' : 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {buildStatus === 'building' ? '⏳ Building...' : buildStatus === 'success' ? '✓ Build Successful' : 'Build'}
+                    </button>
+                    {buildStatus === 'success' && (
+                      <>
+                        <button
+                          onClick={handleStatus}
+                          style={{
+                            padding: '10px',
+                            backgroundColor: '#0066cc',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          Status
+                        </button>
+                        <button
+                          onClick={handleStop}
+                          style={{
+                            padding: '10px',
+                            backgroundColor: '#dc2626',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          Stop
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,0 +1,43 @@
+{
+  "id": "linux-alpine",
+  "name": "Alpine Linux",
+  "description": "Lightweight Linux container for network nodes",
+  "kind": "linux",
+  "image": "alpine",
+  "properties": {
+    "exec": [
+      "ip addr add 10.0.0.0/24 dev eth1",
+      "ip route add default via 10.0.0.1 dev eth1"
+    ],
+    "env": {
+      "IP": "10.0.0.0/24",
+      "GW": "10.0.0.1"
+    },
+    "binds": [],
+    "IP": "10.0.0.0/24",
+    "GW": "10.0.0.1"
+  },
+  "ui": {
+    "icon": "server",
+    "color": "#3b82f6",
+    "category": "client",
+    "defaultPosition": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "configurableFields": [
+    "name",
+    "image",
+    "exec",
+    "env",
+    "IP",
+    "GW",
+    "binds"
+  ],
+  "validation": {
+    "requiresImage": false,
+    "requiresKind": true,
+    "ipAddressFormat": "CIDR"
+  }
+}
