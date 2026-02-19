@@ -15,8 +15,16 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
+# Check if running in a TTY
+TTY_FLAG=""
+if [ -t 0 ]; then
+    TTY_FLAG="-it"
+else
+    TTY_FLAG="-i"
+fi
+
 # Run containerlab in Docker container with proper mounts
-docker run --rm -it --privileged \
+docker run --rm $TTY_FLAG --privileged \
     --network host \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /var/run/netns:/var/run/netns \

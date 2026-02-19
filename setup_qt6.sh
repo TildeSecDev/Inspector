@@ -68,7 +68,16 @@ if ! command -v docker &> /dev/null; then
     echo "Error: Docker is not installed or not in PATH"
     exit 1
 fi
-docker run --rm -it --privileged \
+
+# Check if running in a TTY
+TTY_FLAG=""
+if [ -t 0 ]; then
+    TTY_FLAG="-it"
+else
+    TTY_FLAG="-i"
+fi
+
+docker run --rm $TTY_FLAG --privileged \
     --network host \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /var/run/netns:/var/run/netns \

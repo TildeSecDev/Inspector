@@ -15,7 +15,7 @@ REM Get current directory
 for /f "tokens=*" %%i in ('cd') do set "CDIR=%%i"
 
 REM Run containerlab in Docker container with proper mounts
-docker run --rm -it --privileged ^
+docker run --rm --privileged ^
     --network host ^
     -v /var/run/docker.sock:/var/run/docker.sock ^
     -v /var/run/netns:/var/run/netns ^
