@@ -33,8 +33,19 @@ if errorlevel 1 (
         echo.
     ) else (
         echo Checkmark Docker is installed
+        echo Installing containerlab wrapper to use Docker container...
+        echo.
+        
+        REM Copy wrapper to Scripts folder in venv
+        copy clab-wrapper.bat venv\Scripts\clab.bat >nul
+        if exist venv\Scripts\clab.bat (
+            echo Checkmark containerlab wrapper installed at venv\Scripts\clab.bat
+        ) else (
+            echo Warning: Failed to install wrapper in venv
+        )
     )
     
+    echo.
     echo Installation options:
     echo 1. Docker container approach (recommended - works if Docker is installed):
     echo    docker run --rm -it --privileged --network host ^
@@ -48,6 +59,7 @@ if errorlevel 1 (
     echo 3. Manual installation:
     echo    https://containerlab.dev/install/
     echo.
+    
     echo Attempting automated installation...
     powershell -Command "& { iwr -useb https://get.containerlab.dev | iex }" 2>nul
     

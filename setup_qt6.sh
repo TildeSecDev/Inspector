@@ -52,18 +52,70 @@ if ! command -v clab &> /dev/null; then
             echo "For more details, see: https://containerlab.dev/macos/"
         else
             echo "✓ Docker is installed"
-            echo "✓ You can now use containerlab via Docker container: ghcr.io/srl-labs/clab"
+            echo "✓ Installing containerlab wrapper script to use Docker container..."
             echo ""
-            echo "For more details, see: https://containerlab.dev/macos/"
+            
+            # Create wrapper script in /usr/local/bin
+            sudo bash -c 'cat > /usr/local/bin/clab << '"'"'EOF'"'"'
+#!/bin/bash
+# Wrapper script for containerlab using Docker container
+if ! command -v docker &> /dev/null; then
+    echo "Error: Docker is not installed or not in PATH"
+    exit 1
+fi
+docker run --rm -it --privileged \
+    --network host \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/run/netns:/var/run/netns \
+    -v /etc/hosts:/etc/hosts \
+    -v /var/lib/docker/containers:/var/lib/docker/containers \
+    --pid="host" \
+    -v "$(pwd):$(pwd)" \
+    -w "$(pwd)" \
+    ghcr.io/srl-labs/clab "$@"
+EOF'
+            
+            sudo chmod +x /usr/local/bin/clab
+            
+            if command -v clab &> /dev/null; then
+                echo "✓ containerlab wrapper installed successfully at /usr/local/bin/clab"
+            else
+                echo "⚠ Failed to install wrapper. You can still use containerlab with Docker manually."
+            fi
         fi
     else
         # Linux - try automated installation
         echo "Checking for Docker..."
         if command -v docker &> /dev/null; then
             echo "✓ Docker is installed"
+            echo "✓ Installing containerlab wrapper script to use Docker container..."
+            echo ""
+            
+            # Create wrapper script in /usr/local/bin
+            sudo bash -c 'cat > /usr/local/bin/clab << '"'"'EOF'"'"'
+#!/bin/bash
+# Wrapper script for containerlab using Docker container
+if ! command -v docker &> /dev/null; then
+    echo "Error: Docker is not installed or not in PATH"
+    exit 1
+fi
+docker run --rm -it --privileged \
+    --network host \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/run/netns:/var/run/netns \
+    -v /etc/hosts:/etc/hosts \
+    -v /var/lib/docker/containers:/var/lib/docker/containers \
+    --pid="host" \
+    -v "$(pwd):$(pwd)" \
+    -w "$(pwd)" \
+    ghcr.io/srl-labs/clab "$@"
+EOF'
+            
+            sudo chmod +x /usr/local/bin/clab
         else
             echo "⚠ Docker is not installed or not in PATH."
         fi
+        
         echo ""
         echo "Attempting automated containerlab installation on Linux..."
         bash -c "$(curl -sL https://get.containerlab.dev)" || true
