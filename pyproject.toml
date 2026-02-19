@@ -51,10 +51,11 @@ dev = [
 ]
 
 [project.scripts]
-inspector-twin = "inspector_twin.main:main"
+inspector-twin = "inspector_qt6.__main__:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["inspector_qt6*"]
 
 [tool.black]
 line-length = 100
