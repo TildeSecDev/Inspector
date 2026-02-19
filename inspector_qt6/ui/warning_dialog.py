@@ -109,7 +109,7 @@ class AuthorizationWarningDialog(QDialog):
         layout.addLayout(h_layout, stretch=1)
         
         # Set dialog size - increased to fit all content
-        self.setFixedSize(750, 480)
+        self.setFixedSize(800, 520)
         
         # Center on screen
         self.move(self.screen().geometry().center() - self.rect().center())
