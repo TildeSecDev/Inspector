@@ -119,7 +119,7 @@ test.describe('Inspector Twin - Full Application Screenshots', () => {
     console.log('✓ Screenshot saved: 5_scenarios_page.png');
   });
 
-  test('5. Simulation Runner Tab in Twin Designer', async ({ page }) => {
+  test('5. Simulation Runner Panel in Twin Designer', async ({ page }) => {
     // First create a project
     await page.click('button:has-text("New Project")');
     await page.fill('input[placeholder="Project Name"]', 'Test Runner Project');
@@ -132,13 +132,12 @@ test.describe('Inspector Twin - Full Application Screenshots', () => {
     await page.click('.card:has-text("Test Runner Project")');
     await page.waitForTimeout(1000);
     
-    // Navigate to Twin Designer
+    // Navigate to Twin Designer (Simulation Runner is in the right panel of the Designer tab)
     await page.click('a:has-text("Twin Designer")');
     await page.waitForTimeout(500);
     
-    // Click Simulation Runner tab
-    await page.click('button:has-text("Simulation Runner")');
-    await page.waitForTimeout(500);
+    // Simulation Runner is embedded in the Designer tab right panel - wait for it to appear
+    await page.waitForSelector('h3:has-text("Simulation Runner")');
     
     // Take screenshot
     await page.screenshot({ 
