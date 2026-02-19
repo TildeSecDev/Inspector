@@ -1,30 +1,111 @@
-node_modules/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
 dist/
 build/
-*.log
+.eggs/
+.Python
+ENV/
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyQt6
+*.pyc
+*.pyo
+*.ui.py
+*.qrc.py
+*.pro.user
+*.qm
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS
 .DS_Store
-*.sqlite
-*.sqlite-shm
-*.sqlite-wal
-.env
-.env.local
-coverage/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
 test-results/
 playwright-report/
-*.tsbuildinfo
-.vite/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-shm
+*.sqlite-wal
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Documentation
+docs/_build/
+site/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+*.spec
+*.manifest
+*.exe
+*.app
+*.dmg
+
+# Network scans
+network-scans/*.json
+network-scans/*.yml
+network-scans/*.yaml
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Project specific
 out/
-
-# Tauri / Rust build artifacts
-src-tauri/target/
-target/
-Cargo.lock
-*.o
-*.a
-*.so
-.cargo/
-*.rlib
-
-# Development files
 .tauri/
-libappindicator3/
