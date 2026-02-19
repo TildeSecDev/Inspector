@@ -29,30 +29,43 @@ if ! command -v clab &> /dev/null; then
     echo ""
     
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS specific - recommend Docker container approach
-        echo "For macOS, the recommended approach is to use containerlab via Docker."
-        echo ""
-        echo "Prerequisites:"
-        echo "- Docker Desktop must be installed: https://www.docker.com/products/docker-desktop"
-        echo ""
-        echo "Then, containerlab is available as a Docker image and can be used with:"
-        echo "  docker run --rm -it --privileged \\"
-        echo "    --network host \\"
-        echo "    -v /var/run/docker.sock:/var/run/docker.sock \\"
-        echo "    -v /var/run/netns:/var/run/netns \\"
-        echo "    -v /etc/hosts:/etc/hosts \\"
-        echo "    -v /var/lib/docker/containers:/var/lib/docker/containers \\"
-        echo "    --pid=\"host\" \\"
-        echo "    -v \$(pwd):\$(pwd) \\"
-        echo "    -w \$(pwd) \\"
-        echo "    ghcr.io/srl-labs/clab bash"
-        echo ""
-        echo "For more details, see: https://containerlab.dev/macos/"
-        echo ""
-        echo "⚠ Skipping containerlab installation - use Docker container when needed"
+        # macOS specific - check for Docker first
+        echo "Checking for Docker..."
+        if ! command -v docker &> /dev/null; then
+            echo "⚠ Docker is not installed or not in PATH."
+            echo ""
+            echo "For macOS, the recommended approach is to use containerlab via Docker."
+            echo "Please install Docker Desktop first: https://www.docker.com/products/docker-desktop"
+            echo ""
+            echo "Then containerlab can be used with:"
+            echo "  docker run --rm -it --privileged \\"
+            echo "    --network host \\"
+            echo "    -v /var/run/docker.sock:/var/run/docker.sock \\"
+            echo "    -v /var/run/netns:/var/run/netns \\"
+            echo "    -v /etc/hosts:/etc/hosts \\"
+            echo "    -v /var/lib/docker/containers:/var/lib/docker/containers \\"
+            echo "    --pid=\"host\" \\"
+            echo "    -v \$(pwd):\$(pwd) \\"
+            echo "    -w \$(pwd) \\"
+            echo "    ghcr.io/srl-labs/clab bash"
+            echo ""
+            echo "For more details, see: https://containerlab.dev/macos/"
+        else
+            echo "✓ Docker is installed"
+            echo "✓ You can now use containerlab via Docker container: ghcr.io/srl-labs/clab"
+            echo ""
+            echo "For more details, see: https://containerlab.dev/macos/"
+        fi
     else
         # Linux - try automated installation
-        echo "Attempting automated installation on Linux..."
+        echo "Checking for Docker..."
+        if command -v docker &> /dev/null; then
+            echo "✓ Docker is installed"
+        else
+            echo "⚠ Docker is not installed or not in PATH."
+        fi
+        echo ""
+        echo "Attempting automated containerlab installation on Linux..."
         bash -c "$(curl -sL https://get.containerlab.dev)" || true
         
         if command -v clab &> /dev/null; then

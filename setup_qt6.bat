@@ -22,19 +22,31 @@ where clab >nul 2>nul
 if errorlevel 1 (
     echo containerlab is not installed.
     echo.
+    
+    REM Check for Docker
+    echo Checking for Docker...
+    docker --version >nul 2>nul
+    if errorlevel 1 (
+        echo Warning: Docker is not installed or not in PATH.
+        echo Docker is recommended for running containerlab on Windows.
+        echo Please install Docker Desktop: https://www.docker.com/products/docker-desktop
+        echo.
+    ) else (
+        echo Checkmark Docker is installed
+    )
+    
     echo Installation options:
-    echo 1. Automated installation (Linux preferred):
-    echo    Run: https://get.containerlab.dev
-    echo.
-    echo 2. Docker container approach (recommended for macOS and Windows):
-    echo    Requires: Docker Desktop installed
-    echo    Then use: docker run --rm -it --privileged --network host ^
+    echo 1. Docker container approach (recommended - works if Docker is installed):
+    echo    docker run --rm -it --privileged --network host ^
     echo      -v /var/run/docker.sock:/var/run/docker.sock ^
     echo      -v /var/run/netns:/var/run/netns ^
     echo      ghcr.io/srl-labs/clab bash
     echo.
+    echo 2. Automated installation (Linux preferred):
+    echo    https://get.containerlab.dev
+    echo.
     echo 3. Manual installation:
-    echo    Visit: https://containerlab.dev/install/
+    echo    https://containerlab.dev/install/
     echo.
     echo Attempting automated installation...
     powershell -Command "& { iwr -useb https://get.containerlab.dev | iex }" 2>nul
