@@ -1,0 +1,34 @@
+name: SME Office + Cloud App
+
+topology:
+  nodes:
+    router1:
+      kind: router
+      image: frrouting/frr:latest
+      binds:
+        - './state/router1:/var/lib/inspector'
+    switch1:
+      kind: switch
+      image: networkop/cx:latest
+      binds:
+        - './state/switch1:/var/lib/inspector'
+    server1:
+      kind: server
+      image: alpine:latest
+      binds:
+        - './state/server1:/var/lib/inspector'
+    pc1:
+      kind: workstation
+      image: alpine:latest
+      binds:
+        - './state/pc1:/var/lib/inspector'
+    cloud1:
+      kind: server
+      image: alpine:latest
+      binds:
+        - './state/cloud1:/var/lib/inspector'
+  links:
+    - endpoints: ["router1:eth0", "switch1:eth0"]
+    - endpoints: ["switch1:eth1", "server1:eth0"]
+    - endpoints: ["switch1:eth2", "pc1:eth0"]
+    - endpoints: ["router1:eth1", "cloud1:eth0"]
