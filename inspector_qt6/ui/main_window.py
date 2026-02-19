@@ -11,6 +11,7 @@ from inspector_qt6.pages.projects_page import ProjectsPage
 from inspector_qt6.pages.project_detail_page import ProjectDetailPage
 from inspector_qt6.pages.reports_page import ReportsPage
 from inspector_qt6.pages.settings_page import SettingsPage
+from inspector_qt6.pages.inspector_twins_page import InspectorTwinsPage
 from inspector_qt6.ui.styles import (
     SIDEBAR_STYLESHEET, SIDEBAR_HEADER_STYLESHEET, SIDEBAR_TITLE_STYLESHEET,
     SIDEBAR_MENU_BUTTON_STYLESHEET, SIDEBAR_BUTTON_STYLESHEET,
@@ -90,11 +91,12 @@ class MainWindow(QMainWindow):
         
         sidebar_layout.addWidget(header_widget)
         
-        # Navigation buttons (Projects, Reports, Settings only - Twin Designer accessed via projects)
+        # Navigation buttons (Projects, Inspector Twins, Reports, Settings - Twin Designer accessed via projects)
         nav_data = [
             ("📁  Projects", 0),
-            ("📊  Reports", 1),
-            ("⚙️  Settings", 2),
+            ("🤖  Inspector Twins", 1),
+            ("📊  Reports", 2),
+            ("⚙️  Settings", 3),
         ]
         
         for label, page_idx in nav_data:
@@ -134,16 +136,19 @@ class MainWindow(QMainWindow):
         self.projects_page.project_selected.connect(self.on_project_selected)
         self.pages.addWidget(self.projects_page)  # 0
         
+        self.inspector_twins_page = InspectorTwinsPage()
+        self.pages.addWidget(self.inspector_twins_page)  # 1
+        
         self.reports_page = ReportsPage()
-        self.pages.addWidget(self.reports_page)  # 1
+        self.pages.addWidget(self.reports_page)  # 2
         
         self.settings_page = SettingsPage()
-        self.pages.addWidget(self.settings_page)  # 2
+        self.pages.addWidget(self.settings_page)  # 3
         
         # Project detail page (accessed by selecting a project, not via sidebar)
         self.project_detail_page = ProjectDetailPage()
         self.project_detail_page.back_to_projects.connect(lambda: self.navigate_to_page(0))
-        self.pages.addWidget(self.project_detail_page)  # 3
+        self.pages.addWidget(self.project_detail_page)  # 4
         
         # Set Projects as default
         self.navigate_to_page(0)
@@ -156,9 +161,9 @@ class MainWindow(QMainWindow):
         assert status_bar is not None
         status_bar.showMessage("Ready")
     
-    def showEvent(self, event):
+    def showEvent(self, a0):
         """Override showEvent to display warning dialog on first show"""
-        super().showEvent(event)
+        super().showEvent(a0)
         
         # Show warning dialog only once on first display
         if not self.warning_shown:
@@ -171,7 +176,7 @@ class MainWindow(QMainWindow):
         self.pages.setCurrentIndex(page_index)
         
         # Update nav button states (only for non-project-detail pages)
-        if page_index < 3:  # Not project detail page
+        if page_index < 4:  # Not project detail page
             for i, btn in enumerate(self.nav_buttons):
                 btn.setChecked(i == page_index)
     
@@ -179,7 +184,7 @@ class MainWindow(QMainWindow):
         """Handle project selection - open project detail view"""
         self.current_project = project
         self.project_detail_page.load_project(project)
-        self.pages.setCurrentIndex(3)  # Show project detail page
+        self.pages.setCurrentIndex(4)  # Show project detail page
         
         # Deselect all nav buttons when showing project detail
         for btn in self.nav_buttons:
@@ -214,12 +219,16 @@ class MainWindow(QMainWindow):
         projects_action.triggered.connect(lambda: self.navigate_to_page(0))
         view_menu.addAction(projects_action)
         
+        twins_action = QAction("Inspector &Twins", self)
+        twins_action.triggered.connect(lambda: self.navigate_to_page(1))
+        view_menu.addAction(twins_action)
+        
         reports_action = QAction("&Reports", self)
-        reports_action.triggered.connect(lambda: self.navigate_to_page(1))
+        reports_action.triggered.connect(lambda: self.navigate_to_page(2))
         view_menu.addAction(reports_action)
         
         settings_action = QAction("&Settings", self)
-        settings_action.triggered.connect(lambda: self.navigate_to_page(2))
+        settings_action.triggered.connect(lambda: self.navigate_to_page(3))
         view_menu.addAction(settings_action)
         
         # Help menu
@@ -234,8 +243,9 @@ class MainWindow(QMainWindow):
         """Show a compact app menu from the sidebar header"""
         menu = QMenu(self)
         menu.addAction("Projects", lambda: self.navigate_to_page(0))
-        menu.addAction("Reports", lambda: self.navigate_to_page(1))
-        menu.addAction("Settings", lambda: self.navigate_to_page(2))
+        menu.addAction("Inspector Twins", lambda: self.navigate_to_page(1))
+        menu.addAction("Reports", lambda: self.navigate_to_page(2))
+        menu.addAction("Settings", lambda: self.navigate_to_page(3))
         menu.addSeparator()
         menu.addAction("About", self.show_about)
         menu.addAction("Quit", self.close)
