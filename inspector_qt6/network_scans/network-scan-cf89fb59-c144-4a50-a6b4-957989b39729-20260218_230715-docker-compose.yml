@@ -1,0 +1,80 @@
+networks:
+  inspector_network:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.154.72.0/22
+services:
+  node_10_154_72_1:
+    container_name: node_10_154_72_1
+    hostname: node_10_154_72_1
+    image: alpine:latest
+    labels:
+      inspector.device_type: unknown
+      inspector.mac: 00:00:5E:00:01:01
+      inspector.os: ''
+    networks:
+      inspector_network:
+        ipv4_address: 10.154.72.1
+    ports: []
+  node_10_154_72_2:
+    container_name: node_10_154_72_2
+    hostname: node_10_154_72_2
+    image: alpine:latest
+    labels:
+      inspector.device_type: unknown
+      inspector.mac: 20:6C:8A:F3:41:13
+      inspector.os: ''
+    networks:
+      inspector_network:
+        ipv4_address: 10.154.72.2
+    ports: []
+  node_10_154_72_3:
+    container_name: node_10_154_72_3
+    hostname: node_10_154_72_3
+    image: alpine:latest
+    labels:
+      inspector.device_type: unknown
+      inspector.mac: 20:6C:8A:F3:79:13
+      inspector.os: ''
+    networks:
+      inspector_network:
+        ipv4_address: 10.154.72.3
+    ports: []
+  node_10_154_72_92:
+    container_name: node_10_154_72_92
+    hostname: node_10_154_72_92
+    image: alpine:latest
+    labels:
+      inspector.device_type: unknown
+      inspector.mac: 4A:4D:76:AD:2C:9D
+      inspector.os: ''
+    networks:
+      inspector_network:
+        ipv4_address: 10.154.72.92
+    ports: []
+  node_10_154_74_49:
+    container_name: node_10_154_74_49
+    hostname: node_10_154_74_49
+    image: mcr.microsoft.com/windows/servercore:ltsc2022
+    labels:
+      inspector.device_type: general purpose
+      inspector.mac: C0:DD:8A:A6:41:1C
+      inspector.os: Microsoft Windows 10 - 11
+    networks:
+      inspector_network:
+        ipv4_address: 10.154.74.49
+    ports: []
+  node_10_154_74_65:
+    container_name: node_10_154_74_65
+    hostname: node_10_154_74_65
+    image: mcr.microsoft.com/windows/servercore:ltsc2022
+    labels:
+      inspector.device_type: general purpose
+      inspector.mac: CE:A9:4A:E2:2C:B0
+      inspector.os: Microsoft Windows 10 - 11
+    networks:
+      inspector_network:
+        ipv4_address: 10.154.74.65
+    ports: []
+version: '3.8'

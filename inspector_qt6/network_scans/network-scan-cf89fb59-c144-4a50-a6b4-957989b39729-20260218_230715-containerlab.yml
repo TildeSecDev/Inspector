@@ -1,0 +1,58 @@
+name: inspector-twin-network
+topology:
+  links: []
+  nodes:
+    node_10_154_72_1:
+      image: alpine:latest
+      kind: linux
+      labels:
+        device_type: unknown
+        discovered_mac: 00:00:5E:00:01:01
+        discovered_os: ''
+      mgmt_ipv4: 10.154.72.1
+      ports: []
+    node_10_154_72_2:
+      image: alpine:latest
+      kind: linux
+      labels:
+        device_type: unknown
+        discovered_mac: 20:6C:8A:F3:41:13
+        discovered_os: ''
+      mgmt_ipv4: 10.154.72.2
+      ports: []
+    node_10_154_72_3:
+      image: alpine:latest
+      kind: linux
+      labels:
+        device_type: unknown
+        discovered_mac: 20:6C:8A:F3:79:13
+        discovered_os: ''
+      mgmt_ipv4: 10.154.72.3
+      ports: []
+    node_10_154_72_92:
+      image: alpine:latest
+      kind: linux
+      labels:
+        device_type: unknown
+        discovered_mac: 4A:4D:76:AD:2C:9D
+        discovered_os: ''
+      mgmt_ipv4: 10.154.72.92
+      ports: []
+    node_10_154_74_49:
+      image: winamd64/windows:latest
+      kind: linux
+      labels:
+        device_type: general purpose
+        discovered_mac: C0:DD:8A:A6:41:1C
+        discovered_os: Microsoft Windows 10 - 11
+      mgmt_ipv4: 10.154.74.49
+      ports: []
+    node_10_154_74_65:
+      image: winamd64/windows:latest
+      kind: linux
+      labels:
+        device_type: general purpose
+        discovered_mac: CE:A9:4A:E2:2C:B0
+        discovered_os: Microsoft Windows 10 - 11
+      mgmt_ipv4: 10.154.74.65
+      ports: []
