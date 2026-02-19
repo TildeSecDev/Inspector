@@ -9,7 +9,6 @@ PyQt6-WebEngine==6.7.0
 
 # Network Scanning Dependencies
 scapy==2.5.0
-nmap==0.0.1
 python-nmap==0.7.1
 
 # Data Processing
