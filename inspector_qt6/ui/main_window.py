@@ -16,6 +16,7 @@ from inspector_qt6.ui.styles import (
     SIDEBAR_MENU_BUTTON_STYLESHEET, SIDEBAR_BUTTON_STYLESHEET,
     WARNING_BOX_STYLESHEET, WARNING_TITLE_STYLESHEET, WARNING_TEXT_STYLESHEET
 )
+from inspector_qt6.ui.warning_dialog import AuthorizationWarningDialog
 from inspector_qt6.models.topology import Topology
 from inspector_qt6.core.topology_utils import (
     export_topology_json, export_topology_yaml,
@@ -44,6 +45,7 @@ class MainWindow(QMainWindow):
         self.current_project: Optional[Dict[str, Any]] = None
         self.settings = QSettings("TildeSec", "InspectorTwin")
         self.nav_buttons = []
+        self.warning_shown = False
         
         self.init_ui()
         self.restore_state()
@@ -153,6 +155,16 @@ class MainWindow(QMainWindow):
         status_bar = self.statusBar()
         assert status_bar is not None
         status_bar.showMessage("Ready")
+    
+    def showEvent(self, event):
+        """Override showEvent to display warning dialog on first show"""
+        super().showEvent(event)
+        
+        # Show warning dialog only once on first display
+        if not self.warning_shown:
+            self.warning_shown = True
+            dialog = AuthorizationWarningDialog(self)
+            dialog.exec()
     
     def navigate_to_page(self, page_index: int):
         """Navigate to a specific page"""
