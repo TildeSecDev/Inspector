@@ -22,20 +22,28 @@ where clab >nul 2>nul
 if errorlevel 1 (
     echo containerlab is not installed.
     echo.
-    echo Attempting automated installation on Windows...
-    REM Install containerlab using the official installer
+    echo Installation options:
+    echo 1. Automated installation (Linux preferred):
+    echo    Run: https://get.containerlab.dev
+    echo.
+    echo 2. Docker container approach (recommended for macOS and Windows):
+    echo    Requires: Docker Desktop installed
+    echo    Then use: docker run --rm -it --privileged --network host ^
+    echo      -v /var/run/docker.sock:/var/run/docker.sock ^
+    echo      -v /var/run/netns:/var/run/netns ^
+    echo      ghcr.io/srl-labs/clab bash
+    echo.
+    echo 3. Manual installation:
+    echo    Visit: https://containerlab.dev/install/
+    echo.
+    echo Attempting automated installation...
     powershell -Command "& { iwr -useb https://get.containerlab.dev | iex }" 2>nul
     
     where clab >nul 2>nul
     if errorlevel 1 (
         echo.
-        echo Warning: containerlab installation failed or is unavailable.
-        echo Some network simulation features will not be available without containerlab.
-        echo.
-        echo Installation options:
-        echo 1. Retry automated installation on next setup
-        echo 2. Follow manual installation: https://containerlab.dev/install/
-        echo 3. Use WSL2 with Linux installation method
+        echo Checkmark Automated installation did not complete.
+        echo Use one of the options above, or Inspector can run without containerlab.
     ) else (
         echo Checkmark containerlab installed successfully
     )

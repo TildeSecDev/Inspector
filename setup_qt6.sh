@@ -29,20 +29,27 @@ if ! command -v clab &> /dev/null; then
     echo ""
     
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS specific instructions
-        echo "For macOS, containerlab requires Docker and manual setup."
+        # macOS specific - recommend Docker container approach
+        echo "For macOS, the recommended approach is to use containerlab via Docker."
         echo ""
-        echo "To install containerlab on macOS:"
-        echo "1. Ensure Docker Desktop is installed: https://www.docker.com/products/docker-desktop"
-        echo "2. Install Go (required to build from source): brew install go"
-        echo "3. Build containerlab from source:"
-        echo "   git clone https://github.com/srl-labs/containerlab.git"
-        echo "   cd containerlab"
-        echo "   make install"
+        echo "Prerequisites:"
+        echo "- Docker Desktop must be installed: https://www.docker.com/products/docker-desktop"
         echo ""
-        echo "Or follow the official guide: https://containerlab.dev/macos/"
+        echo "Then, containerlab is available as a Docker image and can be used with:"
+        echo "  docker run --rm -it --privileged \\"
+        echo "    --network host \\"
+        echo "    -v /var/run/docker.sock:/var/run/docker.sock \\"
+        echo "    -v /var/run/netns:/var/run/netns \\"
+        echo "    -v /etc/hosts:/etc/hosts \\"
+        echo "    -v /var/lib/docker/containers:/var/lib/docker/containers \\"
+        echo "    --pid=\"host\" \\"
+        echo "    -v \$(pwd):\$(pwd) \\"
+        echo "    -w \$(pwd) \\"
+        echo "    ghcr.io/srl-labs/clab bash"
         echo ""
-        echo "⚠ Skipping containerlab installation - it will be available after manual setup"
+        echo "For more details, see: https://containerlab.dev/macos/"
+        echo ""
+        echo "⚠ Skipping containerlab installation - use Docker container when needed"
     else
         # Linux - try automated installation
         echo "Attempting automated installation on Linux..."
