@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
-use std::{fs, io::{BufRead, BufReader}, path::PathBuf, process::{Command, Stdio}, sync::{Arc, Mutex}, time::{SystemTime, UNIX_EPOCH}};
+use std::{env, fs, io::{BufRead, BufReader}, path::PathBuf, process::{Command, Stdio}, sync::{Arc, Mutex}, time::{Duration, SystemTime, UNIX_EPOCH}};
 use tauri::{AppHandle, Emitter, Manager};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -264,6 +264,64 @@ async fn run_network_scan(
     }
 
     // Check if running as root (required for network scanning)
+    if env::var("INSPECTOR_SCAN_MOCK").as_deref() == Ok("1") {
+        let mock_device_ip = "10.0.0.42";
+        let mock_device_mac = "AA:BB:CC:DD:EE:FF";
+        let _ = app.emit(
+            "network-scan-log",
+            NetworkScanLog {
+                level: "info".to_string(),
+                message: format!("Found: {} ({})", mock_device_ip, mock_device_mac),
+            },
+        );
+        std::thread::sleep(Duration::from_millis(200));
+        let _ = app.emit(
+            "network-scan-log",
+            NetworkScanLog {
+                level: "info".to_string(),
+                message: format!("Scanning {}", mock_device_ip),
+            },
+        );
+        std::thread::sleep(Duration::from_millis(200));
+        let _ = app.emit(
+            "network-scan-log",
+            NetworkScanLog {
+                level: "info".to_string(),
+                message: format!("Completed {}", mock_device_ip),
+            },
+        );
+
+        let mock_scan_data = serde_json::json!({
+            "metadata": {
+                "network_info": {
+                    "network_cidr": "10.0.0.0/24",
+                    "gateway": "10.0.0.1"
+                }
+            },
+            "devices": {
+                mock_device_ip: {
+                    "ip": mock_device_ip,
+                    "mac": mock_device_mac,
+                    "device_type": "router",
+                    "ports": [{"port": 22, "protocol": "tcp", "state": "open"}],
+                    "os_detection": {"name": "Linux", "accuracy": "95"}
+                }
+            }
+        });
+
+        if let Ok(data) = serde_json::to_string_pretty(&mock_scan_data) {
+            let _ = fs::write(&output_file, data);
+        }
+
+        return Ok(NetworkScanResult {
+            status: "success".to_string(),
+            message: "Network scan completed. Found 1 devices.".to_string(),
+            output_file: Some(output_file.to_string_lossy().to_string()),
+            scan_data: Some(mock_scan_data),
+            timestamp,
+        });
+    }
+
     let whoami_output = Command::new("whoami")
         .output()
         .map_err(|err| format!("Failed to check user: {err}"))?;

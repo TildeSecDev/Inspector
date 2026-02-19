@@ -1,0 +1,398 @@
+{
+  "metadata": {
+    "scan_time": "2026-02-18T22:50:16.840098",
+    "scanner_version": "1.0.0",
+    "scan_type": "comprehensive",
+    "network_info": {
+      "gateway": "10.154.72.1",
+      "interface": "en0",
+      "local_ip": "10.154.73.40",
+      "netmask": "255.255.252.0",
+      "network_cidr": "10.154.72.0/22",
+      "network_size": 1024
+    },
+    "bluetooth_devices": [],
+    "topology": {
+      "gateway": "10.154.72.1",
+      "switches": [],
+      "routers": [
+        "10.154.72.2"
+      ],
+      "endpoints": [
+        "10.154.72.3",
+        "10.154.72.1",
+        "10.154.74.49",
+        "10.154.72.92",
+        "10.154.74.65"
+      ],
+      "access_points": [],
+      "connections": []
+    }
+  },
+  "devices": {
+    "10.154.72.2": {
+      "ip": "10.154.72.2",
+      "scan_time": "2026-02-18T22:50:20.870071",
+      "ports": [],
+      "services": [],
+      "os_detection": {
+        "name": "Cisco Adaptive Security Appliance (ASA 8.4)",
+        "accuracy": "100",
+        "os_family": "ASA",
+        "os_gen": "8.X",
+        "vendor": "Cisco"
+      },
+      "device_type": "firewall",
+      "distance_hops": 1,
+      "traceroute": [
+        {
+          "ttl": "1",
+          "ip": "10.154.72.2",
+          "hostname": "",
+          "rtt": "3.27"
+        }
+      ],
+      "mac": "20:6C:8A:F3:41:13",
+      "discovered_by": "arp_nmap"
+    },
+    "10.154.72.3": {
+      "ip": "10.154.72.3",
+      "scan_time": "2026-02-18T22:50:20.871463",
+      "ports": [],
+      "services": [],
+      "os_detection": {},
+      "device_type": "unknown",
+      "distance_hops": 1,
+      "traceroute": [
+        {
+          "ttl": "1",
+          "ip": "10.154.72.3",
+          "hostname": "",
+          "rtt": "3.73"
+        }
+      ],
+      "mac": "20:6C:8A:F3:79:13",
+      "discovered_by": "arp_nmap"
+    },
+    "10.154.72.1": {
+      "ip": "10.154.72.1",
+      "scan_time": "2026-02-18T22:50:20.869940",
+      "ports": [],
+      "services": [],
+      "os_detection": {},
+      "device_type": "unknown",
+      "distance_hops": 1,
+      "traceroute": [
+        {
+          "ttl": "1",
+          "ip": "10.154.72.1",
+          "hostname": "",
+          "rtt": "2.60"
+        }
+      ],
+      "mac": "00:00:5E:00:01:01",
+      "discovered_by": "arp_nmap"
+    },
+    "10.154.74.49": {
+      "ip": "10.154.74.49",
+      "scan_time": "2026-02-18T22:50:20.874882",
+      "ports": [],
+      "services": [],
+      "os_detection": {
+        "name": "Microsoft Windows 10 - 11",
+        "accuracy": "100",
+        "os_family": "Windows",
+        "os_gen": "10",
+        "vendor": "Microsoft"
+      },
+      "device_type": "general purpose",
+      "distance_hops": 1,
+      "traceroute": [
+        {
+          "ttl": "1",
+          "ip": "10.154.74.49",
+          "hostname": "",
+          "rtt": "15.19"
+        }
+      ],
+      "mac": "C0:DD:8A:A6:41:1C",
+      "discovered_by": "arp_nmap"
+    },
+    "10.154.72.92": {
+      "ip": "10.154.72.92",
+      "scan_time": "2026-02-18T22:50:20.872072",
+      "ports": [],
+      "services": [],
+      "os_detection": {
+        "name": "Microsoft Windows 10 - 11",
+        "accuracy": "100",
+        "os_family": "Windows",
+        "os_gen": "10",
+        "vendor": "Microsoft"
+      },
+      "device_type": "general purpose",
+      "distance_hops": 1,
+      "traceroute": [
+        {
+          "ttl": "1",
+          "ip": "10.154.72.92",
+          "hostname": "",
+          "rtt": "23.02"
+        }
+      ],
+      "mac": "4A:4D:76:AD:2C:9D",
+      "discovered_by": "arp_nmap"
+    },
+    "10.154.74.65": {
+      "ip": "10.154.74.65",
+      "scan_time": "2026-02-18T22:50:20.877282",
+      "ports": [
+        {
+          "port": 49152,
+          "protocol": "tcp",
+          "state": "open"
+        }
+      ],
+      "services": [
+        {
+          "port": 49152,
+          "protocol": "tcp",
+          "state": "open",
+          "service": "tcpwrapped",
+          "product": "",
+          "version": "",
+          "extrainfo": "",
+          "cpe": []
+        }
+      ],
+      "os_detection": {
+        "name": "Apple macOS 12 (Monterey) (Darwin 21.6.0)",
+        "accuracy": "95",
+        "os_family": "macOS",
+        "os_gen": "12.X",
+        "vendor": "Apple"
+      },
+      "device_type": "general purpose",
+      "distance_hops": 1,
+      "traceroute": [
+        {
+          "ttl": "1",
+          "ip": "10.154.74.65",
+          "hostname": "",
+          "rtt": "26.92"
+        }
+      ],
+      "uptime_seconds": "9",
+      "mac": "CE:A9:4A:E2:2C:B0",
+      "discovered_by": "arp_nmap"
+    }
+  },
+  "topology": {
+    "gateway": "10.154.72.1",
+    "switches": [],
+    "routers": [
+      "10.154.72.2"
+    ],
+    "endpoints": [
+      "10.154.72.3",
+      "10.154.72.1",
+      "10.154.74.49",
+      "10.154.72.92",
+      "10.154.74.65"
+    ],
+    "access_points": [],
+    "connections": []
+  },
+  "bluetooth_devices": [],
+  "containerlab_format": {
+    "name": "inspector-twin-network",
+    "topology": {
+      "nodes": {
+        "node_10_154_72_2": {
+          "kind": "vr-sros",
+          "image": "vrnetlab/vr-sros:latest",
+          "mgmt_ipv4": "10.154.72.2",
+          "ports": [],
+          "labels": {
+            "discovered_mac": "20:6C:8A:F3:41:13",
+            "discovered_os": "Cisco Adaptive Security Appliance (ASA 8.4)",
+            "device_type": "firewall"
+          }
+        },
+        "node_10_154_72_3": {
+          "kind": "linux",
+          "image": "alpine:latest",
+          "mgmt_ipv4": "10.154.72.3",
+          "ports": [],
+          "labels": {
+            "discovered_mac": "20:6C:8A:F3:79:13",
+            "discovered_os": "",
+            "device_type": "unknown"
+          }
+        },
+        "node_10_154_72_1": {
+          "kind": "linux",
+          "image": "alpine:latest",
+          "mgmt_ipv4": "10.154.72.1",
+          "ports": [],
+          "labels": {
+            "discovered_mac": "00:00:5E:00:01:01",
+            "discovered_os": "",
+            "device_type": "unknown"
+          }
+        },
+        "node_10_154_74_49": {
+          "kind": "linux",
+          "image": "winamd64/windows:latest",
+          "mgmt_ipv4": "10.154.74.49",
+          "ports": [],
+          "labels": {
+            "discovered_mac": "C0:DD:8A:A6:41:1C",
+            "discovered_os": "Microsoft Windows 10 - 11",
+            "device_type": "general purpose"
+          }
+        },
+        "node_10_154_72_92": {
+          "kind": "linux",
+          "image": "winamd64/windows:latest",
+          "mgmt_ipv4": "10.154.72.92",
+          "ports": [],
+          "labels": {
+            "discovered_mac": "4A:4D:76:AD:2C:9D",
+            "discovered_os": "Microsoft Windows 10 - 11",
+            "device_type": "general purpose"
+          }
+        },
+        "node_10_154_74_65": {
+          "kind": "linux",
+          "image": "alpine:latest",
+          "mgmt_ipv4": "10.154.74.65",
+          "ports": [
+            49152
+          ],
+          "labels": {
+            "discovered_mac": "CE:A9:4A:E2:2C:B0",
+            "discovered_os": "Apple macOS 12 (Monterey) (Darwin 21.6.0)",
+            "device_type": "general purpose"
+          }
+        }
+      },
+      "links": []
+    }
+  },
+  "docker_compose_format": {
+    "version": "3.8",
+    "services": {
+      "node_10_154_72_2": {
+        "image": "alpine:latest",
+        "container_name": "node_10_154_72_2",
+        "hostname": "node_10_154_72_2",
+        "networks": {
+          "inspector_network": {
+            "ipv4_address": "10.154.72.2"
+          }
+        },
+        "labels": {
+          "inspector.device_type": "firewall",
+          "inspector.mac": "20:6C:8A:F3:41:13",
+          "inspector.os": "Cisco Adaptive Security Appliance (ASA 8.4)"
+        },
+        "ports": []
+      },
+      "node_10_154_72_3": {
+        "image": "alpine:latest",
+        "container_name": "node_10_154_72_3",
+        "hostname": "node_10_154_72_3",
+        "networks": {
+          "inspector_network": {
+            "ipv4_address": "10.154.72.3"
+          }
+        },
+        "labels": {
+          "inspector.device_type": "unknown",
+          "inspector.mac": "20:6C:8A:F3:79:13",
+          "inspector.os": ""
+        },
+        "ports": []
+      },
+      "node_10_154_72_1": {
+        "image": "alpine:latest",
+        "container_name": "node_10_154_72_1",
+        "hostname": "node_10_154_72_1",
+        "networks": {
+          "inspector_network": {
+            "ipv4_address": "10.154.72.1"
+          }
+        },
+        "labels": {
+          "inspector.device_type": "unknown",
+          "inspector.mac": "00:00:5E:00:01:01",
+          "inspector.os": ""
+        },
+        "ports": []
+      },
+      "node_10_154_74_49": {
+        "image": "mcr.microsoft.com/windows/servercore:ltsc2022",
+        "container_name": "node_10_154_74_49",
+        "hostname": "node_10_154_74_49",
+        "networks": {
+          "inspector_network": {
+            "ipv4_address": "10.154.74.49"
+          }
+        },
+        "labels": {
+          "inspector.device_type": "general purpose",
+          "inspector.mac": "C0:DD:8A:A6:41:1C",
+          "inspector.os": "Microsoft Windows 10 - 11"
+        },
+        "ports": []
+      },
+      "node_10_154_72_92": {
+        "image": "mcr.microsoft.com/windows/servercore:ltsc2022",
+        "container_name": "node_10_154_72_92",
+        "hostname": "node_10_154_72_92",
+        "networks": {
+          "inspector_network": {
+            "ipv4_address": "10.154.72.92"
+          }
+        },
+        "labels": {
+          "inspector.device_type": "general purpose",
+          "inspector.mac": "4A:4D:76:AD:2C:9D",
+          "inspector.os": "Microsoft Windows 10 - 11"
+        },
+        "ports": []
+      },
+      "node_10_154_74_65": {
+        "image": "alpine:latest",
+        "container_name": "node_10_154_74_65",
+        "hostname": "node_10_154_74_65",
+        "networks": {
+          "inspector_network": {
+            "ipv4_address": "10.154.74.65"
+          }
+        },
+        "labels": {
+          "inspector.device_type": "general purpose",
+          "inspector.mac": "CE:A9:4A:E2:2C:B0",
+          "inspector.os": "Apple macOS 12 (Monterey) (Darwin 21.6.0)"
+        },
+        "ports": [
+          "49152:49152"
+        ]
+      }
+    },
+    "networks": {
+      "inspector_network": {
+        "driver": "bridge",
+        "ipam": {
+          "config": [
+            {
+              "subnet": "10.154.72.0/22"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

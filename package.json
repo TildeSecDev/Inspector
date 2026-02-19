@@ -16,7 +16,8 @@
     "tauri:start": "cd src-tauri && cargo tauri dev",
     "build": "npm run build -ws --if-present",
     "test": "npm run test -ws --if-present",
-    "test:smoke": "playwright test",
+      "test:smoke": "playwright test",
+      "test:desktop-e2e": "node tests/desktop-e2e/scan-network-desktop.e2e.mjs",
     "lint": "npm run lint -ws --if-present",
     "seed": "npm run build -ws --if-present && node scripts/seed.mjs",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/dist packages/*/dist"
@@ -26,6 +27,7 @@
     "@types/node": "^20.10.0",
     "electron-rebuild": "^3.2.9",
     "playwright": "^1.40.0",
+      "webdriverio": "^9.13.0",
     "typescript": "^5.3.3",
     "vitest": "^1.0.4"
   },
