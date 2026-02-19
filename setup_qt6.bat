@@ -20,16 +20,22 @@ echo.
 echo Checking for containerlab...
 where clab >nul 2>nul
 if errorlevel 1 (
-    echo containerlab is not installed. Attempting installation...
+    echo containerlab is not installed.
     echo.
+    echo Attempting automated installation on Windows...
     REM Install containerlab using the official installer
     powershell -Command "& { iwr -useb https://get.containerlab.dev | iex }" 2>nul
     
     where clab >nul 2>nul
     if errorlevel 1 (
-        echo Warning: containerlab installation failed or skipped.
-        echo Some features requiring network simulation will not be available.
-        echo You can manually install containerlab from: https://containerlab.dev/install/
+        echo.
+        echo Warning: containerlab installation failed or is unavailable.
+        echo Some network simulation features will not be available without containerlab.
+        echo.
+        echo Installation options:
+        echo 1. Retry automated installation on next setup
+        echo 2. Follow manual installation: https://containerlab.dev/install/
+        echo 3. Use WSL2 with Linux installation method
     ) else (
         echo Checkmark containerlab installed successfully
     )
