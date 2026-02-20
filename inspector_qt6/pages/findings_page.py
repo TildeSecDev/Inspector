@@ -17,7 +17,6 @@ class FindingsPage(QWidget):
         # Header
         header_layout = QHBoxLayout()
         title = QLabel("Security Findings")
-        title.setStyleSheet("font-size: 28px; font-weight: bold; color: white;")
         header_layout.addWidget(title)
         header_layout.addStretch()
         

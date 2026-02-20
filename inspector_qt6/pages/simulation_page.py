@@ -15,7 +15,6 @@ class SimulationPage(QWidget):
         layout.setSpacing(25)
         
         title = QLabel("Simulation Runner")
-        title.setStyleSheet("font-size: 28px; font-weight: bold; color: white;")
         layout.addWidget(title)
         
         # Control buttons
@@ -62,7 +61,6 @@ class SimulationPage(QWidget):
         
         # Log output
         log_label = QLabel("Simulation Log:")
-        log_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #ecf0f1; margin-top: 20px;")
         layout.addWidget(log_label)
         
         self.log_text = QTextEdit()

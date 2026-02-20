@@ -106,7 +106,6 @@ class ScenariosPage(QWidget):
         header_layout = QHBoxLayout()
         
         title = QLabel("Test Scenarios")
-        title.setStyleSheet("font-size: 28px; font-weight: bold; color: white;")
         header_layout.addWidget(title)
         
         header_layout.addStretch()

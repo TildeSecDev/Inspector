@@ -47,7 +47,6 @@ class QuickActionCard(QFrame):
         
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setStyleSheet("color: #666;")
         layout.addWidget(desc_label)
     
     def mousePressEvent(self, a0):
@@ -80,17 +79,14 @@ class StatCard(QFrame):
         layout.setSpacing(5)
         
         title_label = QLabel(title)
-        title_label.setStyleSheet("color: #666; font-size: 12px;")
         layout.addWidget(title_label)
         
         value_label = QLabel(value)
         value_label.setFont(QFont("Arial", 24, QFont.Weight.Bold))
-        value_label.setStyleSheet("color: #2c3e50;")
         layout.addWidget(value_label)
         
         if description:
             desc_label = QLabel(description)
-            desc_label.setStyleSheet("color: #999; font-size: 11px;")
             layout.addWidget(desc_label)
 
 
@@ -121,12 +117,10 @@ class HomePage(QWidget):
         # Welcome section
         welcome_label = QLabel("Inspector Twin")
         welcome_label.setFont(QFont("Arial", 32, QFont.Weight.Bold))
-        welcome_label.setStyleSheet("color: #2c3e50;")
         content_layout.addWidget(welcome_label)
         
         subtitle_label = QLabel("Digital Twin Simulation and Security Assessment Platform")
         subtitle_label.setFont(QFont("Arial", 14))
-        subtitle_label.setStyleSheet("color: #7f8c8d; margin-bottom: 20px;")
         content_layout.addWidget(subtitle_label)
         
         # Statistics section
@@ -151,13 +145,11 @@ class HomePage(QWidget):
         separator = QFrame()
         separator.setFrameShape(QFrame.Shape.HLine)
         separator.setFrameShadow(QFrame.Shadow.Sunken)
-        separator.setStyleSheet("background-color: #ddd;")
         content_layout.addWidget(separator)
         
         # Quick actions section
         actions_title = QLabel("Quick Actions")
         actions_title.setFont(QFont("Arial", 18, QFont.Weight.Bold))
-        actions_title.setStyleSheet("color: #2c3e50; margin-top: 10px;")
         content_layout.addWidget(actions_title)
         
         # Action cards grid

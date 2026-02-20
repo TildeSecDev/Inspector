@@ -65,7 +65,6 @@ class ProjectDetailPage(QWidget):
         title_font.setPointSize(16)
         title_font.setBold(True)
         self.project_title.setFont(title_font)
-        self.project_title.setStyleSheet("color: white; background: transparent;")
         header_layout.addWidget(self.project_title)
         header_layout.addStretch()
         

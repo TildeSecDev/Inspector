@@ -48,14 +48,12 @@ class AIModelCard(QFrame):
         
         name_label = QLabel(self.name)
         name_label.setFont(QFont("Arial", 14, QFont.Weight.Bold))
-        name_label.setStyleSheet("color: #ecf0f1;")
         header_layout.addWidget(name_label)
         
         header_layout.addStretch()
         
         version_label = QLabel(f"v{self.version}")
         version_label.setFont(QFont("Arial", 10))
-        version_label.setStyleSheet("color: #95a5a6;")
         header_layout.addWidget(version_label)
         
         layout.addLayout(header_layout)
@@ -63,13 +61,11 @@ class AIModelCard(QFrame):
         # Description
         desc_label = QLabel(self.description)
         desc_label.setWordWrap(True)
-        desc_label.setStyleSheet("color: #bdc3c7; font-size: 12px;")
         layout.addWidget(desc_label)
         
         # Capabilities
         if self.capabilities:
             capabilities_label = QLabel("Capabilities:")
-            capabilities_label.setStyleSheet("color: #95a5a6; font-weight: bold; font-size: 11px;")
             layout.addWidget(capabilities_label)
             
             caps_layout = QHBoxLayout()
@@ -78,12 +74,10 @@ class AIModelCard(QFrame):
             
             for cap in self.capabilities[:3]:  # Show first 3
                 cap_label = QLabel(f"• {cap}")
-                cap_label.setStyleSheet("color: #2ecc71; font-size: 11px;")
                 caps_layout.addWidget(cap_label)
             
             if len(self.capabilities) > 3:
                 more_label = QLabel(f"+ {len(self.capabilities) - 3} more")
-                more_label.setStyleSheet("color: #3498db; font-size: 11px;")
                 caps_layout.addWidget(more_label)
             
             caps_layout.addStretch()
@@ -243,7 +237,6 @@ class InspectorTwinsPage(QWidget):
         header_label = QLabel("Inspector Twins - AI Models")
         header_font = QFont("Arial", 24, QFont.Weight.Bold)
         header_label.setFont(header_font)
-        header_label.setStyleSheet("color: #ecf0f1;")
         layout.addWidget(header_label)
         
         # Subtitle
@@ -252,7 +245,6 @@ class InspectorTwinsPage(QWidget):
             "and evaluate security posture"
         )
         subtitle_label.setWordWrap(True)
-        subtitle_label.setStyleSheet("color: #95a5a6; font-size: 12px; margin-bottom: 10px;")
         layout.addWidget(subtitle_label)
         
         # Scroll area for model cards
@@ -303,7 +295,6 @@ class InspectorTwinsPage(QWidget):
         layout.addWidget(scroll, stretch=1)
         
         # Set background
-        self.setStyleSheet("background-color: #1e1e1e;")
     
     def _on_deploy_model(self, model_id: str):
         """Handle model deployment"""

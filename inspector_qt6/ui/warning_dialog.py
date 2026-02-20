@@ -52,7 +52,6 @@ class AuthorizationWarningDialog(QDialog):
         title_font.setPointSize(24)
         title_font.setBold(True)
         title_label.setFont(title_font)
-        title_label.setStyleSheet("color: white; background: transparent;")
         content_layout.addWidget(title_label)
         
         # Warning message
@@ -66,7 +65,6 @@ class AuthorizationWarningDialog(QDialog):
         message_label.setWordWrap(True)
         message_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         message_label.setMinimumHeight(80)
-        message_label.setStyleSheet("color: white; background: transparent;")
         content_layout.addWidget(message_label)
         
         content_layout.addSpacing(30)
