@@ -1,33 +1,33 @@
-# Inspector Twin - PyQt6 Edition
+# Inspector Twin - PyQt6 Edition (Linux)
 # Python Desktop Application for Digital Twin Simulation and Security Assessment
 
-# Core GUI Framework
+# Core GUI Framework (for Linux with system Qt6)
 PyQt6>=6.7.0
 PyQt6-sip>=13.6.0
 
 # Network Scanning Dependencies
-scapy==2.5.0
-python-nmap==0.7.1
+scapy>=2.5.0
+python-nmap>=0.7.1
 
 # Data Processing
-PyYAML==6.0.1
-pydantic==2.6.1
-pydantic-settings==2.1.0
+PyYAML>=6.0.1
+pydantic>=2.6.1
+pydantic-settings>=2.1.0
 
 # JSON Schema Validation
 jsonschema==4.21.1
 
 # PDF Report Generation
-reportlab==4.0.9
-pypdf==4.0.1
+reportlab>=4.0.9
+pypdf>=4.0.1
 
 # Database
-SQLAlchemy==2.0.25
+SQLAlchemy>=2.0.25
 
 # Plotting and Visualization
-matplotlib==3.8.2
-networkx==3.2.1
-Pillow==10.2.0
+matplotlib>=3.8.2
+networkx>=3.2.1
+Pillow>=10.3.0
 
 # Async Support
 asyncio-mqtt==0.16.2

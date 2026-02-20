@@ -10,6 +10,7 @@ This is the PyQt6 desktop application version of Inspector Twin. This version is
 
 - Python 3.10 or higher
 - pip package manager
+- sudo privileges (required for setup script)
 
 ### Installation
 
@@ -20,7 +21,19 @@ This is the PyQt6 desktop application version of Inspector Twin. This version is
    git checkout QT6
    ```
 
-2. **Install Python dependencies:**
+2. **Run the setup script (requires sudo):**
+   ```bash
+   sudo ./setup_qt6.sh
+   ```
+   
+   The setup script will:
+   - Create a Python virtual environment
+   - Install all required dependencies
+   - Install containerlab (Linux) or set up Docker wrapper (macOS/Linux with Docker)
+   - Launch the application
+
+   **Or** install manually:
+
    ```bash
    pip install -r requirements.txt
    ```
