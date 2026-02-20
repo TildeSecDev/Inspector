@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspector Twin — MoSCoW Requirements (PyQt6)</title>
+  <style>
+    :root {
+      --bg:         #0f1117;
+      --surface:    #1a1d27;
+      --border:     #2a2d3e;
+      --text:       #e2e8f0;
+      --muted:      #8892a4;
+      --must:       #ef4444;
+      --should:     #f59e0b;
+      --could:      #3b82f6;
+      --wont:       #6b7280;
+      --must-bg:    rgba(239,68,68,0.08);
+      --should-bg:  rgba(245,158,11,0.08);
+      --could-bg:   rgba(59,130,246,0.08);
+      --wont-bg:    rgba(107,114,128,0.08);
+      --fe:         #8b5cf6;
+      --mw:         #06b6d4;
+      --be:         #22c55e;
+      --ext:        #f97316;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header h1 span { color: #3b82f6; }
+
+    header p {
+      color: var(--muted);
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
+      margin-top: 1.4rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-must   { background: var(--must-bg);   color: var(--must);   border: 1px solid var(--must); }
+    .badge-should { background: var(--should-bg); color: var(--should); border: 1px solid var(--should); }
+    .badge-could  { background: var(--could-bg);  color: var(--could);  border: 1px solid var(--could); }
+    .badge-wont   { background: var(--wont-bg);   color: var(--wont);   border: 1px solid var(--wont); }
+
+    .layer-badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .layer-fe  { background: rgba(139,92,246,0.15); color: var(--fe); }
+    .layer-mw  { background: rgba(6,182,212,0.15);  color: var(--mw); }
+    .layer-be  { background: rgba(34,197,94,0.15);  color: var(--be); }
+    .layer-ext { background: rgba(249,115,22,0.15); color: var(--ext); }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section-title h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-fe  { background: var(--fe); }
+    .dot-mw  { background: var(--mw); }
+    .dot-be  { background: var(--be); }
+    .dot-ext { background: var(--ext); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-bottom: 0.5rem;
+    }
+
+    thead tr {
+      background: var(--surface);
+    }
+
+    th {
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    td.req-title {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    td.rationale {
+      color: var(--muted);
+      font-size: 0.83rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+
+    .summary-card .count {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .summary-card .label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .must-count   { color: var(--must); }
+    .should-count { color: var(--should); }
+    .could-count  { color: var(--could); }
+    .wont-count   { color: var(--wont); }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Inspector Twin — <span>MoSCoW</span> Requirements</h1>
+  <p>Priority-classified feature requirements sorted by application layer · PyQt6 Python edition · v0.1 Draft</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="badge badge-must">Must</span> Required for MVP — non-negotiable</div>
+    <div class="legend-item"><span class="badge badge-should">Should</span> High-value, ship soon after MVP</div>
+    <div class="legend-item"><span class="badge badge-could">Could</span> Nice-to-have, include if capacity allows</div>
+    <div class="legend-item"><span class="badge badge-wont">Won't (now)</span> Explicitly deferred or out-of-scope</div>
+    <div class="legend-item"><span class="layer-badge layer-fe">Frontend</span></div>
+    <div class="legend-item"><span class="layer-badge layer-mw">Middleware</span></div>
+    <div class="legend-item"><span class="layer-badge layer-be">Backend</span></div>
+    <div class="legend-item"><span class="layer-badge layer-ext">External</span></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Summary counts -->
+  <div class="summary-grid">
+    <div class="summary-card"><div class="count must-count">16</div><div class="label">Must Have</div></div>
+    <div class="summary-card"><div class="count should-count">13</div><div class="label">Should Have</div></div>
+    <div class="summary-card"><div class="count could-count">10</div><div class="label">Could Have</div></div>
+    <div class="summary-card"><div class="count wont-count">7</div><div class="label">Won't Have (now)</div></div>
+  </div>
+
+  <div class="section-title">
+    <span class="dot dot-fe"></span>
+    <h2>Frontend</h2>
+    <span class="layer-badge layer-fe">PyQt6 Widgets / Pages / Dialogs</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Projects dashboard with create / open / delete</td>
+        <td class="rationale">Entry point for all workflows. User must be able to name a project and navigate to the Twin Designer. Implemented as <code>ProjectsPage</code> (QWidget + QGridLayout of <code>ProjectCard</code> frames).</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Drag-and-drop topology canvas (QGraphicsView)</td>
+        <td class="rationale">Core interaction model via <code>TopologyCanvas</code> (QGraphicsView). Supports Router, Switch, Firewall, Server, Workstation, IoT, Cloud, Hacking Device, TDL nodes. Links with bandwidth/latency/loss properties.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Node &amp; link properties panel</td>
+        <td class="rationale"><code>PropertiesPanel</code> widget edits name, role, OS, IP/subnet, exec commands, env vars, and interface details for the selected canvas element.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Left sidebar navigation (Projects, Inspector Twins, Reports, Settings) + project detail tabs</td>
+        <td class="rationale">Consistent app-level navigation via <code>MainWindow</code> sidebar. Projects navigates to <code>ProjectsPage</code>; project detail adds Designer / Scenarios / Simulation / Findings tabs via <code>QTabWidget</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Simulation runner page with log output and progress bar</td>
+        <td class="rationale"><code>SimulationPage</code> shows start/stop controls, a <code>QProgressBar</code>, and a <code>QTextEdit</code> log. Simulation runs in a <code>QThread</code> worker to keep UI responsive.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Findings page with severity-grouped table</td>
+        <td class="rationale"><code>FindingsPage</code> uses <code>QTableWidget</code> with columns: Severity / Type / Target / Description / Status. Export button saves findings to JSON.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Authorization warning dialog (ROE gate) on app launch</td>
+        <td class="rationale"><code>AuthorizationWarningDialog</code> displayed on first <code>showEvent</code>. Persistent sidebar warning box ("Authorized Testing Only") visible at all times.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Reports page — generate &amp; save PDF / JSON</td>
+        <td class="rationale"><code>ReportsPage</code> triggers <code>ReportGeneratorThread</code> (QThread). User picks format (JSON / PDF) and output path via <code>QFileDialog</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Scenario editor — define type, duration, commands, description</td>
+        <td class="rationale"><code>ScenariosPage</code> + <code>ScenarioDialog</code>. Types: Security Assessment, Penetration Test, Load Test, Failure Simulation, Custom. Scenarios stored in project data dict.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Inspector Twins page — assign HRH AI models to projects</td>
+        <td class="rationale"><code>InspectorTwinsPage</code> shows a grid of <code>AIModelCard</code> frames (8 HRH models). "Deploy to Project" emits <code>model_deployed</code> signal and opens project-selection dialog.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Canvas mini-map overlay (CanvasPreview)</td>
+        <td class="rationale"><code>CanvasPreview</code> widget shows a scaled thumbnail of the full topology. Required for large enterprise topologies.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Device palette with drag-and-drop templates (DevicePalette)</td>
+        <td class="rationale"><code>DevicePalette</code> loads node templates from <code>inspector_qt6/frontend/devices/*.json</code>. Devices are draggable onto the canvas. Custom templates supported by adding JSON files.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Dark theme applied globally (QSS stylesheets)</td>
+        <td class="rationale">Centralised in <code>inspector_qt6/ui/styles.py</code>. Colour palette: backgrounds #1e1e1e / #2c2c2c, accent #3498db / #2ecc71. Applied via <code>app.setStyleSheet()</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Light/system theme toggle</td>
+        <td class="rationale">Accessibility improvement. Requires refactoring style constants to a theme dict. Not needed for MVP.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Animated packet-flow rendering on canvas during simulation</td>
+        <td class="rationale">Visual "dot moving along a link" QGraphicsItem animation. Enhances UX but not critical for correctness.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Containerlab Status Dialog — live per-node container state</td>
+        <td class="rationale"><code>ContainerlabStatusDialog</code> already implemented. Needs integration with live <code>clab inspect</code> polling to replace static status view.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Multi-user / collaborative editing</td>
+        <td class="rationale">Single-user desktop app (PyQt6). Collaboration is a v2+ concern, likely requiring a web front-end rewrite.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Web browser interface / Electron shell</td>
+        <td class="rationale">This branch is the Python/PyQt6 edition. Electron and React are explicitly deferred to a future branch rebuild.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =================== MIDDLEWARE =================== -->
+  <div class="section-title">
+    <span class="dot dot-mw"></span>
+    <h2>Middleware</h2>
+    <span class="layer-badge layer-mw">Qt Signals / Pydantic Validation / QThread Workers</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">PyQt6 Signal/Slot inter-widget communication</td>
+        <td class="rationale">All cross-widget communication via typed <code>pyqtSignal</code>. No direct widget references between pages. Signals: <code>project_selected(dict)</code>, <code>back_to_projects()</code>, <code>model_deployed(str)</code>, <code>settings_changed(dict)</code>, <code>topology_changed()</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Pydantic data models for all core domain objects</td>
+        <td class="rationale"><code>inspector_qt6/models/topology.py</code> defines validated <code>Topology</code>, <code>Node</code>, <code>Link</code>, <code>Position</code>, <code>NodeProperties</code>, <code>UIProperties</code> models. All JSON imports/exports pass through Pydantic validation.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">JSON schema validation on topology load/save (<code>jsonschema</code>)</td>
+        <td class="rationale">Topology, node, and link JSON schemas in <code>inspector_qt6/frontend/schemas/</code> validated via <code>jsonschema</code> library before persistence. Prevents corrupt data entering the app state.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">QThread workers for all blocking operations</td>
+        <td class="rationale"><code>ReportGeneratorThread</code> and <code>NetworkScanThread</code> subclass <code>QThread</code>. All network I/O, file I/O, and subprocess calls run off the GUI thread. Progress fed back via signals.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">QSettings for persistent app configuration</td>
+        <td class="rationale"><code>QSettings("TildeSec", "InspectorTwin")</code> persists window geometry, state, and user preferences across sessions. No external config file required.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">AI twin model assignment signal pipeline</td>
+        <td class="rationale"><code>AIModelCard.deploy_clicked(model_id)</code> → <code>InspectorTwinsPage.model_deployed(model_id)</code> → project selection dialog → backend model runner. Full signal chain typed end-to-end.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Network scanner progress streaming via QThread signals</td>
+        <td class="rationale"><code>NetworkScanThread</code> emits <code>progress_update(int, str)</code>, <code>device_found(dict)</code>, <code>scan_completed(bool, str)</code>. Dialog receives updates without blocking UI.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">OTLP telemetry forwarding to simulation view</td>
+        <td class="rationale">Collector metrics forwarded to <code>SimulationPage</code> log via a QThread polling loop. Live latency and packet-loss values update the progress display.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">SQLAlchemy session management layer</td>
+        <td class="rationale"><code>requirements.txt</code> includes SQLAlchemy 2.0.25. A session/repository layer would replace ad-hoc project dicts and add proper migrations.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">asyncio / asyncio-mqtt integration for real-time telemetry</td>
+        <td class="rationale"><code>asyncio-mqtt</code> is in requirements. Bridge via <code>qasync</code> would allow async MQTT/OTLP event loops alongside the Qt event loop.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Electron IPC / preload bridge / contextBridge</td>
+        <td class="rationale">This is the Python/PyQt6 branch. Electron-specific security primitives (contextIsolation, CSP headers, preload.ts) are not applicable here.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =================== BACKEND =================== -->
+  <div class="section-title">
+    <span class="dot dot-be"></span>
+    <h2>Backend</h2>
+    <span class="layer-badge layer-be">Python Core Logic / topology_utils / network_scanner / report generation</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Topology YAML/JSON export (<code>topology_utils.py</code>)</td>
+        <td class="rationale"><code>topology_to_yaml()</code>, <code>validate_topology()</code>, <code>export_topology_json()</code>, <code>export_topology_yaml()</code> in <code>inspector_qt6/core/topology_utils.py</code>. Produces containerlab-compatible YAML. Validates interface names and detects duplicate endpoints.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">PDF and JSON report generation (reportlab + pypdf)</td>
+        <td class="rationale"><code>ReportGeneratorThread</code> uses <code>reportlab</code> for PDF and stdlib <code>json</code> for JSON output. Runs in QThread. Accepts a <code>report_data</code> dict built from simulation results and findings.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Simulation engine — failure injection and event log</td>
+        <td class="rationale"><code>SimulationPage</code> orchestrates simulation runs. Must support link-down, link-degrade, and firewall-block fault types. Each fault produces a findings entry. Simulation state machine runs in a <code>QThread</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Project persistence to SQLite via SQLAlchemy</td>
+        <td class="rationale">SQLAlchemy 2.0 ORM manages tables: <code>projects</code>, <code>topologies</code>, <code>scenarios</code>, <code>runs</code>, <code>findings</code>, <code>reports</code>. Schema created on first run. All topology/scenario blobs validated with Pydantic before write.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Firewall policy evaluation (Python DSL / rule parser)</td>
+        <td class="rationale">Human-friendly rule format (<code>allow tcp from Users to WebApp port 443</code>) parsed in Python. Rules stored per-node in <code>NodeProperties</code>. Evaluated during simulation routing decisions.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Blast-radius / reachability computation</td>
+        <td class="rationale">Given a compromised node ID, compute which other nodes are reachable using the topology graph (<code>networkx</code>). Output displayed as reachability matrix in simulation view.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Inspector Twins AI model runner — assign model to project, run analysis</td>
+        <td class="rationale">Python module loads a configured HRH AI model stub, runs it against a topology or run result, and appends typed findings. Supports chaining: output of one twin feeds the next.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Network scanner (<code>network_scanner/mapper.py</code>) — nmap + ARP + LLDP</td>
+        <td class="rationale"><code>NetworkTopologyMapper</code> uses Scapy (ARP), python-nmap, and LLDP passive listen. Concurrent via <code>ThreadPoolExecutor</code>. Outputs JSON device inventory. Blocked against external targets by IP range check.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">OpenTelemetry collector integration (receive traces/metrics from twins)</td>
+        <td class="rationale">OTLP collector process (Go, <code>OTLP/opentelemetry-collector/</code>) receives gRPC (:4317) + HTTP (:4318) telemetry from containerlab nodes. Python app polls/receives forwarded metrics for live display.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Automated report generation after simulation completes</td>
+        <td class="rationale">After a <code>SimulationPage</code> run finishes, automatically trigger <code>ReportGeneratorThread</code> if the project has auto-report enabled. Configurable per-project in Settings.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Misconfiguration linting (static policy analysis without simulation)</td>
+        <td class="rationale">Static pass over topology graph detects patterns like "Admin interface reachable from Guest VLAN" using <code>networkx</code> path queries. Findings added without running a full simulation.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Custom firmware / software upload and behaviour mapping</td>
+        <td class="rationale">User uploads router firmware file; backend maps known CVE patterns and config profiles to simulation node behaviour. Requires CVE lookup integration.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Full packet-level routing simulation (P4 / pcapInt)</td>
+        <td class="rationale">Deep packet simulation using FreRTR/RARE pcapInt or p4emu dataplane. High complexity — defer until basic logical routing is stable.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Pure TypeScript/Node.js core-sim engine</td>
+        <td class="rationale">This branch is Python/PyQt6 only. The TS monorepo packages (<code>packages/core-sim</code>, <code>packages/policy-dsl</code>, <code>packages/report-kit</code>) are deferred to the Electron rebuild.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Exploit payload generation or bruteforce modules</td>
+        <td class="rationale">Explicitly prohibited. App enforces local-only, simulation-only security checks. All scanning blocked against external IPs.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =================== EXTERNAL =================== -->
+  <div class="section-title">
+    <span class="dot dot-ext"></span>
+    <h2>External</h2>
+    <span class="layer-badge layer-ext">Containerlab · Docker · AI Models · OTLP</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Docker — launch local lab stacks from user-provided docker-compose.yml or built-in templates</td>
+        <td class="rationale">Python subprocess wraps <code>docker-compose up/down</code>. Only localhost or 192.168.x.x bind addresses permitted. Built-in templates: Alpine, Netshoot, Kali, FreRTR. No external registry pulls without explicit user consent.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Containerlab — deploy topology YAML and monitor status</td>
+        <td class="rationale">Wraps <code>clab deploy</code> / <code>clab destroy</code> CLI via Python subprocess. <code>ContainerlabStatusDialog</code> parses <code>clab inspect --format json</code> output. Required for digital twin deployment.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Inspector Twins — recursive HRH AI model assignment to projects</td>
+        <td class="rationale">8 HRH model stubs already defined (<code>InspectorTwinsPage</code>). Each has capability set (vuln scanner, anomaly detector, compliance auditor, etc.). Multiple twins assignable to one project; run sequentially or in parallel via QThread pool.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">OpenTelemetry collector — receive telemetry from deployed twins</td>
+        <td class="rationale">Go OTLP collector (<code>OTLP/opentelemetry-collector/</code>) configured via <code>scripts/otlp-collector-config.yaml</code>. Receives traces/metrics from containerlab nodes on gRPC :4317 / HTTP :4318. Python app reads forwarded data for live dashboards.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Network scan tools (nmap, ARP, LLDP) — local sandbox only</td>
+        <td class="rationale">Discovers local devices to auto-populate topology. <code>NetworkScanThread</code> enforces local-only targets. Requires elevated privileges for ARP/raw socket operations. Results importable into Twin Designer.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">AI twin — automated safe test execution against deployed lab</td>
+        <td class="rationale">HRH twin model triggers safe checks (TLS presence, exposed admin panels, missing headers) against lab containers. Results appended to findings table. Local-only constraint enforced.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">AI twin — recursive report improvement loop</td>
+        <td class="rationale">Twin re-analyses updated topology and iteratively refines findings quality. Adds AI-generated remediation text to existing finding entries.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">FreRTR / RARE container integration for advanced routing simulation</td>
+        <td class="rationale">Uses <code>ghcr.io/rare-freertr/freertr-containerlab:latest</code> (examples in <code>inspector_qt6/containerlab_examples/</code>). Enables pcapInt and p4emu dataplane simulation.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">External SaaS AI API calls (OpenAI, Claude) in default build</td>
+        <td class="rationale">Offline-first requirement. AI features use local HRH model stubs. External API keys are opt-in via Settings. No cloud calls by default.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Container image registry publishing / CI pipeline in app</td>
+        <td class="rationale">Out of scope for desktop simulation tool. Users manage their own container images.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+<footer>
+  Inspector Twin · MoSCoW Requirements · Generated 2026 · For internal planning use
+</footer>
+
+</body>
+</html>

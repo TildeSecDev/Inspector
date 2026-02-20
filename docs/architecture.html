@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspector Twin — Architecture &amp; Endpoints (PyQt6)</title>
+  <style>
+    :root {
+      --bg:      #0f1117;
+      --surface: #1a1d27;
+      --card:    #1e2130;
+      --border:  #2a2d3e;
+      --text:    #e2e8f0;
+      --muted:   #8892a4;
+      --fe:      #8b5cf6;
+      --mw:      #06b6d4;
+      --be:      #22c55e;
+      --ext:     #f97316;
+      --fe-bg:   rgba(139,92,246,0.08);
+      --mw-bg:   rgba(6,182,212,0.08);
+      --be-bg:   rgba(34,197,94,0.08);
+      --ext-bg:  rgba(249,115,22,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    header h1 span { color: #3b82f6; }
+    header p { color: var(--muted); margin-top: 0.4rem; font-size: 0.95rem; }
+
+    /* ---- LAYOUT ---- */
+    main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    /* ---- ARCHITECTURE DIAGRAM ---- */
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem 1.5rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+    .diagram-wrap h2 {
+      font-size: 1rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 1.5rem;
+    }
+
+    /* SVG-based layer diagram */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 800px;
+    }
+
+    .arch-row {
+      display: flex;
+      align-items: stretch;
+      border-radius: 6px;
+      overflow: hidden;
+      min-height: 110px;
+    }
+
+    .arch-label {
+      width: 110px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      writing-mode: horizontal-tb;
+      padding: 0.4rem;
+      text-align: center;
+    }
+    .label-fe  { background: var(--fe-bg);  color: var(--fe);  border-right: 3px solid var(--fe); }
+    .label-mw  { background: var(--mw-bg);  color: var(--mw);  border-right: 3px solid var(--mw); }
+    .label-be  { background: var(--be-bg);  color: var(--be);  border-right: 3px solid var(--be); }
+    .label-ext { background: var(--ext-bg); color: var(--ext); border-right: 3px solid var(--ext); }
+
+    .arch-components {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .comp-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      min-width: 130px;
+    }
+    .comp-box .comp-name { font-weight: 600; color: var(--text); }
+    .comp-box .comp-sub  { font-size: 0.7rem; color: var(--muted); }
+
+    .comp-box.fe  { border-top: 2px solid var(--fe); }
+    .comp-box.mw  { border-top: 2px solid var(--mw); }
+    .comp-box.be  { border-top: 2px solid var(--be); }
+    .comp-box.ext { border-top: 2px solid var(--ext); }
+
+    .arrow-row {
+      display: flex;
+      align-items: center;
+      padding: 0.25rem 0 0.25rem 112px;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+    .arrow-line {
+      flex: 1;
+      height: 1px;
+      border-top: 1px dashed var(--border);
+    }
+
+    /* ---- SECTION HEADINGS ---- */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .section-title h2 { font-size: 1.2rem; font-weight: 700; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot-fe  { background: var(--fe); }
+    .dot-mw  { background: var(--mw); }
+    .dot-be  { background: var(--be); }
+    .dot-ext { background: var(--ext); }
+
+    .layer-badge {
+      display: inline-block;
+      padding: 0.1rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .layer-fe  { background: rgba(139,92,246,0.15); color: var(--fe); }
+    .layer-mw  { background: rgba(6,182,212,0.15);  color: var(--mw); }
+    .layer-be  { background: rgba(34,197,94,0.15);  color: var(--be); }
+    .layer-ext { background: rgba(249,115,22,0.15); color: var(--ext); }
+
+    /* ---- TABLES ---- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+      margin-bottom: 0.5rem;
+    }
+    thead tr { background: var(--surface); }
+    th {
+      text-align: left;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    td code {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.05rem 0.35rem;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+    td.name-col { font-weight: 600; color: var(--text); white-space: nowrap; }
+    td.desc-col { color: var(--muted); font-size: 0.83rem; }
+
+    /* ---- CONNECTION MAP ---- */
+    .conn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .conn-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+    .conn-card h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .conn-card ul {
+      list-style: none;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .conn-card ul li {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .conn-card ul li:last-child { border-bottom: none; }
+    .conn-card ul li::before {
+      content: '→';
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .conn-card ul li code {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0 0.3rem;
+      font-family: monospace;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Inspector Twin — <span>Architecture</span> &amp; Endpoints</h1>
+  <p>System architecture, signal connections, and external integrations · PyQt6 Python edition · v0.1</p>
+</header>
+
+<main>
+
+  <!-- ============================
+       ARCHITECTURE LAYER DIAGRAM
+       ============================ -->
+  <div class="diagram-wrap">
+    <h2>Application Layer Diagram</h2>
+    <div class="arch-diagram">
+
+      <!-- FRONTEND -->
+      <div class="arch-row">
+        <div class="arch-label label-fe">Frontend<br/>PyQt6 UI</div>
+        <div class="arch-components">
+          <div class="comp-box fe"><span class="comp-name">ProjectsPage</span><span class="comp-sub">QWidget + ProjectCard grid</span></div>
+          <div class="comp-box fe"><span class="comp-name">TwinDesignerPage</span><span class="comp-sub">TopologyCanvas (QGraphicsView)</span></div>
+          <div class="comp-box fe"><span class="comp-name">InspectorTwinsPage</span><span class="comp-sub">AIModelCard grid (HRH)</span></div>
+          <div class="comp-box fe"><span class="comp-name">ScenariosPage</span><span class="comp-sub">Scenario list + editor dialog</span></div>
+          <div class="comp-box fe"><span class="comp-name">SimulationPage</span><span class="comp-sub">Log + ProgressBar + controls</span></div>
+          <div class="comp-box fe"><span class="comp-name">FindingsPage</span><span class="comp-sub">QTableWidget severity table</span></div>
+          <div class="comp-box fe"><span class="comp-name">ReportsPage</span><span class="comp-sub">Format picker + QFileDialog</span></div>
+          <div class="comp-box fe"><span class="comp-name">SettingsPage</span><span class="comp-sub">Tabs: General/Network/Docker</span></div>
+        </div>
+      </div>
+
+      <div class="arrow-row">
+        <span>pyqtSignal / pyqtSlot — Qt Signal/Slot mechanism</span>
+        <div class="arrow-line"></div>
+      </div>
+
+      <!-- MIDDLEWARE -->
+      <div class="arch-row">
+        <div class="arch-label label-mw">Middleware<br/>Qt Signals</div>
+        <div class="arch-components">
+          <div class="comp-box mw"><span class="comp-name">pyqtSignal</span><span class="comp-sub">Typed inter-widget signals</span></div>
+          <div class="comp-box mw"><span class="comp-name">QThread workers</span><span class="comp-sub">ReportGeneratorThread / NetworkScanThread</span></div>
+          <div class="comp-box mw"><span class="comp-name">Pydantic models</span><span class="comp-sub">Topology / Node / Link validation</span></div>
+          <div class="comp-box mw"><span class="comp-name">jsonschema</span><span class="comp-sub">JSON schema validation</span></div>
+          <div class="comp-box mw"><span class="comp-name">QSettings</span><span class="comp-sub">Persistent app config</span></div>
+          <div class="comp-box mw"><span class="comp-name">AuthorizationWarningDialog</span><span class="comp-sub">ROE gate on launch</span></div>
+        </div>
+      </div>
+
+      <div class="arrow-row">
+        <span>Python function calls — core utility modules</span>
+        <div class="arrow-line"></div>
+      </div>
+
+      <!-- BACKEND -->
+      <div class="arch-row">
+        <div class="arch-label label-be">Backend<br/>Python Core</div>
+        <div class="arch-components">
+          <div class="comp-box be"><span class="comp-name">topology_utils.py</span><span class="comp-sub">YAML export / validation</span></div>
+          <div class="comp-box be"><span class="comp-name">models/topology.py</span><span class="comp-sub">Pydantic domain models</span></div>
+          <div class="comp-box be"><span class="comp-name">SQLAlchemy ORM</span><span class="comp-sub">SQLite project store</span></div>
+          <div class="comp-box be"><span class="comp-name">reportlab / pypdf</span><span class="comp-sub">PDF + JSON report generation</span></div>
+          <div class="comp-box be"><span class="comp-name">AI Twin Runner</span><span class="comp-sub">HRH model stubs + chaining</span></div>
+          <div class="comp-box be"><span class="comp-name">network_scanner/mapper.py</span><span class="comp-sub">nmap / ARP / LLDP discovery</span></div>
+          <div class="comp-box be"><span class="comp-name">networkx</span><span class="comp-sub">Graph routing + blast radius</span></div>
+          <div class="comp-box be"><span class="comp-name">OTLP receiver</span><span class="comp-sub">Telemetry polling loop</span></div>
+        </div>
+      </div>
+
+      <div class="arrow-row">
+        <span>subprocess / socket / API — external tools and runtimes</span>
+        <div class="arrow-line"></div>
+      </div>
+
+      <!-- EXTERNAL -->
+      <div class="arch-row">
+        <div class="arch-label label-ext">External<br/>Integrations</div>
+        <div class="arch-components">
+          <div class="comp-box ext"><span class="comp-name">Containerlab</span><span class="comp-sub">clab deploy/destroy CLI</span></div>
+          <div class="comp-box ext"><span class="comp-name">Docker</span><span class="comp-sub">docker-compose subprocess</span></div>
+          <div class="comp-box ext"><span class="comp-name">FreRTR / RARE</span><span class="comp-sub">Routing simulation images</span></div>
+          <div class="comp-box ext"><span class="comp-name">nmap</span><span class="comp-sub">Port / service scan</span></div>
+          <div class="comp-box ext"><span class="comp-name">OpenTelemetry</span><span class="comp-sub">gRPC :4317 / HTTP :4318</span></div>
+          <div class="comp-box ext"><span class="comp-name">AI Model APIs</span><span class="comp-sub">Local HRH stub / opt-in SaaS</span></div>
+          <div class="comp-box ext"><span class="comp-name">SQLite file</span><span class="comp-sub">~/.inspector/projects.db</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /diagram-wrap -->
+
+
+  <!-- ============================
+       FRONTEND
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-fe"></span>
+    <h2>Frontend — Pages &amp; Widgets</h2>
+    <span class="layer-badge layer-fe">PyQt6 / QWidget / QGraphicsView</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Component</th>
+        <th style="width:26%">File</th>
+        <th style="width:18%">Signals Emitted / Received</th>
+        <th>Purpose &amp; Connections</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col">ProjectsPage</td>
+        <td><code>inspector_qt6/pages/projects_page.py</code></td>
+        <td>Emits: <code>project_selected(dict)</code><br/>Receives: —</td>
+        <td class="desc-col">Grid of <code>ProjectCard</code> (QFrame) widgets. Each card emits <code>clicked(dict)</code> which <code>MainWindow</code> catches and routes to <code>ProjectDetailPage</code>. New-project dialog stores project dict in memory (SQLAlchemy persistence planned).</td>
+      </tr>
+      <tr>
+        <td class="name-col">TwinDesignerPage + TopologyCanvas</td>
+        <td><code>inspector_qt6/pages/twin_designer_page.py</code><br/><code>inspector_qt6/widgets/topology_canvas.py</code></td>
+        <td>Emits: <code>topology_changed()</code><br/><code>node_selected(str)</code><br/>Receives: device-drop events</td>
+        <td class="desc-col"><code>TopologyCanvas</code> is a <code>QGraphicsView</code> with <code>NodeItem</code> and <code>LinkItem</code> graphics objects. Drag-and-drop from <code>DevicePalette</code>. "Export" button calls <code>topology_to_yaml()</code> and saves <code>.clab.yml</code>. "Deploy" invokes <code>clab deploy</code> via subprocess.</td>
+      </tr>
+      <tr>
+        <td class="name-col">InspectorTwinsPage</td>
+        <td><code>inspector_qt6/pages/inspector_twins_page.py</code></td>
+        <td>Emits: <code>model_deployed(str)</code><br/>Card emits: <code>deploy_clicked(str)</code></td>
+        <td class="desc-col">2-column grid of <code>AIModelCard</code> (QFrame) widgets. 8 HRH model definitions loaded from <code>_get_available_models()</code>. "Deploy to Project" emits <code>model_deployed(model_id)</code>; <code>MainWindow</code> connects this to project-assignment flow.</td>
+      </tr>
+      <tr>
+        <td class="name-col">ProjectDetailPage</td>
+        <td><code>inspector_qt6/pages/project_detail_page.py</code></td>
+        <td>Emits: <code>back_to_projects()</code><br/>Receives: project dict from <code>MainWindow</code></td>
+        <td class="desc-col"><code>QTabWidget</code> with four tabs: Designer (<code>TwinDesignerPage</code>), Scenarios (<code>ScenariosPage</code>), Simulation Runner (<code>SimulationPage</code>), Findings (<code>FindingsPage</code>). Header bar has Add Node / Save actions and device-type combo.</td>
+      </tr>
+      <tr>
+        <td class="name-col">ScenariosPage</td>
+        <td><code>inspector_qt6/pages/scenarios_page.py</code></td>
+        <td>Emits: <code>scenario_selected(dict)</code><br/>Receives: project context</td>
+        <td class="desc-col">QListWidget of saved scenarios. "New / Edit" opens <code>ScenarioDialog</code> (QDialog + QFormLayout). Types: Security Assessment, Penetration Test, Load Test, Failure Simulation, Custom. Scenarios stored in project dict.</td>
+      </tr>
+      <tr>
+        <td class="name-col">SimulationPage</td>
+        <td><code>inspector_qt6/pages/simulation_page.py</code></td>
+        <td>Receives: <code>simulation_thread.progress(int)</code><br/><code>simulation_thread.finished(str)</code></td>
+        <td class="desc-col">Start/Stop buttons, <code>QProgressBar</code>, and <code>QTextEdit</code> log. Simulation runs in a <code>QThread</code> subclass. "Generate Report" button triggers <code>ReportGeneratorThread</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">FindingsPage</td>
+        <td><code>inspector_qt6/pages/findings_page.py</code></td>
+        <td>Receives: findings list from simulation<br/>Emits: export event</td>
+        <td class="desc-col"><code>QTableWidget</code> with columns: Severity / Type / Target / Description / Status. "Export Findings" saves JSON via <code>QFileDialog</code>. Example findings pre-loaded; replaced by real simulation results post-run.</td>
+      </tr>
+      <tr>
+        <td class="name-col">ReportsPage</td>
+        <td><code>inspector_qt6/pages/reports_page.py</code></td>
+        <td>Receives: <code>generator_thread.progress(int)</code><br/><code>generator_thread.finished(str)</code></td>
+        <td class="desc-col">Format buttons (JSON / PDF) trigger <code>ReportGeneratorThread(QThread)</code>. Progress shown via <code>QProgressBar</code>. Output path selected via <code>QFileDialog</code>. Report list shows previous runs.</td>
+      </tr>
+      <tr>
+        <td class="name-col">SettingsPage</td>
+        <td><code>inspector_qt6/pages/settings_page.py</code></td>
+        <td>Emits: <code>settings_changed(dict)</code></td>
+        <td class="desc-col"><code>QTabWidget</code> with General / Network / Docker / Advanced tabs. Controls: OTLP endpoint, Docker socket path, AI model API key (opt-in), containerlab binary path, scan subnet. Values persisted via <code>QSettings</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">DevicePalette</td>
+        <td><code>inspector_qt6/widgets/device_palette.py</code><br/><code>inspector_qt6/frontend/devices/*.json</code></td>
+        <td>Emits: drag-start events to canvas</td>
+        <td class="desc-col">Draggable device template tiles loaded from JSON files (Router, Switch, Firewall, Server, Workstation, Cloud, IoT, TDL, Hacking Device). Custom templates added by placing JSON in <code>frontend/devices/</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">ContainerlabStatusDialog</td>
+        <td><code>inspector_qt6/widgets/containerlab_status_dialog.py</code></td>
+        <td>Receives: status dict from caller</td>
+        <td class="desc-col">QDialog with node/link/IP filter checkboxes and a <code>QTextEdit</code> status view. Parses <code>clab inspect --format json</code> output. Export button saves status JSON to file.</td>
+      </tr>
+      <tr>
+        <td class="name-col">NetworkScanDialog</td>
+        <td><code>inspector_qt6/widgets/network_scan_dialog.py</code></td>
+        <td>Receives: <code>NetworkScanThread.progress_update(int, str)</code><br/><code>device_found(dict)</code><br/><code>scan_completed(bool, str)</code></td>
+        <td class="desc-col">QDialog that launches <code>NetworkScanThread</code>. Shows live progress bar and scrolling device-found log. Final result: list of discovered nodes user can import into the canvas.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       MIDDLEWARE
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-mw"></span>
+    <h2>Middleware — Qt Signals &amp; Workers</h2>
+    <span class="layer-badge layer-mw">pyqtSignal / QThread / Pydantic / QSettings</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Signal / Module</th>
+        <th style="width:22%">Direction</th>
+        <th style="width:20%">Payload Types</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col"><code>project_selected(dict)</code></td>
+        <td>ProjectsPage → MainWindow</td>
+        <td><code>dict</code> (project record)</td>
+        <td class="desc-col">Emitted when a <code>ProjectCard</code> is clicked. <code>MainWindow.on_project_selected()</code> loads the project into <code>ProjectDetailPage</code> and switches the <code>QStackedWidget</code> to page index 4.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>back_to_projects()</code></td>
+        <td>ProjectDetailPage → MainWindow</td>
+        <td>—</td>
+        <td class="desc-col">Emitted when back-arrow button is clicked. <code>MainWindow</code> connects this to <code>lambda: self.navigate_to_page(0)</code>, returning to the projects dashboard.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>model_deployed(str)</code></td>
+        <td>InspectorTwinsPage → MainWindow</td>
+        <td><code>str</code> (model_id)</td>
+        <td class="desc-col">Emitted after user clicks "Deploy to Project" on an <code>AIModelCard</code>. Carries the HRH model ID. <code>MainWindow</code> uses this to open a project-selection dialog and register the twin assignment.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>settings_changed(dict)</code></td>
+        <td>SettingsPage → MainWindow</td>
+        <td><code>dict</code> (settings key/values)</td>
+        <td class="desc-col">Emitted when settings are saved. Consumers update live config: OTLP endpoint, Docker socket, AI API keys, scan subnet, containerlab binary path.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>topology_changed()</code></td>
+        <td>TopologyCanvas → MainWindow</td>
+        <td>—</td>
+        <td class="desc-col">Emitted on any canvas edit (node add/move/delete, link add/delete). <code>MainWindow.on_topology_changed()</code> updates the status bar message.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>ReportGeneratorThread</code></td>
+        <td>ReportsPage → worker thread</td>
+        <td><code>progress(int)</code><br/><code>finished(str)</code><br/><code>error(str)</code></td>
+        <td class="desc-col">QThread subclass. Accepts <code>report_data(dict)</code>, <code>format(str)</code>, <code>output_path(str)</code>. Emits <code>progress(0-100)</code> during generation and <code>finished(path)</code> on completion. Keeps GUI responsive.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>NetworkScanThread</code></td>
+        <td>NetworkScanDialog → worker thread</td>
+        <td><code>progress_update(int, str)</code><br/><code>device_found(dict)</code><br/><code>scan_completed(bool, str)</code></td>
+        <td class="desc-col">QThread subclass in <code>network_scan_dialog.py</code>. Runs ARP ping-sweep → nmap → LLDP in sequence. Partial results streamed via <code>device_found</code> signal. Sets <code>should_stop</code> flag on user cancel.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Pydantic models</td>
+        <td>All save/load paths</td>
+        <td><code>Topology</code> / <code>Node</code> / <code>Link</code> / <code>Position</code> / <code>NodeProperties</code></td>
+        <td class="desc-col">Defined in <code>inspector_qt6/models/topology.py</code>. All topology JSON imports and exports pass through <code>Topology.model_validate()</code> / <code>model_dump()</code>. Pydantic raises <code>ValidationError</code> on malformed data before it enters app state.</td>
+      </tr>
+      <tr>
+        <td class="name-col">jsonschema validation</td>
+        <td>File import paths</td>
+        <td>JSON Schema objects in <code>frontend/schemas/</code></td>
+        <td class="desc-col">Schemas: <code>node.schema.json</code>, <code>link.schema.json</code>, <code>topology.schema.json</code>. Validated via <code>jsonschema.validate()</code> in <code>topology_utils.validate_topology()</code> before loading user-provided topology files.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>QSettings</code></td>
+        <td>MainWindow ↔ disk</td>
+        <td>org: <code>"TildeSec"</code><br/>app: <code>"InspectorTwin"</code></td>
+        <td class="desc-col">Persists window geometry, window state, and user preferences between sessions. <code>restore_state()</code> called in <code>__init__</code>; <code>closeEvent</code> saves state on quit. No external config file required.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>AuthorizationWarningDialog</code></td>
+        <td>MainWindow → user (on showEvent)</td>
+        <td>—</td>
+        <td class="desc-col">QDialog shown once on first <code>showEvent</code> via <code>warning_shown</code> guard. Persistent sidebar box ("⚠️ Authorized Testing Only") also shown at all times. ROE gate cannot be bypassed.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       BACKEND
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-be"></span>
+    <h2>Backend — Python Core Modules</h2>
+    <span class="layer-badge layer-be">Python / Pydantic / SQLAlchemy / reportlab / networkx</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Module</th>
+        <th style="width:22%">Location</th>
+        <th style="width:22%">Key Functions / Classes</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col">topology_utils</td>
+        <td><code>inspector_qt6/core/topology_utils.py</code></td>
+        <td><code>topology_to_yaml(topology)</code><br/><code>validate_topology(topology)</code><br/><code>export_topology_json()</code><br/><code>export_topology_yaml()</code><br/><code>check_interface_duplicates()</code></td>
+        <td class="desc-col">Converts <code>Topology</code> Pydantic model to containerlab-compatible YAML. Validates node IDs, interface names, link endpoints, and duplicate interfaces. Called by "Export" and "Deploy" buttons in Twin Designer. Ported from original TypeScript <code>topology-utils.ts</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Topology models</td>
+        <td><code>inspector_qt6/models/topology.py</code></td>
+        <td><code>Topology</code><br/><code>Node</code><br/><code>Link</code><br/><code>LinkEndpoint</code><br/><code>Position</code><br/><code>NodeProperties</code><br/><code>UIProperties</code></td>
+        <td class="desc-col">Pydantic v2 models for all domain objects. <code>Node</code> carries <code>kind</code>, <code>image</code>, <code>properties</code> (exec/env/binds), and <code>ui</code> (position/colour/icon). <code>Link</code> joins two <code>LinkEndpoint</code> objects with optional bandwidth/latency/loss params.</td>
+      </tr>
+      <tr>
+        <td class="name-col">SQLAlchemy project store</td>
+        <td><code>inspector_qt6/</code> (planned: <code>db/</code>)</td>
+        <td>Tables: <code>projects</code><br/><code>topologies</code><br/><code>scenarios</code><br/><code>runs</code><br/><code>findings</code><br/><code>reports</code></td>
+        <td class="desc-col">SQLAlchemy 2.0 ORM manages local SQLite database (<code>~/.inspector/projects.db</code>). Schema created on first run via <code>Base.metadata.create_all()</code>. All topology/scenario blobs validated with Pydantic before INSERT. Currently projects stored in-memory; SQLAlchemy persistence is the next milestone.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Report generation</td>
+        <td><code>inspector_qt6/pages/reports_page.py</code><br/>(ReportGeneratorThread)</td>
+        <td><code>ReportGeneratorThread.run()</code><br/><code>generate_pdf(data, path)</code><br/><code>generate_json(data, path)</code></td>
+        <td class="desc-col">QThread subclass using <code>reportlab</code> for PDF and stdlib <code>json</code> for JSON output. Accepts a <code>report_data</code> dict built from topology summary, findings list, and scenario run results. Progress emitted 0→100. Can be triggered manually or automatically after simulation.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Simulation engine</td>
+        <td><code>inspector_qt6/pages/simulation_page.py</code><br/>(SimulationWorkerThread — planned)</td>
+        <td><code>run_simulation(topology, scenario)</code><br/><code>inject_fault(fault_type)</code><br/><code>compute_reachability(graph)</code></td>
+        <td class="desc-col">Python simulation state machine running in QThread. Uses <code>networkx</code> for graph routing and reachability computation. Fault types: link-down, link-degrade, firewall-block. Each fault appends a finding entry. Timeline events emitted as progress signals.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Firewall policy evaluator</td>
+        <td><code>inspector_qt6/core/</code> (planned: <code>policy_eval.py</code>)</td>
+        <td><code>parse_rule(dsl_str)</code><br/><code>evaluate(flow, rules)</code></td>
+        <td class="desc-col">Python parser for human-friendly DSL (<code>allow tcp from Users to WebApp port 443</code>). Rules stored per-node in <code>NodeProperties</code> exec/env fields. Evaluated during simulation routing decisions to determine allow/deny outcomes.</td>
+      </tr>
+      <tr>
+        <td class="name-col">AI Twin Runner</td>
+        <td><code>inspector_qt6/pages/inspector_twins_page.py</code><br/>(runner planned: <code>inspector_qt6/core/twins/</code>)</td>
+        <td><code>assign_twin(project_id, model_id)</code><br/><code>run_analysis(twin, topology)</code><br/><code>chain_twins(twins, run_result)</code></td>
+        <td class="desc-col">8 HRH model stubs defined in <code>InspectorTwinsPage._get_available_models()</code> (Vulnerability Scanner, Anomaly Detector, Network Tester, Compliance Auditor, Threat Intelligence, Performance Optimizer, Incident Responder, Dependency Mapper). Each model assigned to a project; chained execution feeds output of twin N as input to twin N+1. Results appended to findings.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Network Scanner</td>
+        <td><code>inspector_qt6/network_scanner/mapper.py</code><br/><code>scripts/network-topology-mapper.py</code></td>
+        <td><code>NetworkTopologyMapper</code><br/><code>scan_network(subnet)</code><br/><code>arp_scan()</code><br/><code>nmap_scan(hosts)</code><br/><code>lldp_discover()</code></td>
+        <td class="desc-col">Scapy ARP requests + python-nmap (-sV -O) + passive LLDP. <code>ThreadPoolExecutor</code> for concurrent nmap host scans. Parses nmap XML output. IP range enforcement blocks non-local targets. JSON output: device inventory with open ports, OS, services, and MAC addresses.</td>
+      </tr>
+      <tr>
+        <td class="name-col">OTLP Collector (Go)</td>
+        <td><code>OTLP/opentelemetry-collector/</code><br/><code>scripts/otlp-collector-config.yaml</code></td>
+        <td>gRPC receiver: <code>:4317</code><br/>HTTP receiver: <code>:4318</code><br/>Health: <code>:13133</code></td>
+        <td class="desc-col">OpenTelemetry collector process (Go binary, separate from Python app). Receives traces/metrics/logs from deployed containerlab nodes. Configured with batch processor, memory limiter, and debug exporter. Python app polls or subscribes to forwarded metrics for live simulation dashboards.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       EXTERNAL
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-ext"></span>
+    <h2>External — Integrations &amp; Endpoints</h2>
+    <span class="layer-badge layer-ext">Containerlab · Docker · AI Models · OTLP · Scanners</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Integration</th>
+        <th style="width:20%">Endpoint / CLI</th>
+        <th style="width:18%">Direction</th>
+        <th>Description &amp; Connection Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col">Containerlab</td>
+        <td><code>clab deploy -t &lt;yaml&gt;</code><br/><code>clab destroy -t &lt;yaml&gt;</code><br/><code>clab inspect --format json</code></td>
+        <td>Backend → CLI (Python subprocess)</td>
+        <td class="desc-col">Deploys containerlab YAML topologies exported from Twin Designer by <code>topology_utils.topology_to_yaml()</code>. Python subprocess wraps CLI calls. <code>clab inspect --format json</code> output parsed and displayed in <code>ContainerlabStatusDialog</code>. Example topologies in <code>inspector_qt6/containerlab_examples/twin/</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Docker</td>
+        <td>Python subprocess<br/><code>docker-compose up/down</code><br/><code>docker ps</code></td>
+        <td>Backend → CLI subprocess</td>
+        <td class="desc-col">Lab stacks managed via Python <code>subprocess</code> calling <code>docker-compose</code>. Accepts user-provided <code>docker-compose.yml</code> or built-in templates (Alpine, Netshoot, Kali, FreRTR). All container bind addresses restricted to <code>127.0.0.1</code> or <code>192.168.x.x</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">FreRTR / RARE images</td>
+        <td><code>ghcr.io/rare-freertr/freertr-containerlab:latest</code></td>
+        <td>Docker pull (user-initiated)</td>
+        <td class="desc-col">FreRTR router containers for advanced routing simulation. Support <code>DATAPLANE_TYPE=pcapInt</code> and <code>p4emu</code>. Used in <code>inspector_qt6/containerlab_examples/twin/rtr000.clab.yml</code>. Provides full IP routing, OSPF, LLDP, and packet capture capabilities inside the digital twin.</td>
+      </tr>
+      <tr>
+        <td class="name-col">OpenTelemetry Collector</td>
+        <td>gRPC <code>localhost:4317</code><br/>HTTP <code>localhost:4318</code><br/>Health: <code>localhost:13133</code></td>
+        <td>Twin nodes → Collector → Python app → SimulationPage</td>
+        <td class="desc-col">Containerlab nodes emit OTLP traces and metrics to the Go collector. Collector configured via <code>scripts/otlp-collector-config.yaml</code> (batch processor, memory limiter, debug + OTLP exporters). Python app polls forwarded data and updates <code>SimulationPage</code> log/progress via QThread signal.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Inspector Twins (HRH AI Models)</td>
+        <td>Local Python stub<br/><em>or</em> <code>https://api.openai.com</code> (opt-in)<br/><em>or</em> <code>https://api.anthropic.com</code> (opt-in)</td>
+        <td>Python backend ↔ HRH model runner</td>
+        <td class="desc-col">8 HRH AI model stubs defined in <code>InspectorTwinsPage</code>. Each model runs against the topology graph or findings list. Supports recursive/chained analysis: output of one twin feeds the next (e.g., vuln-scanner → remediation-writer → report-generator). Results appended to <code>findings</code> table. External API calls require explicit opt-in API key in Settings; disabled by default.</td>
+      </tr>
+      <tr>
+        <td class="name-col">nmap</td>
+        <td>Local binary <code>nmap</code></td>
+        <td>Backend → OS subprocess</td>
+        <td class="desc-col">Used by Network Scanner for port/service discovery and OS fingerprinting (<code>-sV -O</code>). Restricted to local subnets (enforced by IP range check before invocation). Results parsed from XML output via <code>python-nmap</code>. Feeds discovered hosts into topology importer.</td>
+      </tr>
+      <tr>
+        <td class="name-col">ARP / Scapy</td>
+        <td>Raw socket (requires elevated perms on some OS)</td>
+        <td>Backend → Network</td>
+        <td class="desc-col">Sends ARP requests to enumerate live hosts on local subnet. Runs alongside nmap scan. Requires root/admin on Linux/Windows for raw socket access. Results merged with nmap output into unified device inventory JSON.</td>
+      </tr>
+      <tr>
+        <td class="name-col">LLDP discovery</td>
+        <td>Network interface (<code>hcitool</code> / passive)</td>
+        <td>Backend → Network (passive listen)</td>
+        <td class="desc-col">Passively listens for LLDP frames to discover network topology (switch/router adjacencies). Supplements ARP and nmap results. Used to auto-draw links between discovered devices in the Twin Designer.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       CONNECTION MAP
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-ext"></span>
+    <h2>Integration Connection Map</h2>
+    <span class="layer-badge layer-ext">How components connect</span>
+  </div>
+
+  <div class="conn-grid">
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-fe">FE</span> Twin Designer → Containerlab</h3>
+      <ul>
+        <li>User designs topology on <code>TopologyCanvas</code> (QGraphicsView)</li>
+        <li>Clicks <strong>Export</strong> → <code>topology_utils.topology_to_yaml(topology)</code> → writes <code>.clab.yml</code></li>
+        <li>Clicks <strong>Deploy</strong> → Python <code>subprocess.run(["clab", "deploy", "-t", path])</code></li>
+        <li><code>ContainerlabStatusDialog</code> parses <code>clab inspect --format json</code> output</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-be">BE</span> Python subprocess → Docker</h3>
+      <ul>
+        <li>Python subprocess calls <code>docker-compose up -d</code></li>
+        <li>Pulls device images (Alpine, Kali, FreRTR) on first deploy</li>
+        <li>Creates networks and attaches containers per topology links</li>
+        <li>Enforces <code>127.0.0.1</code> / <code>192.168.x.x</code> bind constraint</li>
+        <li>Health checked via <code>docker ps --format json</code> polling</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-fe">FE</span> Inspector Twins → AI Analysis</h3>
+      <ul>
+        <li>User picks HRH model from <code>InspectorTwinsPage</code> card grid</li>
+        <li>Clicks <strong>Deploy to Project</strong> → <code>AIModelCard.deploy_clicked(model_id)</code></li>
+        <li>Signal reaches <code>InspectorTwinsPage.model_deployed(model_id)</code> → MainWindow</li>
+        <li>Python runner: <code>assign_twin(project_id, model_id)</code> persists assignment</li>
+        <li>After simulation: <code>run_analysis(twin, topology)</code> appends findings</li>
+        <li>Multiple twins chained: output of twin-1 feeds twin-2 input</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-be">BE</span> Simulation → Report Auto-generation</h3>
+      <ul>
+        <li>SimulationWorkerThread runs → stores <code>RunResult</code> dict in SQLAlchemy</li>
+        <li>If project has auto-report enabled: <code>ReportGeneratorThread</code> triggered</li>
+        <li>PDF + JSON written to <code>~/.inspector/reports/&lt;run-id&gt;/</code></li>
+        <li>If AI twins assigned: <code>chain_twins(twins, run_result)</code> runs first</li>
+        <li><code>ReportGeneratorThread.finished(path)</code> signal → <code>ReportsPage</code> refreshes list</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-ext">EXT</span> OTLP → Live Telemetry</h3>
+      <ul>
+        <li>Containerlab nodes export metrics/traces to <code>localhost:4317</code> (gRPC)</li>
+        <li>Go OTLP collector processes with batch + memory-limiter</li>
+        <li>Collector forwards to debug exporter + optional downstream</li>
+        <li>Python QThread polls forwarded data, emits signal to <code>SimulationPage</code></li>
+        <li><code>SimulationPage</code> log and progress bar update in real time</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-be">BE</span> Network Scanner → Topology Import</h3>
+      <ul>
+        <li>User opens <code>NetworkScanDialog</code>, enters subnet</li>
+        <li>Dialog starts <code>NetworkScanThread</code> (QThread)</li>
+        <li>ARP scan (Scapy) + nmap (-sV -O) run concurrently on local subnet</li>
+        <li>LLDP passive listen collects adjacency data</li>
+        <li><code>device_found(dict)</code> signal streams partial results to dialog</li>
+        <li>Final JSON: user selects nodes → imported into <code>TopologyCanvas</code></li>
+      </ul>
+    </div>
+
+  </div><!-- /conn-grid -->
+
+</main>
+
+<footer>
+  Inspector Twin · Architecture &amp; Endpoints · Generated 2026 · For internal use
+</footer>
+
+</body>
+</html>
