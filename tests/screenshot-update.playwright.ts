@@ -247,4 +247,21 @@ test.describe('Inspector Twin - Full Application Screenshots', () => {
     
     console.log('✓ Screenshots saved: Workflow screenshots');
   });
+
+  test('10. Inspector Twins Button - Modal', async ({ page }) => {
+    // Click the Inspector Twins button in the sidebar
+    await page.click('button:has-text("Inspector Twins")');
+    await page.waitForTimeout(500);
+    
+    // Wait for modal to appear
+    await page.waitForSelector('h2:has-text("Inspector Twins")');
+    
+    // Take screenshot of modal
+    await page.screenshot({ 
+      path: '.playwright-mcp/10_inspector_twins_modal.png',
+      fullPage: true 
+    });
+    
+    console.log('✓ Screenshot saved: 10_inspector_twins_modal.png');
+  });
 });
