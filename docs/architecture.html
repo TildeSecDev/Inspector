@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspector Twin — Architecture &amp; Endpoints</title>
+  <style>
+    :root {
+      --bg:      #0f1117;
+      --surface: #1a1d27;
+      --card:    #1e2130;
+      --border:  #2a2d3e;
+      --text:    #e2e8f0;
+      --muted:   #8892a4;
+      --fe:      #8b5cf6;
+      --mw:      #06b6d4;
+      --be:      #22c55e;
+      --ext:     #f97316;
+      --fe-bg:   rgba(139,92,246,0.08);
+      --mw-bg:   rgba(6,182,212,0.08);
+      --be-bg:   rgba(34,197,94,0.08);
+      --ext-bg:  rgba(249,115,22,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+    header h1 span { color: #3b82f6; }
+    header p { color: var(--muted); margin-top: 0.4rem; font-size: 0.95rem; }
+
+    /* ---- LAYOUT ---- */
+    main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    /* ---- ARCHITECTURE DIAGRAM ---- */
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem 1.5rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+    .diagram-wrap h2 {
+      font-size: 1rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 1.5rem;
+    }
+
+    /* SVG-based layer diagram */
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 800px;
+    }
+
+    .arch-row {
+      display: flex;
+      align-items: stretch;
+      border-radius: 6px;
+      overflow: hidden;
+      min-height: 110px;
+    }
+
+    .arch-label {
+      width: 110px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      writing-mode: horizontal-tb;
+      padding: 0.4rem;
+      text-align: center;
+    }
+    .label-fe  { background: var(--fe-bg);  color: var(--fe);  border-right: 3px solid var(--fe); }
+    .label-mw  { background: var(--mw-bg);  color: var(--mw);  border-right: 3px solid var(--mw); }
+    .label-be  { background: var(--be-bg);  color: var(--be);  border-right: 3px solid var(--be); }
+    .label-ext { background: var(--ext-bg); color: var(--ext); border-right: 3px solid var(--ext); }
+
+    .arch-components {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .comp-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      min-width: 130px;
+    }
+    .comp-box .comp-name { font-weight: 600; color: var(--text); }
+    .comp-box .comp-sub  { font-size: 0.7rem; color: var(--muted); }
+
+    .comp-box.fe  { border-top: 2px solid var(--fe); }
+    .comp-box.mw  { border-top: 2px solid var(--mw); }
+    .comp-box.be  { border-top: 2px solid var(--be); }
+    .comp-box.ext { border-top: 2px solid var(--ext); }
+
+    .arrow-row {
+      display: flex;
+      align-items: center;
+      padding: 0.25rem 0 0.25rem 112px;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+    .arrow-line {
+      flex: 1;
+      height: 1px;
+      border-top: 1px dashed var(--border);
+    }
+
+    /* ---- SECTION HEADINGS ---- */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .section-title h2 { font-size: 1.2rem; font-weight: 700; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot-fe  { background: var(--fe); }
+    .dot-mw  { background: var(--mw); }
+    .dot-be  { background: var(--be); }
+    .dot-ext { background: var(--ext); }
+
+    .layer-badge {
+      display: inline-block;
+      padding: 0.1rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .layer-fe  { background: rgba(139,92,246,0.15); color: var(--fe); }
+    .layer-mw  { background: rgba(6,182,212,0.15);  color: var(--mw); }
+    .layer-be  { background: rgba(34,197,94,0.15);  color: var(--be); }
+    .layer-ext { background: rgba(249,115,22,0.15); color: var(--ext); }
+
+    /* ---- TABLES ---- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+      margin-bottom: 0.5rem;
+    }
+    thead tr { background: var(--surface); }
+    th {
+      text-align: left;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    td code {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.05rem 0.35rem;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+    td.name-col { font-weight: 600; color: var(--text); white-space: nowrap; }
+    td.desc-col { color: var(--muted); font-size: 0.83rem; }
+
+    /* ---- CONNECTION MAP ---- */
+    .conn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .conn-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+    .conn-card h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .conn-card ul {
+      list-style: none;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .conn-card ul li {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .conn-card ul li:last-child { border-bottom: none; }
+    .conn-card ul li::before {
+      content: '→';
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .conn-card ul li code {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0 0.3rem;
+      font-family: monospace;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Inspector Twin — <span>Architecture</span> &amp; Endpoints</h1>
+  <p>System architecture, integration points, and internal/external connections · v0.1</p>
+</header>
+
+<main>
+
+  <!-- ============================
+       ARCHITECTURE LAYER DIAGRAM
+       ============================ -->
+  <div class="diagram-wrap">
+    <h2>Application Layer Diagram</h2>
+    <div class="arch-diagram">
+
+      <!-- FRONTEND -->
+      <div class="arch-row">
+        <div class="arch-label label-fe">Frontend<br/>Renderer</div>
+        <div class="arch-components">
+          <div class="comp-box fe"><span class="comp-name">Projects Page</span><span class="comp-sub">Create / manage projects</span></div>
+          <div class="comp-box fe"><span class="comp-name">Twin Designer</span><span class="comp-sub">React Flow canvas</span></div>
+          <div class="comp-box fe"><span class="comp-name">Inspector Twins</span><span class="comp-sub">AI model catalogue</span></div>
+          <div class="comp-box fe"><span class="comp-name">Scenarios Page</span><span class="comp-sub">Runbook editor</span></div>
+          <div class="comp-box fe"><span class="comp-name">Simulation Runner</span><span class="comp-sub">Timeline + metrics</span></div>
+          <div class="comp-box fe"><span class="comp-name">Findings Page</span><span class="comp-sub">Severity grouped list</span></div>
+          <div class="comp-box fe"><span class="comp-name">Reports Page</span><span class="comp-sub">PDF / JSON output</span></div>
+          <div class="comp-box fe"><span class="comp-name">Settings Page</span><span class="comp-sub">App config</span></div>
+        </div>
+      </div>
+
+      <div class="arrow-row">
+        <span>IPC (contextBridge) — Electron preload bridge</span>
+        <div class="arrow-line"></div>
+      </div>
+
+      <!-- MIDDLEWARE -->
+      <div class="arch-row">
+        <div class="arch-label label-mw">Middleware<br/>IPC Bridge</div>
+        <div class="arch-components">
+          <div class="comp-box mw"><span class="comp-name">Preload Bridge</span><span class="comp-sub">contextBridge APIs</span></div>
+          <div class="comp-box mw"><span class="comp-name">Zustand Store</span><span class="comp-sub">Global state mgmt</span></div>
+          <div class="comp-box mw"><span class="comp-name">Zod Validators</span><span class="comp-sub">Schema enforcement</span></div>
+          <div class="comp-box mw"><span class="comp-name">IPC Channels</span><span class="comp-sub">project / report / scan / twin</span></div>
+          <div class="comp-box mw"><span class="comp-name">CSP Headers</span><span class="comp-sub">Electron security</span></div>
+          <div class="comp-box mw"><span class="comp-name">ROE Gate</span><span class="comp-sub">Auth check dialog</span></div>
+        </div>
+      </div>
+
+      <div class="arrow-row">
+        <span>Function calls — Node.js main process</span>
+        <div class="arrow-line"></div>
+      </div>
+
+      <!-- BACKEND -->
+      <div class="arch-row">
+        <div class="arch-label label-be">Backend<br/>Main Process</div>
+        <div class="arch-components">
+          <div class="comp-box be"><span class="comp-name">project-store</span><span class="comp-sub">SQLite via better-sqlite3</span></div>
+          <div class="comp-box be"><span class="comp-name">core-sim</span><span class="comp-sub">Simulation engine (TS)</span></div>
+          <div class="comp-box be"><span class="comp-name">policy-dsl</span><span class="comp-sub">Firewall rule parser</span></div>
+          <div class="comp-box be"><span class="comp-name">report-kit</span><span class="comp-sub">PDF + JSON generator</span></div>
+          <div class="comp-box be"><span class="comp-name">lab-runtime</span><span class="comp-sub">Docker orchestration</span></div>
+          <div class="comp-box be"><span class="comp-name">AI Twin Runner</span><span class="comp-sub">Model assignment + analysis</span></div>
+          <div class="comp-box be"><span class="comp-name">Network Scanner</span><span class="comp-sub">nmap / ARP / LLDP</span></div>
+          <div class="comp-box be"><span class="comp-name">OTLP Receiver</span><span class="comp-sub">Telemetry collector</span></div>
+        </div>
+      </div>
+
+      <div class="arrow-row">
+        <span>CLI / API / socket — external tools and runtimes</span>
+        <div class="arrow-line"></div>
+      </div>
+
+      <!-- EXTERNAL -->
+      <div class="arch-row">
+        <div class="arch-label label-ext">External<br/>Integrations</div>
+        <div class="arch-components">
+          <div class="comp-box ext"><span class="comp-name">Containerlab</span><span class="comp-sub">clab deploy/destroy CLI</span></div>
+          <div class="comp-box ext"><span class="comp-name">Docker / dockerode</span><span class="comp-sub">Container lifecycle</span></div>
+          <div class="comp-box ext"><span class="comp-name">FreRTR / RARE</span><span class="comp-sub">Routing simulation images</span></div>
+          <div class="comp-box ext"><span class="comp-name">nmap</span><span class="comp-sub">Port / service scan</span></div>
+          <div class="comp-box ext"><span class="comp-name">OpenTelemetry</span><span class="comp-sub">gRPC :4317 / HTTP :4318</span></div>
+          <div class="comp-box ext"><span class="comp-name">AI Model APIs</span><span class="comp-sub">Local stub / opt-in SaaS</span></div>
+          <div class="comp-box ext"><span class="comp-name">SQLite file</span><span class="comp-sub">~/.inspector/projects.db</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /diagram-wrap -->
+
+
+  <!-- ============================
+       FRONTEND
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-fe"></span>
+    <h2>Frontend — Pages &amp; Widgets</h2>
+    <span class="layer-badge layer-fe">Renderer / React / React Flow</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Component</th>
+        <th style="width:22%">File / Package</th>
+        <th style="width:16%">IPC Channels Used</th>
+        <th>Purpose &amp; Connections</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col">Projects Page</td>
+        <td><code>apps/renderer/src/pages/ProjectsPage.tsx</code></td>
+        <td><code>project:getAll</code><br/><code>project:create</code><br/><code>project:delete</code></td>
+        <td class="desc-col">Dashboard listing all saved projects. Each card navigates to Project Detail. Reads from <code>project-store</code> via IPC. Creates SQLite row on "New Project".</td>
+      </tr>
+      <tr>
+        <td class="name-col">Twin Designer</td>
+        <td><code>apps/renderer/src/pages/TwinDesignerPage.tsx</code></td>
+        <td><code>topology:create</code><br/><code>topology:getByProjectId</code><br/><code>topology:update</code></td>
+        <td class="desc-col">React Flow canvas with drag-and-drop node palette (Router, Switch, Firewall, Server, Workstation, IoT, Cloud, TDL, Hacking Device). Properties panel on right. Bottom bar: Validate → Run Simulation → Export to containerlab YAML.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Inspector Twins Page</td>
+        <td><code>apps/renderer/src/pages/</code><br/>(planned: <code>InspectorTwinsPage.tsx</code>)</td>
+        <td><code>twin:list</code><br/><code>twin:assign</code><br/><code>twin:run</code></td>
+        <td class="desc-col">Card catalogue of AI assessment models. Each card shows model name, version, capability tags. "Assign to Project" sends model config + project ID to backend AI Twin Runner. Supports multiple twins per project.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Scenarios Page</td>
+        <td><code>apps/renderer/src/pages/ScenariosPage.tsx</code></td>
+        <td><code>scenario:create</code><br/><code>scenario:getByProjectId</code><br/><code>scenario:delete</code></td>
+        <td class="desc-col">Define traffic baselines (flow from/to/port) and fault catalogue entries. Each scenario stores <code>scenario_json</code> validated by Zod before save.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Simulation Runner</td>
+        <td><code>apps/renderer/src/pages/SimulationRunnerPage.tsx</code></td>
+        <td><code>simulation:run</code><br/><code>simulation:getRuns</code><br/><code>simulation:getRunById</code></td>
+        <td class="desc-col">Selects scenario + topology, triggers <code>core-sim simulate()</code> via IPC. Streams timeline events, reachability matrix, latency bars back to UI. "Generate Report" button triggers <code>report-kit</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Findings Page</td>
+        <td><code>apps/renderer/src/pages/FindingsPage.tsx</code></td>
+        <td><code>findings:getByRunId</code></td>
+        <td class="desc-col">Severity-grouped table (Critical / High / Medium / Low / Info). Each row links to impacted node/link IDs. Export to JSON. Data sourced from <code>findings</code> SQLite table.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Reports Page</td>
+        <td><code>apps/renderer/src/pages/ReportsPage.tsx</code></td>
+        <td><code>report:generate</code><br/><code>report:getByRunId</code></td>
+        <td class="desc-col">Triggers <code>report-kit</code> to build PDF + JSON from a selected run. Shows generation progress. Opens file from local filesystem on completion.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Settings Page</td>
+        <td><code>apps/renderer/src/pages/SettingsPage.tsx</code></td>
+        <td><code>settings:get</code><br/><code>settings:set</code></td>
+        <td class="desc-col">App configuration: OTLP endpoint, Docker socket path, AI model API key (opt-in), containerlab binary path, network scan subnet.</td>
+      </tr>
+      <tr>
+        <td class="name-col">App Layout / Navigation</td>
+        <td><code>apps/renderer/src/components/Layout.tsx</code><br/><code>apps/renderer/src/App.tsx</code></td>
+        <td>—</td>
+        <td class="desc-col">Left sidebar with navigation items (Projects, Designer, Scenarios, Simulation, Findings, Reports, Settings). React Router handles page transitions. <code>Layout.tsx</code> wraps all pages with the sidebar shell.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Lab Status Panel</td>
+        <td><code>apps/renderer/src/components/</code><br/>(containerlab status UI)</td>
+        <td><code>lab:getStatus</code><br/><code>lab:start</code><br/><code>lab:stop</code><br/><code>lab:getLogs</code></td>
+        <td class="desc-col">Modal showing live container state (running / stopped / error) for each node in a deployed topology. Polls <code>lab:getStatus</code> every 2 s via IPC. Log viewer calls <code>lab:getLogs</code> per service.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       MIDDLEWARE
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-mw"></span>
+    <h2>Middleware — IPC Bridge &amp; State</h2>
+    <span class="layer-badge layer-mw">Electron Preload / Zustand / Zod</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Channel / Module</th>
+        <th style="width:22%">Direction</th>
+        <th style="width:20%">Payload Types</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col"><code>project:*</code></td>
+        <td>Renderer → Main</td>
+        <td><code>ProjectInput</code> / <code>ProjectRecord</code></td>
+        <td class="desc-col">CRUD for project records. <code>project:getAll</code> returns array; <code>project:create</code> inserts into SQLite; <code>project:delete</code> cascades to topologies/scenarios/runs. Also: <code>project:getById</code>, <code>project:update</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>topology:*</code></td>
+        <td>Renderer ↔ Main</td>
+        <td><code>TopologyInput</code> / <code>TopologyRecord</code></td>
+        <td class="desc-col">Save/load topology graph JSON validated with Zod. Channels: <code>topology:create</code>, <code>topology:getByProjectId</code>, <code>topology:getById</code>, <code>topology:update</code>, <code>topology:delete</code>. Update path invokes <code>topology_utils</code> for YAML export.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>scenario:*</code></td>
+        <td>Renderer ↔ Main</td>
+        <td><code>ScenarioInput</code> / <code>ScenarioRecord</code></td>
+        <td class="desc-col">CRUD for scenario runbooks. Channels: <code>scenario:create</code>, <code>scenario:getByProjectId</code>, <code>scenario:getById</code>, <code>scenario:delete</code>. JSON blob validated against Zod scenario schema before persist.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>simulation:run</code> / <code>simulation:getRuns</code></td>
+        <td>Renderer → Main<br/>Main → Renderer (events)</td>
+        <td><code>SimRequest</code> / <code>RunEvent</code></td>
+        <td class="desc-col"><code>simulation:run(graph, scenario, options)</code> invokes <code>core-sim simulate()</code>. Also: <code>simulation:getRuns(scenarioId)</code>, <code>simulation:getRunById(runId)</code>. Progress events pushed back as streamed IPC events.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>findings:getByRunId</code></td>
+        <td>Renderer → Main</td>
+        <td><code>Finding[]</code></td>
+        <td class="desc-col">Queries SQLite <code>findings</code> table filtered by <code>runId</code>. Returns array validated with Zod finding schema. Used by Findings Page to populate severity table.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>report:generate</code> / <code>report:getByRunId</code></td>
+        <td>Renderer → Main</td>
+        <td><code>ReportRequest</code> / <code>ReportRecord</code></td>
+        <td class="desc-col"><code>report:generate(reportData, options)</code> invokes <code>report-kit</code> to build PDF/JSON. Returns file path. <code>report:getByRunId(runId)</code> retrieves existing report metadata from SQLite.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>lab:start</code> / <code>lab:stop</code> / <code>lab:getStatus</code> / <code>lab:getLogs</code></td>
+        <td>Renderer → Main</td>
+        <td><code>LabConfig</code> / <code>LabStatus</code></td>
+        <td class="desc-col">Manages Docker / containerlab lab stack lifecycle. <code>lab:start(config)</code> deploys stack; <code>lab:stop()</code> tears it down; <code>lab:getStatus()</code> returns container states; <code>lab:getLogs(serviceName, tail)</code> streams container logs.</td>
+      </tr>
+      <tr>
+        <td class="name-col"><code>settings:get</code> / <code>settings:set</code></td>
+        <td>Renderer ↔ Main</td>
+        <td><code>string</code> key / <code>any</code> value</td>
+        <td class="desc-col">Key-value app settings store. Controls OTLP endpoint, Docker socket path, AI API keys (opt-in), containerlab binary path, network scan subnet. Values persisted to <code>electron-store</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">twin:assign / twin:run</td>
+        <td>Renderer → Main</td>
+        <td><code>TwinAssignment</code> / <code>TwinResult</code></td>
+        <td class="desc-col">Assigns AI model to project (planned channel). <code>twin:run</code> executes model against topology + run result, returns structured findings and optional refined report.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Zustand Store</td>
+        <td>In-renderer state</td>
+        <td><code>AppState</code></td>
+        <td class="desc-col">Holds: <code>activeProject</code>, <code>activeTopology</code>, <code>simState</code> (idle/running/done), <code>findings[]</code>, <code>assignedTwins[]</code>. Located in <code>apps/renderer/src/store/</code>. Persists to localStorage for tab-reload recovery.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Zod Schemas</td>
+        <td>Both directions</td>
+        <td><code>packages/shared</code></td>
+        <td class="desc-col">Shared schema library (<code>packages/shared/</code>) imported by both renderer and main process. Validates all JSON blobs before write to SQLite and before passing to <code>core-sim</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       BACKEND
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-be"></span>
+    <h2>Backend — Core Packages &amp; Main Process</h2>
+    <span class="layer-badge layer-be">Node.js Main / TypeScript Packages</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Module / Package</th>
+        <th style="width:22%">Location</th>
+        <th style="width:22%">Key Functions / API</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col">project-store</td>
+        <td><code>packages/project-store/</code></td>
+        <td><code>createProject()</code><br/><code>getTopology()</code><br/><code>saveRun()</code><br/><code>listFindings()</code></td>
+        <td class="desc-col">SQLite repository layer using <code>better-sqlite3</code>. Tables: <code>projects</code>, <code>topologies</code>, <code>scenarios</code>, <code>runs</code>, <code>findings</code>, <code>reports</code>. Schema migrations run on app start. All JSON blobs validated with Zod before INSERT.</td>
+      </tr>
+      <tr>
+        <td class="name-col">core-sim</td>
+        <td><code>packages/core-sim/</code></td>
+        <td><code>validateGraph(graph)</code><br/><code>simulate(graph, scenario)</code><br/><code>computeBlastRadius(graph, nodeId)</code></td>
+        <td class="desc-col">Pure TypeScript simulation engine (no I/O). Builds routing graph from topology, evaluates policy-dsl rules per flow, injects faults, computes latency estimates and reachability matrix. Returns <code>RunResult</code> with timeline, metrics, and findings array.</td>
+      </tr>
+      <tr>
+        <td class="name-col">policy-dsl</td>
+        <td><code>packages/policy-dsl/</code></td>
+        <td><code>parse(dsl)</code><br/><code>validate(ast, graph)</code><br/><code>compile(ast)</code></td>
+        <td class="desc-col">Tokeniser + recursive-descent parser for human-friendly firewall DSL (<code>allow tcp from Users to WebApp port 443</code>). Compiles to predicate function consumed by <code>core-sim</code>. Reports undefined node/tag references as validation errors.</td>
+      </tr>
+      <tr>
+        <td class="name-col">report-kit</td>
+        <td><code>packages/report-kit/</code></td>
+        <td><code>buildReport(runResult)</code><br/><code>exportPDF(report, path)</code><br/><code>exportJSON(report, path)</code></td>
+        <td class="desc-col">Assembles architecture summary (nodes/links), risk findings (sorted by severity), and scenario timeline into a <code>Report</code> object. Renders PDF via <code>pdf-lib</code>. Can also be triggered automatically after a simulation run completes.</td>
+      </tr>
+      <tr>
+        <td class="name-col">lab-runtime</td>
+        <td><code>packages/lab-runtime/</code></td>
+        <td><code>deployStack(composePath)</code><br/><code>destroyStack(id)</code><br/><code>listContainers()</code><br/><code>checkHealth()</code></td>
+        <td class="desc-col">Docker orchestration via <code>dockerode</code>. Accepts user-provided <code>docker-compose.yml</code> or built-in templates. Enforces local-only constraint — blocks non-localhost bind addresses. Also wraps <code>clab deploy</code> CLI for containerlab topologies.</td>
+      </tr>
+      <tr>
+        <td class="name-col">AI Twin Runner</td>
+        <td><code>packages/lab-runtime/</code><br/>(twins sub-module)</td>
+        <td><code>assignTwin(projectId, modelConfig)</code><br/><code>runAnalysis(twin, runResult)</code><br/><code>getFindings(twin)</code></td>
+        <td class="desc-col">Manages a registry of Inspector Twin AI models. Each model has a capability set (vulnerability analysis, config review, report generation). Models are assigned per-project and can be chained (output of one feeds next). Results appended to <code>findings</code> table. Supports local model stubs and opt-in external API keys.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Network Scanner</td>
+        <td><code>scripts/network-topology-mapper.py</code><br/><code>apps/containerlab/</code> integration</td>
+        <td><code>scan_network(subnet)</code><br/><code>arp_scan()</code><br/><code>nmap_scan(hosts)</code><br/><code>lldp_discover()</code></td>
+        <td class="desc-col">Discovers local devices using ARP (Scapy), nmap (OS + service fingerprinting), and LLDP. Concurrent scanning via <code>ThreadPoolExecutor</code>. Outputs JSON device inventory. Results imported into topology designer. Blocked against external targets.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Topology Utils</td>
+        <td><code>packages/core-sim/</code><br/><code>apps/containerlab/</code></td>
+        <td><code>topology_to_yaml()</code><br/><code>validate_topology()</code><br/><code>export_topology_json()</code></td>
+        <td class="desc-col">Converts Topology model to containerlab-compatible YAML. Validates node IDs, interface names, link endpoints. Checks for duplicate interfaces. Used by "Export" button in Twin Designer. Also used by <code>apps/containerlab/</code> lab deployment pipeline.</td>
+      </tr>
+      <tr>
+        <td class="name-col">OTLP Collector</td>
+        <td><code>OTLP/opentelemetry-collector/</code><br/><code>scripts/otlp-collector-config.yaml</code></td>
+        <td>gRPC <code>:4317</code><br/>HTTP <code>:4318</code></td>
+        <td class="desc-col">OpenTelemetry collector process (Go). Receives traces, metrics, and logs from deployed containerlab nodes. Forwards to debug exporter and optionally to a downstream OTLP endpoint. Metrics streamed to renderer via IPC for live dashboards.</td>
+      </tr>
+      <tr>
+        <td class="name-col">SQLite Database</td>
+        <td><code>~/.inspector/projects.db</code></td>
+        <td>Tables: <code>projects</code><br/><code>topologies</code><br/><code>scenarios</code><br/><code>runs</code><br/><code>findings</code><br/><code>reports</code></td>
+        <td class="desc-col">Local file database. All reads/writes go through <code>project-store</code> repo layer. Migrations applied on startup. JSON blob columns validated with Zod before write. No network access required.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       EXTERNAL
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-ext"></span>
+    <h2>External — Integrations &amp; Endpoints</h2>
+    <span class="layer-badge layer-ext">Containerlab · Docker · AI Models · OTLP · Scanners</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22%">Integration</th>
+        <th style="width:20%">Endpoint / CLI</th>
+        <th style="width:18%">Direction</th>
+        <th>Description &amp; Connection Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name-col">Containerlab</td>
+        <td><code>clab deploy -t &lt;yaml&gt;</code><br/><code>clab destroy -t &lt;yaml&gt;</code><br/><code>clab inspect</code></td>
+        <td>Backend → CLI (child_process)</td>
+        <td class="desc-col">Deploys containerlab YAML topologies generated from the Twin Designer. Manages container lifecycle (create, start, stop, destroy). Status polled via <code>clab inspect --format json</code> and forwarded to Containerlab Status Dialog in frontend. Topology files stored under <code>inspector_qt6/containerlab_examples/twin/</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Docker / dockerode</td>
+        <td>Docker socket<br/><code>/var/run/docker.sock</code><br/>(Windows: named pipe)</td>
+        <td>Backend → Docker API</td>
+        <td class="desc-col">lab-runtime uses dockerode to pull images, create containers, start/stop stacks, and inspect health. Containers sourced from built-in templates (Alpine, Netshoot, Kali, FreRTR) or user-provided compose files. All container bind addresses restricted to <code>127.0.0.1</code> or <code>192.168.x.x</code>.</td>
+      </tr>
+      <tr>
+        <td class="name-col">FreRTR / RARE images</td>
+        <td><code>ghcr.io/rare-freertr/freertr-containerlab:latest</code></td>
+        <td>Docker pull (user-initiated)</td>
+        <td class="desc-col">FreRTR router containers for advanced routing simulation. Support <code>DATAPLANE_TYPE=pcapInt</code> and <code>p4emu</code>. Used in <code>containerlab_examples/twin/rtr000.clab.yml</code>. Provides full IP routing, OSPF, LLDP, and packet capture capabilities inside the digital twin.</td>
+      </tr>
+      <tr>
+        <td class="name-col">OpenTelemetry Collector</td>
+        <td>gRPC <code>localhost:4317</code><br/>HTTP <code>localhost:4318</code><br/>Health: <code>localhost:13133</code></td>
+        <td>Twin nodes → Collector → Backend → Frontend</td>
+        <td class="desc-col">Containerlab nodes emit OTLP traces and metrics to the collector. Collector configured via <code>scripts/otlp-collector-config.yaml</code> (batch processor, memory limiter, debug + OTLP exporters). Backend receives forwarded data and streams it to renderer for real-time telemetry dashboards during simulation.</td>
+      </tr>
+      <tr>
+        <td class="name-col">Inspector Twins (AI Models)</td>
+        <td>Local model binary<br/><em>or</em> <code>https://api.openai.com</code> (opt-in)<br/><em>or</em> <code>https://api.anthropic.com</code> (opt-in)</td>
+        <td>Backend ↔ Model runner</td>
+        <td class="desc-col">AI models assigned per-project through the Inspector Twins page. Each model runs against the topology graph, simulation RunResult, or findings list. Supports recursive/chained analysis: one model's output feeds the next (e.g., vuln-scanner → remediation-writer → report-generator). Results appended to the <code>findings</code> table. External API calls require explicit user-provided API key; disabled by default (offline-first).</td>
+      </tr>
+      <tr>
+        <td class="name-col">nmap</td>
+        <td>Local binary <code>nmap</code></td>
+        <td>Backend → OS subprocess</td>
+        <td class="desc-col">Used by Network Scanner for port/service discovery and OS fingerprinting (<code>-sV -O</code>). Restricted to local subnets (enforced by IP range check before invocation). Results parsed from XML output via <code>python-nmap</code>. Feeds discovered hosts into topology importer.</td>
+      </tr>
+      <tr>
+        <td class="name-col">ARP / Scapy</td>
+        <td>Raw socket (requires elevated perms on some OS)</td>
+        <td>Backend → Network</td>
+        <td class="desc-col">Sends ARP requests to enumerate live hosts on local subnet. Runs alongside nmap scan. Requires root/admin on Linux/Windows for raw socket access. Results merged with nmap output into unified device inventory JSON.</td>
+      </tr>
+      <tr>
+        <td class="name-col">LLDP discovery</td>
+        <td>Network interface (<code>hcitool</code> / passive)</td>
+        <td>Backend → Network (passive listen)</td>
+        <td class="desc-col">Passively listens for LLDP frames to discover network topology (switch/router adjacencies). Supplements ARP and nmap results. Used to auto-draw links between discovered devices in the Twin Designer.</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- ============================
+       CONNECTION MAP
+       ============================ -->
+  <div class="section-title">
+    <span class="dot dot-ext"></span>
+    <h2>Integration Connection Map</h2>
+    <span class="layer-badge layer-ext">How components connect</span>
+  </div>
+
+  <div class="conn-grid">
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-fe">FE</span> Twin Designer → Containerlab</h3>
+      <ul>
+        <li>User designs topology on canvas</li>
+        <li>Clicks <strong>Export</strong> → <code>topology:export-yaml</code> IPC → <code>topology_utils.topology_to_yaml()</code> → writes <code>.clab.yml</code></li>
+        <li>Clicks <strong>Deploy</strong> → <code>clab:deploy</code> IPC → <code>clab deploy -t &lt;path&gt;</code> CLI</li>
+        <li>Containerlab Status Dialog polls <code>clab:status</code> every 2 s</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-be">BE</span> lab-runtime → Docker</h3>
+      <ul>
+        <li>dockerode connects to <code>/var/run/docker.sock</code></li>
+        <li>Pulls device images (Alpine, Kali, FreRTR) on first deploy</li>
+        <li>Creates networks and attaches containers per topology links</li>
+        <li>Health-check loop: <code>checkHealth()</code> every 5 s during run</li>
+        <li>Enforces <code>127.0.0.1</code> / <code>192.168.x.x</code> bind constraint</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-fe">FE</span> Inspector Twins → AI Analysis</h3>
+      <ul>
+        <li>User selects model from catalogue on Twins page</li>
+        <li>Clicks <strong>Assign to Project</strong> → <code>twin:assign</code> IPC</li>
+        <li>Backend: <code>assignTwin(projectId, modelConfig)</code> persists assignment</li>
+        <li>After simulation: <code>twin:run</code> → <code>runAnalysis(twin, runResult)</code></li>
+        <li>Findings appended to SQLite, visible on Findings page</li>
+        <li>Multiple twins chained: output of twin-1 feeds twin-2 input</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-be">BE</span> Simulation → Report Auto-generation</h3>
+      <ul>
+        <li><code>sim:run</code> → <code>core-sim simulate()</code> → stores <code>RunResult</code> in SQLite</li>
+        <li>If project has report schedule: <code>report-kit buildReport(runResult)</code></li>
+        <li>PDF + JSON written to <code>~/.inspector/reports/&lt;run-id&gt;/</code></li>
+        <li>If AI twins assigned: runs analysis before report finalised</li>
+        <li>Frontend notified via IPC event → Reports page updates</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-ext">EXT</span> OTLP → Live Telemetry</h3>
+      <ul>
+        <li>Containerlab nodes export metrics/traces to <code>localhost:4317</code> (gRPC)</li>
+        <li>OTLP collector processes with batch + memory-limiter</li>
+        <li>Collector forwards to debug exporter + optional downstream</li>
+        <li>Backend receives forwarded data, streams to renderer via IPC event</li>
+        <li>Simulation Runner page displays live latency, packet-loss graphs</li>
+      </ul>
+    </div>
+
+    <div class="conn-card">
+      <h3><span class="layer-badge layer-be">BE</span> Network Scanner → Topology Import</h3>
+      <ul>
+        <li>User opens Network Scan Dialog, enters subnet</li>
+        <li><code>scan:start</code> IPC → main process spawns scanner subprocess</li>
+        <li>ARP scan (Scapy) + nmap (-sV -O) run concurrently on local subnet</li>
+        <li>LLDP passive listen collects adjacency data</li>
+        <li>Partial results streamed back as <code>scan:progress</code> events</li>
+        <li>Final JSON: user selects nodes → imported into Twin Designer canvas</li>
+      </ul>
+    </div>
+
+  </div><!-- /conn-grid -->
+
+</main>
+
+<footer>
+  Inspector Twin · Architecture &amp; Endpoints · Generated 2026 · For internal use
+</footer>
+
+</body>
+</html>

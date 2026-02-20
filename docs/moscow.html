@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspector Twin — MoSCoW Requirements</title>
+  <style>
+    :root {
+      --bg:         #0f1117;
+      --surface:    #1a1d27;
+      --border:     #2a2d3e;
+      --text:       #e2e8f0;
+      --muted:      #8892a4;
+      --must:       #ef4444;
+      --should:     #f59e0b;
+      --could:      #3b82f6;
+      --wont:       #6b7280;
+      --must-bg:    rgba(239,68,68,0.08);
+      --should-bg:  rgba(245,158,11,0.08);
+      --could-bg:   rgba(59,130,246,0.08);
+      --wont-bg:    rgba(107,114,128,0.08);
+      --fe:         #8b5cf6;
+      --mw:         #06b6d4;
+      --be:         #22c55e;
+      --ext:        #f97316;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header h1 span { color: #3b82f6; }
+
+    header p {
+      color: var(--muted);
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
+      margin-top: 1.4rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-must   { background: var(--must-bg);   color: var(--must);   border: 1px solid var(--must); }
+    .badge-should { background: var(--should-bg); color: var(--should); border: 1px solid var(--should); }
+    .badge-could  { background: var(--could-bg);  color: var(--could);  border: 1px solid var(--could); }
+    .badge-wont   { background: var(--wont-bg);   color: var(--wont);   border: 1px solid var(--wont); }
+
+    .layer-badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .layer-fe  { background: rgba(139,92,246,0.15); color: var(--fe); }
+    .layer-mw  { background: rgba(6,182,212,0.15);  color: var(--mw); }
+    .layer-be  { background: rgba(34,197,94,0.15);  color: var(--be); }
+    .layer-ext { background: rgba(249,115,22,0.15); color: var(--ext); }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section-title h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-fe  { background: var(--fe); }
+    .dot-mw  { background: var(--mw); }
+    .dot-be  { background: var(--be); }
+    .dot-ext { background: var(--ext); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-bottom: 0.5rem;
+    }
+
+    thead tr {
+      background: var(--surface);
+    }
+
+    th {
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    td.req-title {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    td.rationale {
+      color: var(--muted);
+      font-size: 0.83rem;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+    }
+
+    .summary-card .count {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .summary-card .label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .must-count   { color: var(--must); }
+    .should-count { color: var(--should); }
+    .could-count  { color: var(--could); }
+    .wont-count   { color: var(--wont); }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Inspector Twin — <span>MoSCoW</span> Requirements</h1>
+  <p>Priority-classified feature requirements sorted by application layer · v0.1 Draft</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="badge badge-must">Must</span> Required for MVP — non-negotiable</div>
+    <div class="legend-item"><span class="badge badge-should">Should</span> High-value, ship soon after MVP</div>
+    <div class="legend-item"><span class="badge badge-could">Could</span> Nice-to-have, include if capacity allows</div>
+    <div class="legend-item"><span class="badge badge-wont">Won't (now)</span> Explicitly deferred or out-of-scope</div>
+    <div class="legend-item"><span class="layer-badge layer-fe">Frontend</span></div>
+    <div class="legend-item"><span class="layer-badge layer-mw">Middleware</span></div>
+    <div class="legend-item"><span class="layer-badge layer-be">Backend</span></div>
+    <div class="legend-item"><span class="layer-badge layer-ext">External</span></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Summary counts -->
+  <div class="summary-grid">
+    <div class="summary-card"><div class="count must-count">18</div><div class="label">Must Have</div></div>
+    <div class="summary-card"><div class="count should-count">14</div><div class="label">Should Have</div></div>
+    <div class="summary-card"><div class="count could-count">11</div><div class="label">Could Have</div></div>
+    <div class="summary-card"><div class="count wont-count">7</div><div class="label">Won't Have (now)</div></div>
+  </div>
+
+  <!-- =================== FRONTEND =================== -->
+  <div class="section-title">
+    <span class="dot dot-fe"></span>
+    <h2>Frontend</h2>
+    <span class="layer-badge layer-fe">Renderer / UI</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Projects dashboard with create / open / delete</td>
+        <td class="rationale">Entry point for all workflows. User must be able to name a project and navigate to the Twin Designer.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Drag-and-drop topology canvas (React Flow)</td>
+        <td class="rationale">Core interaction model. Supports Router, Switch, Firewall, Server, Workstation, IoT, Cloud, Hacking Device, TDL nodes. Links with bandwidth/latency/loss properties.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Node & link properties panel</td>
+        <td class="rationale">Right-hand panel edits name, role, OS, IP/subnet, firewall DSL, criticality, and interface details for selected element.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Left sidebar navigation (Projects, Designer, Scenarios, Simulation, Findings, Reports, Settings)</td>
+        <td class="rationale">Consistent app-level navigation. All primary pages reachable in ≤ 2 clicks.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Simulation runner page with timeline view</td>
+        <td class="rationale">Shows animated packet-flow events, failure injections, policy blocks, and a reachability matrix in real time.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Findings page grouped by severity (Critical / High / Medium / Low / Info)</td>
+        <td class="rationale">Each finding links to impacted nodes/links and shows remediation text.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Rules-of-Engagement (ROE) gate dialog before any security check</td>
+        <td class="rationale">Mandatory "Authorised Testing Only" confirmation with checkbox. Cannot be bypassed.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Reports page — generate & download PDF / JSON</td>
+        <td class="rationale">User selects a completed run and triggers report generation. File opens or saves locally.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Scenario editor with traffic baseline + fault injection UI</td>
+        <td class="rationale">Visual form for defining traffic flows and selecting from a predefined fault catalogue (link down, firewall block, DNS failure).</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Inspector Twins page — assign AI models to projects</td>
+        <td class="rationale">Card-based catalogue of available AI models. User can attach a model to a project and configure analysis scope.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Canvas mini-map / overview panel</td>
+        <td class="rationale">Bottom-right preview of full topology for large networks. Required for Enterprise-DT template scale.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Device palette with template types</td>
+        <td class="rationale">Pre-built icons for all node types draggable onto canvas. Supports custom JSON device templates.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Dark theme applied globally</td>
+        <td class="rationale">Default and only theme for v0.1. Consistent colour palette across all pages.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Light/system theme toggle</td>
+        <td class="rationale">Accessibility improvement. Not needed for MVP.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Monaco-editor inline policy/DSL editing on node</td>
+        <td class="rationale">Replaces plain textarea for firewall rules. Adds syntax highlighting and linting.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Animated packet-flow rendering on canvas during simulation</td>
+        <td class="rationale">Visual "dot moving along a link" animation. Enhances UX but not critical for correctness.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Multi-user / collaborative editing</td>
+        <td class="rationale">Single-user desktop app. Collaboration is a v2+ concern.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Cloud sync / remote project storage</td>
+        <td class="rationale">Offline-first is a hard requirement. Cloud is out of scope for v0.1.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =================== MIDDLEWARE =================== -->
+  <div class="section-title">
+    <span class="dot dot-mw"></span>
+    <h2>Middleware</h2>
+    <span class="layer-badge layer-mw">Electron IPC / Preload Bridge / State</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Electron contextIsolation + nodeIntegration disabled</td>
+        <td class="rationale">Security baseline. Renderer cannot access Node APIs directly. All IPC goes through preload bridge.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Typed preload IPC bridge (project CRUD, report generation, lab orchestration)</td>
+        <td class="rationale">Exposes only explicitly defined APIs to renderer. No wildcard channel access.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Zustand global state management (active project, topology, simulation state)</td>
+        <td class="rationale">Single source of truth for renderer. Prevents prop-drilling across 10+ pages.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Zod schema validation on all JSON load / save paths</td>
+        <td class="rationale">Prevents corrupt data entering the store. All topology, scenario, findings, and report blobs validated before persistence.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">CSP headers enforced in Electron renderer</td>
+        <td class="rationale">Blocks XSS and inline-script injection in the desktop shell.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">AI twin model assignment IPC channel</td>
+        <td class="rationale">Bridges UI twin selection to backend model runner. Passes project ID + model config through typed IPC.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Network scanner IPC channel (invoke scan, stream progress events)</td>
+        <td class="rationale">Launches nmap/ARP scanner in main process; streams partial results back to renderer via IPC events.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">OTLP telemetry receiver IPC channel</td>
+        <td class="rationale">Forwards metrics/traces from OpenTelemetry collector to renderer for live display during simulation.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Deep-link / URL protocol handler (inspector-twin://)</td>
+        <td class="rationale">Allows external tools to open a specific project via OS protocol handler. Useful for IDE integrations.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Auto-update IPC channel (electron-updater)</td>
+        <td class="rationale">In-app update notifications. Not needed until first public release.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">REST API server exposed on localhost</td>
+        <td class="rationale">Desktop app uses IPC only. A localhost HTTP API introduces unnecessary attack surface for v0.1.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =================== BACKEND =================== -->
+  <div class="section-title">
+    <span class="dot dot-be"></span>
+    <h2>Backend</h2>
+    <span class="layer-badge layer-be">Electron Main Process / Core Packages</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">SQLite project store (projects, topologies, scenarios, runs, findings, reports)</td>
+        <td class="rationale">Local persistence without external DB. Schema migrations run on startup. All writes validated with Zod before insert.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">core-sim: validateGraph(), simulate(), computeBlastRadius()</td>
+        <td class="rationale">Pure TypeScript engine. No I/O. validateGraph returns typed errors; simulate returns RunResult with timeline + findings + metrics.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">policy-dsl: parse + evaluate firewall rules</td>
+        <td class="rationale">Human-friendly DSL (allow tcp from X to Y port Z). Compiles to evaluation function used by core-sim packet routing.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">report-kit: generate PDF and JSON reports from RunResult</td>
+        <td class="rationale">Outputs architecture summary, risk findings, and scenario pass/fail timeline. PDF rendered via pdf-lib or Playwright print-to-PDF.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Topology YAML/JSON export (containerlab-compatible)</td>
+        <td class="rationale">Converts Topology model to containerlab YAML for deployment to Docker. Validates interface names and link endpoints.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Simulation failure injection (link down, link degrade, firewall block)</td>
+        <td class="rationale">core-sim must support at least 3 fault types. Each produces finding entries in the RunResult.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Inspector Twins (AI model runner) — assign model to project, run analysis, return findings</td>
+        <td class="rationale">Backend module loads a configured AI model (local LLM or API stub), runs it against a RunResult or topology, and appends findings.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Network scanner integration (nmap + ARP + LLDP)</td>
+        <td class="rationale">mapper.py / scripts wrapped by main process. Results fed into topology as discovered nodes. Sandbox enforced: local-only targets.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">OpenTelemetry collector integration (receive traces/metrics from twins)</td>
+        <td class="rationale">OTLP gRPC receiver (port 4317) + HTTP (port 4318). Metrics forwarded to renderer for live dashboards.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Automated report scheduling (run scenario → auto-generate report)</td>
+        <td class="rationale">Backend job queue triggers report-kit after simulation completes. Configurable per-project.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Misconfiguration linting engine (policy-dsl static analysis)</td>
+        <td class="rationale">Detects patterns like "Admin reachable from Guest VLAN" without running a full simulation.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">Custom firmware / software upload and simulation mapping</td>
+        <td class="rationale">User uploads router firmware; core-sim maps known CVEs and config profiles to simulation behaviour.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">P4 / full-packet routing simulation</td>
+        <td class="rationale">Deep packet simulation for advanced scenarios. High complexity — defer after basic routing is stable.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Exploit payload generation or bruteforce modules</td>
+        <td class="rationale">Explicitly prohibited by spec. App enforces local-only, simulation-only security checks.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Automatic targeting of external IPs/domains</td>
+        <td class="rationale">Hard constraint. All network operations blocked outside localhost / 192.168.x.x by default.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =================== EXTERNAL =================== -->
+  <div class="section-title">
+    <span class="dot dot-ext"></span>
+    <h2>External</h2>
+    <span class="layer-badge layer-ext">Containerlab · Docker · AI Models · OTLP</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:90px">Priority</th>
+        <th style="width:30%">Requirement</th>
+        <th>Rationale / Acceptance Criteria</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Docker — launch local lab stacks from user-provided docker-compose.yml or built-in templates</td>
+        <td class="rationale">lab-runtime package uses dockerode. Only localhost or 192.168.x.x stacks permitted. No external registry pulls without explicit user consent.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-must">Must</span></td>
+        <td class="req-title">Containerlab — deploy containerlab YAML topologies and monitor status</td>
+        <td class="rationale">Wraps `clab deploy` / `clab destroy` CLI. ContainerlabStatusDialog shows real-time container state. Required for digital twin deployment.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Inspector Twins — recursive AI model assignment to projects</td>
+        <td class="rationale">Each AI twin has a defined capability set (vulnerability analysis, config review, report generation). Multiple twins can be assigned to one project and run in sequence or parallel.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">OpenTelemetry collector — receive telemetry from deployed twins</td>
+        <td class="rationale">OTLP collector runs alongside app. Traces and metrics from containerlab nodes forwarded to renderer. Config via scripts/otlp-collector-config.yaml.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-should">Should</span></td>
+        <td class="req-title">Network scan tools (nmap, ARP, LLDP) — local sandbox only</td>
+        <td class="rationale">Discovers existing local network devices to auto-populate topology. Blocked against external targets by IP range enforcement.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">AI twin — automated test execution against deployed lab (local only)</td>
+        <td class="rationale">Twin model triggers safe checks (TLS presence, exposed admin panels, missing headers) against lab containers. Results added to findings.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">AI twin — recursive report improvement loop</td>
+        <td class="rationale">Twin re-runs analysis on updated topology and iteratively refines findings quality. Adds AI-generated remediation suggestions.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-could">Could</span></td>
+        <td class="req-title">FreRTR / RARE container integration for advanced routing simulation</td>
+        <td class="rationale">Uses ghcr.io/rare-freertr images (already in containerlab_examples). Enables pcapInt and p4emu data-plane simulation.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">External SaaS AI API calls (OpenAI, Claude) in default build</td>
+        <td class="rationale">Offline-first requirement. AI features use local model stubs or opt-in API keys. No cloud calls without explicit user action.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-wont">Won't (now)</span></td>
+        <td class="req-title">Container image registry publishing / CI pipeline in app</td>
+        <td class="rationale">Out of scope for desktop simulation tool. Users manage their own images.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+<footer>
+  Inspector Twin · MoSCoW Requirements · Generated 2026 · For internal planning use
+</footer>
+
+</body>
+</html>
